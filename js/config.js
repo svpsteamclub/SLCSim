@@ -8,7 +8,7 @@
 
     export const ROBOT_IMAGE_PATHS = {
         body: 'assets/robot_body.png',
-        wheel: 'assets/robot_wheel.png'
+        wheel: 'assets/robot_wheel.png'r
     };
     export const WATERMARK_IMAGE_PATH = 'assets/SVPSTEAM_Club.png';
 
@@ -38,8 +38,15 @@
     // Track editor constants
     export const TRACK_PART_SIZE_PX = 350;
     export const AVAILABLE_TRACK_PARTS = [ // filenames relative to assets/track_parts/
-        { name: "Straight", file: "straight.png", connections: { N: true, S: true, E: false, W: false } },
-        { name: "Curve Left (N-W)", file: "curve_NW.png", connections: { N: true, S: false, E: false, W: true } },
+        { name: "Recta", file: "recta.png", connections: { N: true, S: true, E: false, W: false } },
+        { name: "Curva", file: "curva.png", connections: { N: false, S: true, E: false, W: true } },
+		 { name: "Curva Cerrada", file: "curva_cerrada.png", connections: { N: false, S: true, E: true, W: false } },
+    { name: "Esquina", file: "esquina.png", connections: { N: false, S: true, E: true, W: false } }, // Assuming you have this
+    { name: "Harpin", file: "harpin.png", connections: { N: false, S: true, E: true, W: false } }, // Assuming you have this
+    { name: "Harpin Asimetrico", file: "harpin_asimetrico.png", connections: { N: false, S: true, E: true, W: false } }, // If you have a horizontal straight
+    { name: "Chicana", file: "chicana.png", connections: { N: true, S: true, E: false, W: false } },
+    { name: "Diagonal", file: "diagonal.png", connections: { N: false, S: true, E: true, W: false } }, // Assuming
+   
         // Add more parts: curve_NE, curve_SW, curve_SE, T_NSE, T_NSW, T_NEW, T_SEW, Cross_NSEW
         // Ensure you create these PNGs (350x350px) and place them in assets/track_parts/
         // The 'connections' property will be crucial for random generation.
