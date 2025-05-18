@@ -46,7 +46,12 @@ export function initTrackEditor(mainAppInterface) {
         renderEditor();
     });
 
-    elems.generateRandomTrack.addEventListener('click', generateRandomTrackWithRetry); // Calls the simplified retry function
+    // --- THIS IS THE CORRECTED EVENT LISTENER ---
+    elems.generateRandomTrack.addEventListener('click', () => { 
+        generateRandomTrackWithRetry(); // Call without arguments to use default maxRetries
+    });
+    // --- END OF CORRECTION ---
+
     elems.exportTrackFromEditor.addEventListener('click', () => {
         if (!validateTrack()) {
             if (!confirm("La pista puede tener problemas (desconexiones o callejones sin salida). ¿Exportar de todos modos?")) {
@@ -243,7 +248,7 @@ function getRotatedConnections(part, rotation_deg) {
 
 // --- SIMPLIFIED generateRandomTrackWithRetry FOR DEBUGGING THE LOOP ---
 function generateRandomTrackWithRetry(maxRetries = 10) {
-    console.log("generateRandomTrackWithRetry CALLED. maxRetries:", maxRetries); 
+    console.log("generateRandomTrackWithRetry CALLED. maxRetries:", maxRetries);
 
     if (maxRetries <= 0) {
         console.error("maxRetries is 0 or less, loop will not run.");
@@ -260,10 +265,6 @@ function generateRandomTrackWithRetry(maxRetries = 10) {
              console.log(`   Simulating generateRandomLayout() returning false for attempt ${i + 1}`);
         } else { // Simulate "success" on the 3rd attempt (i=2)
              console.log(`   Simulating generateRandomLayout() returning true for attempt ${i + 1} to stop loop.`);
-             // If you had a dummy layout function you wanted to call on success for visual:
-             // setupGrid(); // Clear grid
-             // grid[0][0] = { ...AVAILABLE_TRACK_PARTS[0], image: trackPartsImages[AVAILABLE_TRACK_PARTS[0]?.file], rotation_deg: 0 }; // Place one part
-             // renderEditor();
              return; // Simulate success to exit retry function
         }
     }
@@ -272,9 +273,8 @@ function generateRandomTrackWithRetry(maxRetries = 10) {
         console.error("FOR LOOP WAS NOT ENTERED AT ALL!");
     }
 
-    // This alert should only appear if all simulated "failures" happen
-    // (which won't happen with the current i < 2 condition above, as it will return on i=2)
-    // OR if maxRetries was <= 0 initially.
+    // This alert should only appear if all simulated "failures" happen OR if maxRetries was invalid.
+    // With the current (i < 2) logic, this alert should NOT show if maxRetries is >=3.
     alert("Simplified retry loop finished OR maxRetries was invalid and loop didn't run as expected.");
     // setupGrid(); 
     // renderEditor();
@@ -290,12 +290,178 @@ function generateRandomLayout() {
 // --- END OF MINIMAL generateRandomLayout ---
 
 
-// --- Keep the original complex generateRandomLayout commented out or removed for this test ---
+// --- Keep the original complex generateRandomLayout commented out below for future restoration ---
 /*
 function generateRandomLayout() {
-    // ... (The long, heavily instrumented version from previous responses) ...
+    console.log("--- generateRandomLayout FUNCTION ENTERED ---"); 
+    
+    setupGrid(); 
+    if (AVAILABLE_TRACK_PARTS.length === 0) {
+        alert("No hay partes de pista disponibles para generar una pista.");
+        console.error("generateRandomLayout: AVAILABLE_TRACK_PARTS is empty.");
+        return false;
+    }
+    console.log(`--- Starting Random Layout Generation (Grid: ${gridSize.rows}x${gridSize.cols}) ---`);
+    console.log("Available base parts in config:", JSON.parse(JSON.stringify(AVAILABLE_TRACK_PARTS)));
+
+
+    const suitableParts = AVAILABLE_TRACK_PARTS.filter(p => {
+        const connCount = Object.values(p.connections || {}).filter(conn => conn === true).length;
+        return connCount >= 1 && connCount <= 2;
+    });
+
+    if (suitableParts.length === 0) {
+        alert("No hay partes de pista adecuadas (con 1 o 2 conexiones) en config.js para generar la pista.");
+        console.error("No suitable parts (1-2 connections) found in AVAILABLE_TRACK_PARTS. Check 'connections' definitions.");
+        return false;
+    }
+    console.log("Suitable base parts for path generation (1-2 connections):", JSON.parse(JSON.stringify(suitableParts)));
+
+
+    let currentR = Math.floor(gridSize.rows / 2);
+    let currentC = Math.floor(gridSize.cols / 2);
+
+    let startPieceInfo = suitableParts[Math.floor(Math.random() * suitableParts.length)];
+    let startRotation = (Math.floor(Math.random() * 4)) * 90;
+
+    if (!trackPartsImages[startPieceInfo.file]) {
+        console.error(`Image not found for starting piece: ${startPieceInfo.file}. Check asset loading (paths in config.js, files in assets/track_parts/) and console for image load errors from loadAndScaleImage.`);
+        alert(`Error: Imagen no encontrada para la pieza inicial: ${startPieceInfo.file}. Revisa la carpeta assets/track_parts/ y config.js. Mira la consola para errores de carga de imágenes.`);
+        return false;
+    }
+
+    grid[currentR][currentC] = {
+        ...startPieceInfo,
+        image: trackPartsImages[startPieceInfo.file],
+        rotation_deg: startRotation
+    };
+    console.log(`Placed STARTING piece: ${startPieceInfo.name} (File: ${startPieceInfo.file}) at [${currentR},${currentC}] (Rotation: ${startRotation} deg)`);
+    console.log("Its 0-deg connections (from config):", JSON.stringify(startPieceInfo.connections));
+    console.log("Its ROTATED connections (actual on grid):", JSON.stringify(getRotatedConnections(startPieceInfo, startRotation)));
+
+
+    let placedCount = 1;
+    const totalCells = gridSize.rows * gridSize.cols;
+    let pathLength = 1;
+    const maxPathLength = Math.floor(totalCells * 0.9);
+
+    let lastExitDirectionNameFromPrevCell = null;
+
+    for (let i = 0; i < maxPathLength && pathLength < totalCells; i++) {
+        console.log(`\nPATH STEP ${pathLength}: Current cell [${currentR},${currentC}]`);
+        const currentPart = grid[currentR][currentC];
+        if (!currentPart) {
+            console.error("FATAL: currentPart is null at current cell, path broken.");
+            break;
+        }
+
+        const currentActualConnections = getRotatedConnections(currentPart, currentPart.rotation_deg);
+        console.log(`  Current part: ${currentPart.name}, Rot: ${currentPart.rotation_deg} deg, Actual Connections: ${JSON.stringify(currentActualConnections)}`);
+
+        let possibleExits = [];
+        DIRECTIONS.forEach(dir => {
+            if (currentActualConnections[dir.name]) {
+                const entryDirectionToCurrentCell = lastExitDirectionNameFromPrevCell ? OPPOSITE_DIRECTIONS[lastExitDirectionNameFromPrevCell] : null;
+                if (entryDirectionToCurrentCell && dir.name === entryDirectionToCurrentCell && Object.keys(currentActualConnections).length > 1) {
+                    return;
+                }
+                possibleExits.push(dir);
+            }
+        });
+
+        if (possibleExits.length === 0) {
+            console.log(`  Path ended at [${currentR},${currentC}]. No valid non-reversing exits from ${currentPart.name}.`);
+            break;
+        }
+        console.log(`  Possible exits from current cell: ${possibleExits.map(p=>p.name).join(', ')}`);
+
+        possibleExits.sort(() => 0.5 - Math.random());
+        let placedNext = false;
+
+        for (const exitDir of possibleExits) {
+            console.log(`    Trying exit: ${exitDir.name} from [${currentR},${currentC}]`);
+            const nextR = currentR + exitDir.dr;
+            const nextC = currentC + exitDir.dc;
+
+            if (nextR >= 0 && nextR < gridSize.rows && nextC >= 0 && nextC < gridSize.cols && !grid[nextR][nextC]) {
+                const requiredEntryForNewPart = OPPOSITE_DIRECTIONS[exitDir.name];
+                console.log(`      Target cell [${nextR},${nextC}] is empty. New part needs entry from: ${requiredEntryForNewPart}`);
+
+                const candidatePlacements = [];
+                suitableParts.forEach(pInfo => {
+                    if (!trackPartsImages[pInfo.file]) {
+                        console.warn(`Skipping candidate ${pInfo.name} (file: ${pInfo.file}) as its image is not loaded from trackPartsImages.`);
+                        return;
+                    }
+                    for (let rot = 0; rot < 360; rot += 90) {
+                        const newPartActualConnections = getRotatedConnections(pInfo, rot);
+                        if (newPartActualConnections[requiredEntryForNewPart]) {
+                            let isValidCandidatePlacement = true;
+                            if (Object.keys(newPartActualConnections).length > 1) {
+                                for (const newPartExitDirName in newPartActualConnections) {
+                                    if (newPartActualConnections[newPartExitDirName] && newPartExitDirName !== requiredEntryForNewPart) {
+                                        const checkDirObj = DIRECTIONS.find(d => d.name === newPartExitDirName);
+                                        if (!checkDirObj) { console.error(`Invalid direction name ${newPartExitDirName}`); continue; }
+                                        const checkFurtherR = nextR + checkDirObj.dr;
+                                        const checkFurtherC = nextC + checkDirObj.dc;
+                                        if (checkFurtherR === currentR && checkFurtherC === currentC) {
+                                            isValidCandidatePlacement = false;
+                                            break;
+                                        }
+                                        if (checkFurtherR >= 0 && checkFurtherR < gridSize.rows &&
+                                            checkFurtherC >= 0 && checkFurtherC < gridSize.cols &&
+                                            grid[checkFurtherR][checkFurtherC] ) {
+                                            isValidCandidatePlacement = false;
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+                            if (isValidCandidatePlacement) {
+                                candidatePlacements.push({ partInfo: pInfo, rotation: rot });
+                            }
+                        }
+                    }
+                });
+
+                if (candidatePlacements.length > 0) {
+                    const chosenPlacement = candidatePlacements[Math.floor(Math.random() * candidatePlacements.length)];
+                    console.log(`        Found ${candidatePlacements.length} candidate placements. Chosen: ${chosenPlacement.partInfo.name} (Rot: ${chosenPlacement.rotation})`);
+
+                    grid[nextR][nextC] = {
+                        ...chosenPlacement.partInfo,
+                        image: trackPartsImages[chosenPlacement.partInfo.file],
+                        rotation_deg: chosenPlacement.rotation
+                    };
+
+                    currentR = nextR;
+                    currentC = nextC;
+                    lastExitDirectionNameFromPrevCell = exitDir.name;
+                    placedCount++;
+                    pathLength++;
+                    placedNext = true;
+                    break;
+                } else {
+                    console.log(`      No suitable candidate parts found for cell [${nextR},${nextC}] requiring entry ${requiredEntryForNewPart}.`);
+                }
+            } else {
+                 console.log(`      Target cell [${nextR},${nextC}] is out of bounds or occupied.`);
+            }
+        }
+
+        if (!placedNext) {
+            const partNameAtStall = grid[currentR] && grid[currentR][currentC] ? grid[currentR][currentC].name : 'Unknown part';
+            console.log(`  Path ended at [${partNameAtStall} at ${currentR},${currentC}]. Could not find a valid part for any remaining exit.`);
+            break;
+        }
+    }
+
+    console.log(`--- Generation Finished. Path length: ${pathLength}, Parts placed: ${placedCount}/${totalCells} ---`);
+    renderEditor();
+    return pathLength > 1;
 }
 */
+// --- End of Original generateRandomLayout (commented) ---
 
 
 function validateTrack() {
