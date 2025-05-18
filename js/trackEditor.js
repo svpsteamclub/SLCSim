@@ -46,7 +46,7 @@ export function initTrackEditor(mainAppInterface) {
         renderEditor();
     });
 
-    elems.generateRandomTrack.addEventListener('click', generateRandomTrackWithRetry); // Calls the retry function
+    elems.generateRandomTrack.addEventListener('click', generateRandomTrackWithRetry);
     elems.exportTrackFromEditor.addEventListener('click', () => {
         if (!validateTrack()) { 
             if (!confirm("La pista puede tener problemas (desconexiones o callejones sin salida). ¿Exportar de todos modos?")) {
@@ -88,7 +88,6 @@ function loadTrackPartAssets(callback) {
         loadAndScaleImage(`assets/track_parts/${partInfo.file}`, TRACK_PART_SIZE_PX, TRACK_PART_SIZE_PX, (img) => {
             if (img) {
                 trackPartsImages[partInfo.file] = img;
-                // console.log(`Successfully loaded and cached image for: ${partInfo.file}`);
             } else {
                 console.error(`Failed to load image for track part: ${partInfo.file}`);
             }
@@ -124,7 +123,7 @@ function populateTrackPartsPalette(paletteElement) {
             if (trackPartsImages[partInfo.file]) { 
                  selectedTrackPart = { ...partInfo, image: trackPartsImages[partInfo.file] };
             } else {
-                selectedTrackPart = null; // Should not happen if image check is done before allowing selection
+                selectedTrackPart = null; 
                 alert(`La imagen para la parte '${partInfo.name}' no está cargada. No se puede seleccionar.`);
                 console.warn(`Cannot select part ${partInfo.name}, image not loaded from cache.`);
             }
@@ -140,7 +139,7 @@ function setupGrid() {
         editorCanvas.width = gridSize.cols * TRACK_PART_SIZE_PX;
         editorCanvas.height = gridSize.rows * TRACK_PART_SIZE_PX;
          if (ctx) { 
-            renderEditor(); // Re-render after size change
+            renderEditor(); 
         }
     }
 }
@@ -242,16 +241,16 @@ function getRotatedConnections(part, rotation_deg) {
     return rotated;
 }
 
-// --- ADDED LOGS in generateRandomTrackWithRetry ---
+// --- MODIFIED LOGS in generateRandomTrackWithRetry ---
 function generateRandomTrackWithRetry(maxRetries = 10) {
-    console.log("generateRandomTrackWithRetry CALLED"); // NEW LOG
+    console.log("generateRandomTrackWithRetry CALLED"); // LOG ADDED
     for (let i = 0; i < maxRetries; i++) {
-        console.log(`--- generateRandomTrackWithRetry: Attempt ${i + 1} calling generateRandomLayout ---`); // NEW LOG
-        if (generateRandomLayout()) {
+        console.log(`--- generateRandomTrackWithRetry: Attempt ${i + 1} calling generateRandomLayout ---`); // LOG ADDED
+        if (generateRandomLayout()) { 
             console.log(`Random track generated successfully on attempt ${i + 1}`);
             return;
         }
-        console.log(`Random track generation attempt ${i + 1} failed to meet criteria, retrying...`);
+        console.log(`generateRandomLayout attempt ${i + 1} returned false. Retrying...`); // LOG MODIFIED
     }
     alert("No se pudo generar una pista después de varios intentos. Verifica la definición de las partes (config.js), asegúrate que las imágenes de las partes estén cargadas (revisa la consola por errores de carga), o intenta de nuevo con un tamaño de cuadrícula mayor.");
     setupGrid();
@@ -260,10 +259,12 @@ function generateRandomTrackWithRetry(maxRetries = 10) {
 
 // Heavily Instrumented generateRandomLayout for Debugging:
 function generateRandomLayout() {
-    setupGrid(); // This also calls renderEditor if ctx is available
+    console.log("--- generateRandomLayout FUNCTION ENTERED ---"); // ***** NEW VERY FIRST LOG *****
+    
+    setupGrid(); 
     if (AVAILABLE_TRACK_PARTS.length === 0) {
         alert("No hay partes de pista disponibles para generar una pista.");
-        // renderEditor(); // setupGrid calls renderEditor
+        console.error("generateRandomLayout: AVAILABLE_TRACK_PARTS is empty.");
         return false;
     }
     console.log(`--- Starting Random Layout Generation (Grid: ${gridSize.rows}x${gridSize.cols}) ---`);
@@ -278,7 +279,6 @@ function generateRandomLayout() {
     if (suitableParts.length === 0) {
         alert("No hay partes de pista adecuadas (con 1 o 2 conexiones) en config.js para generar la pista.");
         console.error("No suitable parts (1-2 connections) found in AVAILABLE_TRACK_PARTS. Check 'connections' definitions.");
-        // renderEditor(); // setupGrid calls renderEditor
         return false;
     }
     console.log("Suitable base parts for path generation (1-2 connections):", JSON.parse(JSON.stringify(suitableParts)));
@@ -293,7 +293,6 @@ function generateRandomLayout() {
     if (!trackPartsImages[startPieceInfo.file]) {
         console.error(`Image not found for starting piece: ${startPieceInfo.file}. Check asset loading (paths in config.js, files in assets/track_parts/) and console for image load errors from loadAndScaleImage.`);
         alert(`Error: Imagen no encontrada para la pieza inicial: ${startPieceInfo.file}. Revisa la carpeta assets/track_parts/ y config.js. Mira la consola para errores de carga de imágenes.`);
-        // renderEditor(); // setupGrid calls renderEditor
         return false;
     }
 
