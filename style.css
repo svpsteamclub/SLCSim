@@ -1,16 +1,376 @@
-body { font-family: sans-serif; margin: 0; display: flex; justify-content: center; background-color: #f0f0f0; }
-.container { display: flex; flex-wrap: wrap; gap: 20px; padding: 20px; max-width: 1200px; }
-.simulation-area { flex: 2; min-width: 400px; }
-#simulationCanvas { border: 1px solid #ccc; background-color: #fff; width: 100%; aspect-ratio: 16/9; }
-.controls-area { flex: 1; min-width: 300px; background-color: #fff; padding: 15px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
-.tab-buttons button { padding: 10px 15px; border: 1px solid #ddd; background-color: #f9f9f9; cursor: pointer; }
-.tab-buttons button.active { background-color: #e0e0e0; border-bottom: 1px solid #e0e0e0; }
-.tab-content { display: none; padding: 15px; border: 1px solid #ddd; border-top: none; }
-.tab-content.active { display: block; }
-.controls-area label, .controls-area input, .controls-area button, .controls-area textarea { display: block; margin-bottom: 10px; width: calc(100% - 20px); }
-.controls-area input[type="number"], .controls-area input[type="color"] { width: auto; }
-.simulation-controls button { margin-right: 10px; padding: 10px 15px; }
-textarea { font-family: monospace; }
+/* START OF FILE style.css */
+body {
+    font-family: Arial, sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 0;
+    padding: 20px;
+    background-color: #f0f0f0;
+}
+
+.header-logos {
+    display: flex;
+    justify-content: space-between; /* Distributes space between items */
+    align-items: center; /* Vertically aligns items in the middle */
+    width: 90%;
+    max-width: 960px; /* Or your preferred max width */
+    margin: 0 auto 20px auto;
+    padding: 5px 0;
+}
+
+.header-logos img {
+    max-height: 150px; /* **Crucial: Sets maximum height** */
+    width: auto;       /* Allows width to scale proportionally */
+    object-fit: contain; /* Ensures image fits within bounds without cropping, maintaining aspect ratio */
+    flex-shrink: 0;    /* Prevents logos from shrinking if h1 text is very long */
+}
+
+#logo-left {
+    margin-right: 15px; /* Space between left logo and title */
+}
+
+#logo-right {
+    margin-left: 15px;  /* Space between title and right logo */
+}
+
+.header-logos h1 {
+    color: #333;
+    margin: 0;
+    font-size: 1.4em; /* Adjust as needed */
+    text-align: center;
+    flex-grow: 1;      /* Allows title to take up available space */
+    min-width: 0; /* Allows h1 to shrink if necessary, works with flex-grow */
+}
+
+
+.controls-container {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    margin-bottom: 20px;
+    width: 90%;
+    max-width: 900px;
+}
+
+.track-selection {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 15px;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    background-color: #f9f9f9;
+    margin-bottom: 15px;
+}
+
+.track-selection h3 {
+    margin-top: 0;
+    margin-bottom: 10px;
+    color: #444;
+    font-size: 1.1em;
+}
+
+#trackImageSelector {
+    padding: 8px 12px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    font-size: 1em;
+    margin-bottom: 10px;
+    min-width: 280px;
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+.track-selection p {
+    font-size: 0.9em;
+    color: #666;
+    margin-top: 5px;
+    text-align: center;
+}
+
+
+.main-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    margin-bottom: 15px;
+    justify-content: space-around;
+}
+
+.controls {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 15px;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    background-color: #f9f9f9;
+    flex: 1 1 280px;
+    min-width: 250px;
+    box-sizing: border-box;
+}
+
+.controls h3 {
+    margin-top: 0;
+    margin-bottom: 12px;
+    font-size: 1.1em;
+    color: #444;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 6px;
+    width: 100%;
+}
+
+.controls h4 {
+    margin-top: 0;
+    margin-bottom: 12px;
+    font-size: 1.0em;
+    color: #444;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 6px;
+    width: 100%;
+}
+
+
+.controls label {
+    margin-bottom: 4px;
+    font-weight: bold;
+    font-size: 0.9em;
+    color: #555;
+    display: block;
+}
+
+.controls input[type="number"],
+.controls input[type="text"] {
+    width: 80px;
+    padding: 6px 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    margin-bottom: 10px;
+    box-sizing: border-box;
+}
+
+#pixelsPerMeterDisplay {
+    background-color: #eee;
+    cursor: not-allowed;
+    color: #333;
+}
+/* Make read-only inputs visually distinct */
+input[readonly] {
+    background-color: #e9ecef; /* A common Bootstrap read-only color */
+    opacity: 1; /* Ensure text is readable */
+    cursor: not-allowed;
+}
+
+
+.arduino-controls > div > div { /* Target the inner divs holding label and input */
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.arduino-controls input[type="number"] {
+    width: 80px;
+}
+
+.buttons {
+    text-align: center;
+    margin-bottom: 15px;
+    padding-top: 10px;
+}
+
+.buttons button {
+    padding: 10px 18px;
+    margin: 5px 8px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.2s ease-in-out, transform 0.1s ease;
+    min-width: 100px;
+}
+
+.buttons button:hover:not(:disabled) {
+    transform: translateY(-1px);
+}
+.buttons button:active:not(:disabled) {
+    transform: translateY(0px);
+}
+
+#startButton { background-color: #4CAF50; color: white; }
+#startButton:hover:not(:disabled) { background-color: #45a049; }
+#stopButton { background-color: #f44336; color: white; }
+#stopButton:hover:not(:disabled) { background-color: #da190b; }
+#resetButton { background-color: #008CBA; color: white; }
+#resetButton:hover:not(:disabled) { background-color: #007ba7; }
+#setStartPositionButton { background-color: #6c757d; color: white; }
+#setStartPositionButton:hover:not(:disabled) { background-color: #5a6268; }
+#setStartPositionButton.active { background-color: #ffc107; color: black; }
+
+
+button:disabled {
+    background-color: #cccccc;
+    color: #666666;
+    cursor: not-allowed;
+}
+
+hr {
+    border: 0;
+    height: 1px;
+    background: #ccc;
+    margin: 20px 0;
+}
+
+.info {
+    background-color: #e9e9e9;
+    padding: 10px;
+    border-radius: 6px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-around;
+    align-items: flex-end;
+}
+
+.info-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 5px 8px;
+    min-width: 60px;
+}
+
+.info-label {
+    font-size: 0.8em;
+    color: #555;
+    margin-bottom: 2px;
+    text-align: center;
+}
+
+.info-value {
+    font-weight: bold;
+    color: #222;
+    background-color: #fff;
+    padding: 2px 5px;
+    border-radius: 3px;
+    border: 1px solid #ddd;
+    font-size: 0.9em;
+    margin-bottom: 4px;
+    min-width: 35px;
+    text-align: center;
+    display: inline-block;
+}
+
+.bar-track {
+    width: 20px;
+    height: 50px;
+    background-color: #ddd;
+    border: 1px solid #bbb;
+    position: relative;
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.bar {
+    width: 100%;
+    background-color: #4CAF50;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 0%;
+    border-radius: 2px 2px 0 0;
+    transition: height 0.05s linear;
+}
+
+#errorBar  { background-color: #f44336; }
+#pBar      { background-color: #2196F3; }
+#iBar      { background-color: #FFC107; }
+#dBar      { background-color: #9C27B0; }
+#adjPIDBar { background-color: #009688; }
+#vLeftBar,
+#vRightBar { background-color: #795548; }
+
+
+#simulationCanvas {
+    border: 2px solid #333;
+    background-color: #eee;
+    display: block;
+    margin: 20px auto;
+    max-width: 100%;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    image-rendering: pixelated; /* or auto if preferred */
+}
+
+.lap-times-container {
+    /* Utilizes .controls-container styles */
+}
+
+.lap-times-container h3 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    color: #444;
+    font-size: 1.2em;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 8px;
+}
+
+#lapTimesTable {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+#lapTimesTable th,
+#lapTimesTable td {
+    border: 1px solid #ddd;
+    padding: 8px 10px;
+    text-align: left;
+}
+
+#lapTimesTable th {
+    background-color: #e9e9e9;
+    font-weight: bold;
+}
+
+#lapTimesTable tbody tr:nth-child(even) {
+    background-color: #fdfdfd;
+}
+#lapTimesTable tbody tr:nth-child(odd) {
+    background-color: #f7f7f7;
+}
+
+.foldable-title {
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+
+.fold-indicator {
+    font-weight: bold;
+    margin-left: 10px;
+    user-select: none;
+    font-size: 0.9em;
+}
+
+.foldable-content {
+    margin-top: 10px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.foldable-content label,
+.foldable-content input,
+.foldable-content p,
+.foldable-content ul,
+.foldable-content ol {
+    flex-basis: auto;
+    flex-grow: 0;
+    flex-shrink: 1;
+}
+
+/* Tab Navigation */
 .tab-navigation {
     text-align: center;
     margin-bottom: 20px;
@@ -34,42 +394,102 @@ textarea { font-family: monospace; }
 
 .tab-content {
     display: none; /* Hidden by default */
-    /* Styles for tab content areas can be similar to .controls-container or specific */
-    /* background-color: #fff;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    margin-bottom: 20px;
-    width: 90%;
-    max-width: 900px;
-    margin-left: auto;
-    margin-right: auto; */
+    /* Shared styles for tab content containers, if any. 
+       .controls-container style is applied individually in HTML for complex tabs.
+       Simple tab content could use a common style here. */
 }
 
 .tab-content.active {
     display: block; /* Show active tab */
 }
 
-/* Specific for editor canvases if needed */
+/* Specific for editor canvases */
 #robotEditorCanvas, #trackEditorCanvas {
     display: block;
     margin: 20px auto;
     max-width: 100%;
     box-shadow: 0 0 10px rgba(0,0,0,0.1);
-}
-#trackPartsPalette img {
-    width: 70px; /* Smaller preview */
-    height: 70px;
-    border: 1px solid #eee;
-    cursor: pointer;
-}
-#trackPartsPalette img.selected {
-    border: 2px solid blue;
+    border: 1px solid #ccc; /* Add border to make canvas bounds clear */
 }
 
-/* Make read-only inputs visually distinct */
-input[readonly] {
-    background-color: #e9ecef; /* A common Bootstrap read-only color */
-    opacity: 1; /* Ensure text is readable */
-    cursor: not-allowed;
+/* Track Editor Palette */
+#trackPartsPalette {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    border: 1px solid #ccc;
+    padding: 10px; /* More padding for better appearance */
+    background-color: #f9f9f9;
+    border-radius: 4px;
+    margin-top: 10px;
 }
+
+#trackPartsPalette img {
+    width: 70px;
+    height: 70px;
+    border: 1px solid #ddd;
+    cursor: pointer;
+    object-fit: contain; /* Ensure parts are not stretched */
+    background-color: #fff; /* If parts have transparency */
+    padding: 2px; /* Small padding around the image */
+    border-radius: 3px;
+}
+
+#trackPartsPalette img.selected {
+    border: 2px solid blue;
+    box-shadow: 0 0 5px rgba(0,0,255,0.5);
+}
+#trackPartsPalette img:hover {
+    border-color: #aaa;
+}
+
+
+/* Custom Track Controls */
+.custom-track-controls {
+    /* Inherits .controls styles */
+    align-items: center; /* Center items like input and button */
+}
+.custom-track-controls input[type="file"] {
+    width: auto; /* Allow file input to size naturally */
+    max-width: 100%; /* Prevent overflow on small screens */
+    margin-bottom: 10px;
+}
+.custom-track-controls p {
+    font-size: 0.9em;
+    color: #666;
+    margin-top: 5px;
+    text-align: center;
+}
+
+
+/* Ensure .arduino-controls div wraps nicely and aligns labels/inputs */
+.arduino-controls .foldable-content > div { /* Target the direct div child of foldable-content */
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 15px; /* Vertical and horizontal gap */
+    justify-content: flex-start;
+}
+.arduino-controls .foldable-content > div > div { /* Target the individual parameter holders */
+    display: flex;
+    flex-direction: column; /* Stack label on top of input */
+    align-items: flex-start;
+}
+
+/* General explanation section styling */
+.explanation-section ul, .explanation-section ol {
+    text-align: left;
+    margin-left: 20px; /* Indent lists */
+}
+.explanation-section ul ul, .explanation-section ol ul { /* Nested lists */
+    margin-left: 20px; /* Further indent nested lists */
+}
+
+/* Footer */
+footer {
+    text-align: center;
+    margin-top: 30px;
+    padding-bottom: 20px;
+    font-size: 0.9em;
+    color: #555;
+}
+/* END OF FILE style.css */
