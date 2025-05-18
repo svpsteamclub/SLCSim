@@ -46,14 +46,12 @@ export function initTrackEditor(mainAppInterface) {
         renderEditor();
     });
 
-    // --- THIS IS THE CORRECTED EVENT LISTENER ---
     elems.generateRandomTrack.addEventListener('click', () => { 
-        generateRandomTrackWithRetry(); // Call without arguments to use default maxRetries
+        generateRandomTrackWithRetry(); 
     });
-    // --- END OF CORRECTION ---
 
     elems.exportTrackFromEditor.addEventListener('click', () => {
-        if (!validateTrack()) {
+        if (!validateTrack()) { 
             if (!confirm("La pista puede tener problemas (desconexiones o callejones sin salida). ¿Exportar de todos modos?")) {
                 return;
             }
@@ -125,10 +123,10 @@ function populateTrackPartsPalette(paletteElement) {
         imgElement.addEventListener('click', () => {
             document.querySelectorAll('#trackPartsPalette img').forEach(p => p.classList.remove('selected'));
             imgElement.classList.add('selected');
-            if (trackPartsImages[partInfo.file]) {
+            if (trackPartsImages[partInfo.file]) { 
                  selectedTrackPart = { ...partInfo, image: trackPartsImages[partInfo.file] };
             } else {
-                selectedTrackPart = null;
+                selectedTrackPart = null; 
                 alert(`La imagen para la parte '${partInfo.name}' no está cargada. No se puede seleccionar.`);
                 console.warn(`Cannot select part ${partInfo.name}, image not loaded from cache.`);
             }
@@ -143,14 +141,14 @@ function setupGrid() {
     if (editorCanvas) {
         editorCanvas.width = gridSize.cols * TRACK_PART_SIZE_PX;
         editorCanvas.height = gridSize.rows * TRACK_PART_SIZE_PX;
-         if (ctx) {
-            renderEditor();
+         if (ctx) { 
+            renderEditor(); 
         }
     }
 }
 
 function renderEditor() {
-    if (!ctx || !editorCanvas || editorCanvas.width === 0 || editorCanvas.height === 0) return;
+    if (!ctx || !editorCanvas || editorCanvas.width === 0 || editorCanvas.height === 0) return; 
     ctx.clearRect(0, 0, editorCanvas.width, editorCanvas.height);
     ctx.fillStyle = '#ffffff';
     ctx.fillRect(0,0,editorCanvas.width, editorCanvas.height);
@@ -184,7 +182,7 @@ function renderEditor() {
 }
 
 function onGridSingleClick(event) {
-    if (!selectedTrackPart || !selectedTrackPart.image) {
+    if (!selectedTrackPart || !selectedTrackPart.image) { 
         return;
     }
     if (!editorCanvas) return;
@@ -230,7 +228,7 @@ function getRotatedConnections(part, rotation_deg) {
         return {};
     }
     const rotated = {};
-    const numRotations = Math.round(rotation_deg / 90);
+    const numRotations = Math.round(rotation_deg / 90); 
 
     for (const dirKey in part.connections) {
         if (part.connections[dirKey]) {
@@ -246,52 +244,22 @@ function getRotatedConnections(part, rotation_deg) {
     return rotated;
 }
 
-// --- SIMPLIFIED generateRandomTrackWithRetry FOR DEBUGGING THE LOOP ---
 function generateRandomTrackWithRetry(maxRetries = 10) {
-    console.log("generateRandomTrackWithRetry CALLED. maxRetries:", maxRetries);
-
-    if (maxRetries <= 0) {
-        console.error("maxRetries is 0 or less, loop will not run.");
-    }
-
-    let enteredLoop = false;
+    console.log("generateRandomTrackWithRetry CALLED. maxRetries:", maxRetries); 
     for (let i = 0; i < maxRetries; i++) {
-        enteredLoop = true;
-        console.log(`--- LOOP ITERATION: Attempt ${i + 1} / ${maxRetries} ---`);
-        // We are not calling generateRandomLayout() in this extreme test yet.
-        // We just want to see if the loop runs.
-        // Let's force a "failure" to make the loop continue for a few iterations.
-        if (i < 2) { // Let it "fail" the first 2 times (0, 1)
-             console.log(`   Simulating generateRandomLayout() returning false for attempt ${i + 1}`);
-        } else { // Simulate "success" on the 3rd attempt (i=2)
-             console.log(`   Simulating generateRandomLayout() returning true for attempt ${i + 1} to stop loop.`);
-             return; // Simulate success to exit retry function
+        console.log(`--- generateRandomTrackWithRetry: Attempt ${i + 1} / ${maxRetries} calling generateRandomLayout ---`); 
+        if (generateRandomLayout()) { 
+            console.log(`Random track generated successfully on attempt ${i + 1}`);
+            return; 
         }
+        console.log(`generateRandomLayout attempt ${i + 1} returned false. Retrying...`); 
     }
-
-    if (!enteredLoop) {
-        console.error("FOR LOOP WAS NOT ENTERED AT ALL!");
-    }
-
-    // This alert should only appear if all simulated "failures" happen OR if maxRetries was invalid.
-    // With the current (i < 2) logic, this alert should NOT show if maxRetries is >=3.
-    alert("Simplified retry loop finished OR maxRetries was invalid and loop didn't run as expected.");
-    // setupGrid(); 
-    // renderEditor();
+    alert("No se pudo generar una pista después de varios intentos. Verifica la definición de las partes (config.js), asegúrate que las imágenes de las partes estén cargadas (revisa la consola por errores de carga), o intenta de nuevo con un tamaño de cuadrícula mayor.");
+    setupGrid(); 
+    renderEditor();
 }
-// --- END OF SIMPLIFIED generateRandomTrackWithRetry ---
 
-// --- MINIMAL generateRandomLayout FOR DEBUGGING (Not called by the simplified retry function above) ---
-function generateRandomLayout() {
-    console.log("--- generateRandomLayout MINIMAL TEST ENTERED ---");
-    // alert("generateRandomLayout (minimal version) was called!");
-    return false; // This minimal version always returns false
-}
-// --- END OF MINIMAL generateRandomLayout ---
-
-
-// --- Keep the original complex generateRandomLayout commented out below for future restoration ---
-/*
+// --- THIS IS THE FULL, COMPLEX generateRandomLayout with detailed logs ---
 function generateRandomLayout() {
     console.log("--- generateRandomLayout FUNCTION ENTERED ---"); 
     
@@ -458,10 +426,9 @@ function generateRandomLayout() {
 
     console.log(`--- Generation Finished. Path length: ${pathLength}, Parts placed: ${placedCount}/${totalCells} ---`);
     renderEditor();
-    return pathLength > 1;
+    return pathLength > 1; // Success if more than just the starting piece is placed
 }
-*/
-// --- End of Original generateRandomLayout (commented) ---
+// --- END OF FULL generateRandomLayout ---
 
 
 function validateTrack() {
