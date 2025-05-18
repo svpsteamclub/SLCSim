@@ -327,4 +327,22 @@ hr {
 
 
 footer { text-align: center; margin-top: 30px; padding-bottom: 20px; font-size: 0.9em; color: #555; }
+
+.button-like-label {
+    display: inline-block; /* Or inline-flex for better alignment if needed */
+    padding: 8px 12px; /* Adjust padding to match your buttons */
+    background-color: #007bff; /* Example: Bootstrap primary blue */
+    color: white;
+    border: 1px solid transparent;
+    border-radius: 4px; /* Match your button border-radius */
+    cursor: pointer;
+    font-size: 0.9em; /* Match your button font size */
+    text-align: center;
+    user-select: none; /* Prevent text selection */
+    margin-left: 10px; /* Example margin */
+}
+
+.button-like-label:hover {
+    background-color: #0056b3; /* Darker shade on hover */
+}
 /* END OF FILE style.css */

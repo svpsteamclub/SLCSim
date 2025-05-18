@@ -82,7 +82,7 @@
             <div class="arduino-controls controls">
                 <h3 class="foldable-title">Parámetros del Código (PID) <span class="fold-indicator">[+]</span></h3>
                  <div class="foldable-content" style="display: none;">
-                    <div> <!-- This div will be styled by CSS for flex layout -->
+                    <div> 
                         <div><label for="arduino_kp">Arduino Kp:</label><input type="number" id="arduino_kp" value="120" step="1"></div>
                         <div><label for="arduino_ki">Arduino Ki:</label><input type="number" id="arduino_ki" value="3" step="0.001"></div>
                         <div><label for="arduino_kd">Arduino Kd:</label><input type="number" id="arduino_kd" value="15" step="0.1"></div>
@@ -93,7 +93,7 @@
             </div>
 
             <hr style="width:100%; margin: 15px 0;">
-            <div class="pid-explanation-container controls foldable-container"> <!-- Added foldable-container for consistency if needed -->
+            <div class="pid-explanation-container controls foldable-container">
                 <h4 class="foldable-title">Entendiendo el Controlador PID y los Parámetros del Código <span class="fold-indicator">[+]</span></h4>
                 <div class="foldable-content" style="display: none;">
                     <p>El robot utiliza un controlador <strong>PID (Proporcional-Integral-Derivativo)</strong> para seguir la línea. El objetivo es minimizar el "error", que es la desviación del robot del centro de la línea, calculado a partir de los sensores frontales.</p>
@@ -157,11 +157,11 @@
                     <div class="bar-track"><div class="bar" id="vRightBar"></div></div>
                 </div>
             </div>
-        </div> <!-- End of the first main .controls-container for simulator options -->
+        </div> 
 
-        <canvas id="simulationCanvas" width="800" height="600"></canvas> <!-- Removed inline style for bg color, handled by CSS -->
+        <canvas id="simulationCanvas" width="800" height="600"></canvas>
 
-        <div class="controls-container lap-times-container"> <!-- Added controls-container for consistent centering -->
+        <div class="controls-container lap-times-container"> 
             <h3>Tiempos de Vuelta</h3>
             <div style="padding: 10px; background-color: #f9f9f9; border-radius: 6px;">
                 <div style="margin-bottom: 8px;"><strong>Vuelta Actual:</strong> <span id="currentLapTimeVal">0.000</span> s</div>
@@ -227,7 +227,7 @@
     </div> <!-- End of #simulatorContent -->
 
     <div id="robotEditorContent" class="tab-content" style="display: none;">
-        <div class="controls-container"> <!-- Added controls-container for centering -->
+        <div class="controls-container"> 
             <h2>Editor de Geometría del Robot</h2>
             <p>Aquí podrás diseñar la forma y disposición de los componentes de tu robot.</p>
             <div>
@@ -249,17 +249,25 @@
              <p style="margin-top: 15px;">Usa el canvas para arrastrar, rotar y escalar componentes. Las propiedades del robot (ancho, largo, posición de sensores) se derivarán de este diseño.</p>
         </div>
         <canvas id="robotEditorCanvas" width="800" height="600"></canvas>
-    </div> <!-- End of #robotEditorContent -->
+    </div> 
 
     <div id="trackEditorContent" class="tab-content" style="display: none;">
-        <div class="controls-container"> <!-- Added controls-container for centering -->
+        <div class="controls-container"> 
             <h2>Editor de Pistas</h2>
             <p>Crea tus propias pistas colocando partes o generando una aleatoriamente.</p>
-            <div>
+            <div class="track-editor-file-controls">
+                <label for="trackEditorTrackName">Nombre de la Pista:</label>
+                <input type="text" id="trackEditorTrackName" value="MiPistaEditada">
+                <button id="saveTrackDesignButton">Guardar Diseño de Pista</button>
+                <label for="loadTrackDesignInput" class="button-like-label">Cargar Diseño de Pista</label>
+                <input type="file" id="loadTrackDesignInput" accept=".trackdesign,.json,.txt" style="display:none;">
+            </div>
+            <hr>
+            <div class="track-editor-grid-controls">
                 <label for="trackGridSize">Tamaño de Pista:</label>
                 <select id="trackGridSize">
                     <option value="3x3">3x3 Partes</option>
-                    <option value="4x4">4x4 Partes</option>
+                    <option value="4x4" selected>4x4 Partes</option> <!-- Default to 4x4 -->
                     <option value="5x5">5x5 Partes</option>
                 </select>
                 <button id="generateRandomTrack">Generar Pista Aleatoria</button>
@@ -274,8 +282,8 @@
             <p style="margin-top:15px;"><i>Nota: El tamaño del canvas del editor de pistas se ajustará al tamaño de la cuadrícula seleccionada.</i></p>
             <p>Haz clic en la paleta para seleccionar una parte, luego haz clic en la cuadrícula para colocarla. Doble clic en una parte colocada para rotarla.</p>
         </div>
-        <canvas id="trackEditorCanvas" width="700" height="700"></canvas>
-    </div> <!-- End of #trackEditorContent -->
+        <canvas id="trackEditorCanvas" width="700" height="700"></canvas> <!-- Initial size, will be updated by JS -->
+    </div> 
 
     <footer style="text-align: center; margin-top: 30px; padding-bottom: 20px; font-size: 0.9em; color: #555;">
         Desarrollado por Ing. Luis Fernando Corado y el equipo del SVP Steam Club, Mayo 2025

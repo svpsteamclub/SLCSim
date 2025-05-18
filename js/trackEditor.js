@@ -5,10 +5,10 @@ import { loadAndScaleImage } from './utils.js';
 
 
 let editorCanvas, ctx;
-let grid = []; // 2D array for track parts: { partInfo, image, rotation_deg (0, 90, 180, 270) }
-let gridSize = { rows: 3, cols: 3 }; // Default 3x3
-let trackPartsImages = {}; // Store loaded Image objects for track parts
-let selectedTrackPart = null; // { name, file, connections, image }
+let grid = []; 
+let gridSize = { rows: 4, cols: 4 }; // Default to 4x4 to match HTML selected
+let trackPartsImages = {}; 
+let selectedTrackPart = null; 
 
 export function initTrackEditor(mainAppInterface) {
     const elems = getDOMElements();
@@ -20,9 +20,14 @@ export function initTrackEditor(mainAppInterface) {
     ctx = editorCanvas.getContext('2d');
     console.log("Track Editor Initialized");
 
+    // Set initial grid size from dropdown default
+    const initialGridSizeValue = elems.trackGridSize.value.split('x');
+    gridSize = { rows: parseInt(initialGridSizeValue[0]), cols: parseInt(initialGridSizeValue[1]) };
+
+
     loadTrackPartAssets(() => {
         populateTrackPartsPalette(elems.trackPartsPalette);
-        setupGrid();
+        setupGrid(); // setupGrid will use the gridSize set above
         renderEditor();
     });
 
@@ -43,12 +48,18 @@ export function initTrackEditor(mainAppInterface) {
 
             mainAppInterface.loadTrackFromEditorCanvas(trackCanvas, startX_m, startY_m, startAngle_rad);
             alert("Pista del editor cargada en el simulador. Puede que necesites ajustar la posición inicial.");
-            document.querySelector('.tab-button[data-tab="simulator"]').click();
+            
+            const simulatorTabButton = document.querySelector('.tab-button[data-tab="simulator"]');
+            if (simulatorTabButton) simulatorTabButton.click();
         }
     });
+    
+    elems.saveTrackDesignButton.addEventListener('click', saveTrackDesign);
+    elems.loadTrackDesignInput.addEventListener('change', loadTrackDesign);
 
-    editorCanvas.addEventListener('click', onGridSingleClick); // For placing parts
-    editorCanvas.addEventListener('dblclick', onGridDoubleClick); // For rotating parts
+
+    editorCanvas.addEventListener('click', onGridSingleClick); 
+    editorCanvas.addEventListener('dblclick', onGridDoubleClick); 
 }
 
 function loadTrackPartAssets(callback) {
@@ -107,7 +118,7 @@ function setupGrid() {
 function renderEditor() {
     if (!ctx || !editorCanvas) return;
     ctx.clearRect(0, 0, editorCanvas.width, editorCanvas.height);
-    ctx.fillStyle = '#333333';
+    ctx.fillStyle = '#ffffff'; // White background
     ctx.fillRect(0,0,editorCanvas.width, editorCanvas.height);
 
     for (let r = 0; r < gridSize.rows; r++) {
@@ -124,14 +135,14 @@ function renderEditor() {
                 ctx.drawImage(grid[r][c].image, -TRACK_PART_SIZE_PX / 2, -TRACK_PART_SIZE_PX / 2, TRACK_PART_SIZE_PX, TRACK_PART_SIZE_PX);
                 ctx.restore();
             } else {
-                ctx.strokeStyle = '#555555';
+                ctx.strokeStyle = '#cccccc'; // Lighter grid lines for white background
                 ctx.lineWidth = 1;
                 ctx.strokeRect(x_topLeft, y_topLeft, TRACK_PART_SIZE_PX, TRACK_PART_SIZE_PX);
             }
         }
     }
-    if (AVAILABLE_TRACK_PARTS.length === 0 && editorCanvas && editorCanvas.width > 0) { // Check canvas width to avoid drawing on 0x0 canvas
-         ctx.fillStyle = "rgba(255,255,255,0.7)";
+    if (AVAILABLE_TRACK_PARTS.length === 0 && editorCanvas && editorCanvas.width > 0) { 
+         ctx.fillStyle = "rgba(0,0,0,0.7)"; // Dark text on white background
          ctx.font = "bold 16px Arial";
          ctx.textAlign = "center";
          ctx.fillText("No hay partes de pista definidas en config.js", editorCanvas.width / 2, editorCanvas.height/2);
@@ -161,7 +172,6 @@ function onGridSingleClick(event) {
         const paletteImages = document.querySelectorAll('#trackPartsPalette img');
         paletteImages.forEach(pImg => pImg.classList.remove('selected'));
         selectedTrackPart = null;
-        console.log("Part placed and selection cleared from palette."); // DEBUG
     }
 }
 
@@ -175,9 +185,7 @@ function onGridDoubleClick(event) {
     const r = Math.floor(y_canvas / TRACK_PART_SIZE_PX);
 
     if (r >= 0 && r < gridSize.rows && c >= 0 && c < gridSize.cols && grid[r][c]) {
-        console.log(`Before rotation: cell [${r},${c}], angle: ${grid[r][c].rotation_deg}`); // DEBUG
         grid[r][c].rotation_deg = (grid[r][c].rotation_deg + 90) % 360;
-        console.log(`After rotation: cell [${r},${c}], angle: ${grid[r][c].rotation_deg}`);  // DEBUG
         renderEditor();
     }
     event.preventDefault();
@@ -198,6 +206,106 @@ function generateRandom() {
     }
     renderEditor();
 }
+
+function saveTrackDesign() {
+    const { trackEditorTrackName } = getDOMElements();
+    const trackName = trackEditorTrackName.value.trim() || "MiPistaEditada";
+
+    const designData = {
+        gridSize: { ...gridSize }, 
+        gridParts: []
+    };
+
+    for (let r = 0; r < gridSize.rows; r++) {
+        for (let c = 0; c < gridSize.cols; c++) {
+            if (grid[r][c] && grid[r][c].file) { 
+                designData.gridParts.push({
+                    r: r,
+                    c: c,
+                    partFile: grid[r][c].file, 
+                    rotation: grid[r][c].rotation_deg
+                });
+            }
+        }
+    }
+
+    if (designData.gridParts.length === 0) {
+        alert("La pista está vacía. No hay nada que guardar.");
+        return;
+    }
+
+    const jsonData = JSON.stringify(designData, null, 2); 
+    const blob = new Blob([jsonData], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${trackName}.trackdesign.json`; 
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+}
+
+function loadTrackDesign(event) {
+    const file = event.target.files[0];
+    if (!file) {
+        return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        try {
+            const designData = JSON.parse(e.target.result);
+            if (!designData.gridSize || !designData.gridParts) {
+                throw new Error("Formato de archivo de diseño de pista inválido.");
+            }
+
+            gridSize.rows = designData.gridSize.rows || 4; // Default to 4 if missing
+            gridSize.cols = designData.gridSize.cols || 4; // Default to 4 if missing
+            
+            const { trackGridSize, trackEditorTrackName } = getDOMElements();
+            if (trackGridSize) trackGridSize.value = `${gridSize.rows}x${gridSize.cols}`;
+
+            setupGrid(); 
+
+            designData.gridParts.forEach(partData => {
+                if (partData.r < gridSize.rows && partData.c < gridSize.cols) {
+                    const originalPartInfo = AVAILABLE_TRACK_PARTS.find(p => p.file === partData.partFile);
+                    const partImage = trackPartsImages[partData.partFile];
+                    if (originalPartInfo && partImage) {
+                        grid[partData.r][partData.c] = {
+                            ...originalPartInfo, 
+                            image: partImage,
+                            rotation_deg: partData.rotation || 0
+                        };
+                    } else {
+                        console.warn(`Parte de pista no encontrada o imagen no cargada: ${partData.partFile} en celda [${partData.r}, ${partData.c}]`);
+                    }
+                } else {
+                     console.warn(`Parte de pista fuera de los límites del grid actual: ${partData.partFile} en celda [${partData.r}, ${partData.c}]`);
+                }
+            });
+
+            renderEditor();
+            alert(`Diseño de pista "${file.name}" cargado.`);
+            
+            if(trackEditorTrackName) {
+                let fileNameWithoutExt = file.name.replace(/\.trackdesign\.json$|\.json$|\.txt$/i, '');
+                trackEditorTrackName.value = fileNameWithoutExt || "PistaCargada";
+            }
+
+        } catch (error) {
+            console.error("Error al cargar o parsear el diseño de pista:", error);
+            alert(`Error al cargar el diseño: ${error.message}`);
+        }
+    };
+    reader.onerror = () => {
+        alert("Error al leer el archivo de diseño de pista.");
+    };
+    reader.readAsText(file);
+    event.target.value = null;
+}
+
 
 function exportTrackAsCanvas() {
     if (gridSize.rows === 0 || gridSize.cols === 0) {

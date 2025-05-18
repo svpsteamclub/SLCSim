@@ -18,24 +18,20 @@ export function cacheDOMElements() {
         movementPerturbFactorInput: document.getElementById('movementPerturbFactor'),
         motorDeadbandPWMInput: document.getElementById('motorDeadbandPWM'),
         lineThresholdInput: document.getElementById('lineThreshold'),
-        // Robot Geometry (now mostly read-only in simulator view)
         robotWidthInput_actual: document.getElementById('robotWidthInput_actual'),
         robotLengthInput_actual: document.getElementById('robotLengthInput_actual'),
         sideSensorSpreadInput: document.getElementById('sideSensorSpreadInput'),
         sensorForwardOffsetInput: document.getElementById('sensorForwardOffsetInput'),
         sensorDiameterInput: document.getElementById('sensorDiameterInput'),
-        // PID
         arduinoKpInput: document.getElementById('arduino_kp'),
         arduinoKiInput: document.getElementById('arduino_ki'),
         arduinoKdInput: document.getElementById('arduino_kd'),
         arduinoVelBaseInput: document.getElementById('arduino_velBase'),
         arduinoIntegralMaxInput: document.getElementById('arduino_integralMax'),
-        // Buttons
         startButton: document.getElementById('startButton'),
         stopButton: document.getElementById('stopButton'),
         resetButton: document.getElementById('resetButton'),
         setStartPositionButton: document.getElementById('setStartPositionButton'),
-        // Info Display
         errorValSpan: document.getElementById('errorVal'), errorBar: document.getElementById('errorBar'),
         pValSpan: document.getElementById('pVal'), pBar: document.getElementById('pBar'),
         iValSpan: document.getElementById('iVal'), iBar: document.getElementById('iBar'),
@@ -43,44 +39,39 @@ export function cacheDOMElements() {
         arduinoAjusteValSpan: document.getElementById('arduinoAjusteVal'), adjPIDBar: document.getElementById('adjPIDBar'),
         vLeftValSpan: document.getElementById('vLeftVal'), vLeftBar: document.getElementById('vLeftBar'),
         vRightValSpan: document.getElementById('vRightVal'), vRightBar: document.getElementById('vRightBar'),
-        // Lap Times
         currentLapTimeValSpan: document.getElementById('currentLapTimeVal'),
         bestLapTimeValSpan: document.getElementById('bestLapTimeVal'),
         lapTimesTableBody: document.querySelector('#lapTimesTable tbody'),
-        // Tabs
         tabButtons: document.querySelectorAll('.tab-button'),
         tabContents: document.querySelectorAll('.tab-content'),
-        // Canvases
         simulationCanvas: document.getElementById('simulationCanvas'),
         robotEditorCanvas: document.getElementById('robotEditorCanvas'),
         trackEditorCanvas: document.getElementById('trackEditorCanvas'),
-
-        // --- ADDED/VERIFIED ROBOT EDITOR IDs ---
         robotName: document.getElementById('robotName'),
         saveRobotDesign: document.getElementById('saveRobotDesign'),
         loadRobotDesign: document.getElementById('loadRobotDesign'),
         robotComponentSelector: document.getElementById('robotComponentSelector'),
         addComponentToRobot: document.getElementById('addComponentToRobot'),
         customComponentImage: document.getElementById('customComponentImage'),
-        // --- END OF ROBOT EDITOR IDs ---
-
-        // Track Editor specific
+        
+        // Track Editor specific elements
+        trackEditorTrackName: document.getElementById('trackEditorTrackName'),      // NEW
+        saveTrackDesignButton: document.getElementById('saveTrackDesignButton'),  // NEW
+        loadTrackDesignInput: document.getElementById('loadTrackDesignInput'),    // NEW
         trackGridSize: document.getElementById('trackGridSize'),
         generateRandomTrack: document.getElementById('generateRandomTrack'),
         exportTrackFromEditor: document.getElementById('exportTrackFromEditor'),
         trackPartsPalette: document.getElementById('trackPartsPalette'),
     };
-    // Sanity check for one of the problematic elements from trackEditor
-    if (!domElements.trackGridSize) {
-        console.warn("UI WARNING: trackGridSize element not found during cache!");
-    }
-    if (!domElements.trackPartsPalette) {
-        console.warn("UI WARNING: trackPartsPalette element not found during cache!");
-    }
-
+    // Sanity checks (optional but helpful for debugging missing elements)
+    if (!domElements.trackEditorTrackName) console.warn("UI_CACHE: trackEditorTrackName not found!");
+    if (!domElements.saveTrackDesignButton) console.warn("UI_CACHE: saveTrackDesignButton not found!");
+    if (!domElements.loadTrackDesignInput) console.warn("UI_CACHE: loadTrackDesignInput not found!");
+    
     return domElements;
 }
 
+// ... (rest of ui.js remains the same as previously provided)
 export function getDOMElements() {
     if (Object.keys(domElements).length === 0) {
         cacheDOMElements();
@@ -104,15 +95,14 @@ export function populateTrackSelector() {
 
     AVAILABLE_TRACKS.forEach((track, index) => {
         const option = document.createElement('option');
-        option.value = track.fileName; // Store filename as value
+        option.value = track.fileName; 
         option.textContent = track.displayName;
-        // Store all track data in dataset attributes
         option.dataset.fileName = track.fileName;
         option.dataset.width = track.width;
         option.dataset.height = track.height;
-        option.dataset.startX = track.startX; // These are in pixels for predefined tracks
+        option.dataset.startX = track.startX; 
         option.dataset.startY = track.startY;
-        option.dataset.startAngle = track.startAngle; // Degrees
+        option.dataset.startAngle = track.startAngle; 
 
         if (index === 0) option.selected = true;
         trackImageSelector.appendChild(option);
@@ -126,7 +116,7 @@ export function updateBar(barElement, value, maxValue, valueTextElement) {
         heightPercentage = 0;
     } else if (typeof value === 'number' && !isNaN(value)) {
         absValue = Math.abs(value);
-        if (maxValue > 0.00001) { // Avoid division by zero or tiny numbers
+        if (maxValue > 0.00001) { 
             heightPercentage = Math.min(100, (absValue / maxValue) * 100);
         }
     }
@@ -169,12 +159,12 @@ export function resetPIDDisplay() {
 
 export function updateLapTimeDisplay(lapData) {
     const { currentLapTimeValSpan, bestLapTimeValSpan, lapTimesTableBody } = getDOMElements();
-    if (!lapData || !currentLapTimeValSpan || !bestLapTimeValSpan || !lapTimesTableBody ) return; // Add null checks for safety
+    if (!lapData || !currentLapTimeValSpan || !bestLapTimeValSpan || !lapTimesTableBody ) return; 
 
     currentLapTimeValSpan.textContent = lapData.currentLapTime_s.toFixed(3);
     bestLapTimeValSpan.textContent = lapData.bestLapTime_s ? lapData.bestLapTime_s.toFixed(3) + " s" : "N/A";
 
-    lapTimesTableBody.innerHTML = ''; // Clear previous times
+    lapTimesTableBody.innerHTML = ''; 
     lapData.last5Laps.forEach(lap => {
         const row = lapTimesTableBody.insertRow();
         row.insertCell().textContent = lap.lapNum;
@@ -184,7 +174,7 @@ export function updateLapTimeDisplay(lapData) {
 
 export function resetLapTimeDisplay() {
     const { currentLapTimeValSpan, bestLapTimeValSpan, lapTimesTableBody } = getDOMElements();
-     if (!currentLapTimeValSpan || !bestLapTimeValSpan || !lapTimesTableBody ) return; // Add null checks
+     if (!currentLapTimeValSpan || !bestLapTimeValSpan || !lapTimesTableBody ) return; 
 
     currentLapTimeValSpan.textContent = "0.000";
     bestLapTimeValSpan.textContent = "N/A";
@@ -228,7 +218,7 @@ export function setupFoldableSections() {
 
 export function setupTabNavigation() {
     const { tabButtons, tabContents } = getDOMElements();
-    if (!tabButtons || !tabContents) return; // Safety check
+    if (!tabButtons || !tabContents) return; 
 
     tabButtons.forEach(button => {
         button.addEventListener('click', () => {
@@ -245,7 +235,7 @@ export function setupTabNavigation() {
 
 export function updateRobotGeometryDisplay(geometry) {
     const elems = getDOMElements();
-    if (!geometry || !elems.robotWidthInput_actual) return; // Safety check
+    if (!geometry || !elems.robotWidthInput_actual) return; 
 
     elems.robotWidthInput_actual.value = geometry.width_m.toFixed(3);
     elems.robotLengthInput_actual.value = geometry.length_m.toFixed(3);
