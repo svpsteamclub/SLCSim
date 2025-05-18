@@ -55,7 +55,7 @@ function loadTrackPartAssets(callback) {
     let loadedCount = 0;
     const totalParts = AVAILABLE_TRACK_PARTS.length;
     if (totalParts === 0) {
-        callback();
+        if (typeof callback === 'function') callback();
         return;
     }
 
@@ -66,7 +66,7 @@ function loadTrackPartAssets(callback) {
             }
             loadedCount++;
             if (loadedCount === totalParts) {
-                callback();
+                if (typeof callback === 'function') callback();
             }
         });
     });
@@ -105,7 +105,7 @@ function setupGrid() {
 }
 
 function renderEditor() {
-    if (!ctx) return;
+    if (!ctx || !editorCanvas) return;
     ctx.clearRect(0, 0, editorCanvas.width, editorCanvas.height);
     ctx.fillStyle = '#333333';
     ctx.fillRect(0,0,editorCanvas.width, editorCanvas.height);
@@ -119,9 +119,9 @@ function renderEditor() {
 
             if (grid[r][c] && grid[r][c].image) {
                 ctx.save();
-                ctx.translate(x_center, y_center); // Translate to center of the cell
-                ctx.rotate(grid[r][c].rotation_deg * Math.PI / 180); // Rotate
-                ctx.drawImage(grid[r][c].image, -TRACK_PART_SIZE_PX / 2, -TRACK_PART_SIZE_PX / 2, TRACK_PART_SIZE_PX, TRACK_PART_SIZE_PX); // Draw centered
+                ctx.translate(x_center, y_center); 
+                ctx.rotate(grid[r][c].rotation_deg * Math.PI / 180); 
+                ctx.drawImage(grid[r][c].image, -TRACK_PART_SIZE_PX / 2, -TRACK_PART_SIZE_PX / 2, TRACK_PART_SIZE_PX, TRACK_PART_SIZE_PX);
                 ctx.restore();
             } else {
                 ctx.strokeStyle = '#555555';
@@ -130,7 +130,7 @@ function renderEditor() {
             }
         }
     }
-    if (AVAILABLE_TRACK_PARTS.length === 0 && editorCanvas) {
+    if (AVAILABLE_TRACK_PARTS.length === 0 && editorCanvas && editorCanvas.width > 0) { // Check canvas width to avoid drawing on 0x0 canvas
          ctx.fillStyle = "rgba(255,255,255,0.7)";
          ctx.font = "bold 16px Arial";
          ctx.textAlign = "center";
@@ -140,11 +140,10 @@ function renderEditor() {
 
 function onGridSingleClick(event) {
     if (!selectedTrackPart || !selectedTrackPart.image) {
-        // Do not alert if just clicking on grid without a selected part,
-        // as this event will also fire before a dblclick.
-        // User might be trying to rotate.
         return;
     }
+    if (!editorCanvas) return;
+
     const rect = editorCanvas.getBoundingClientRect();
     const x_canvas = event.clientX - rect.left;
     const y_canvas = event.clientY - rect.top;
@@ -153,16 +152,21 @@ function onGridSingleClick(event) {
     const r = Math.floor(y_canvas / TRACK_PART_SIZE_PX);
 
     if (r >= 0 && r < gridSize.rows && c >= 0 && c < gridSize.cols) {
-        // Place a new copy of the selected part, not the selectedTrackPart object itself
-        grid[r][c] = { 
-            ...selectedTrackPart, // Spread properties from selectedTrackPart (name, file, connections, image)
-            rotation_deg: 0     // Default rotation for newly placed part
-        }; 
+        grid[r][c] = {
+            ...selectedTrackPart, 
+            rotation_deg: 0     
+        };
         renderEditor();
+
+        const paletteImages = document.querySelectorAll('#trackPartsPalette img');
+        paletteImages.forEach(pImg => pImg.classList.remove('selected'));
+        selectedTrackPart = null;
+        console.log("Part placed and selection cleared from palette."); // DEBUG
     }
 }
 
 function onGridDoubleClick(event) {
+    if (!editorCanvas) return;
     const rect = editorCanvas.getBoundingClientRect();
     const x_canvas = event.clientX - rect.left;
     const y_canvas = event.clientY - rect.top;
@@ -184,10 +188,10 @@ function generateRandom() {
     if (AVAILABLE_TRACK_PARTS.length > 0 && trackPartsImages[AVAILABLE_TRACK_PARTS[0].file]) {
         for (let r = 0; r < gridSize.rows; r++) {
             for (let c = 0; c < gridSize.cols; c++) {
-                 grid[r][c] = { 
-                    ...AVAILABLE_TRACK_PARTS[0], 
-                    image: trackPartsImages[AVAILABLE_TRACK_PARTS[0].file], 
-                    rotation_deg: 0 
+                 grid[r][c] = {
+                    ...AVAILABLE_TRACK_PARTS[0],
+                    image: trackPartsImages[AVAILABLE_TRACK_PARTS[0].file],
+                    rotation_deg: 0
                 };
             }
         }
@@ -196,11 +200,21 @@ function generateRandom() {
 }
 
 function exportTrackAsCanvas() {
+    if (gridSize.rows === 0 || gridSize.cols === 0) {
+        alert("Grid size is invalid.");
+        return null;
+    }
     const exportCanvas = document.createElement('canvas');
     exportCanvas.width = gridSize.cols * TRACK_PART_SIZE_PX;
     exportCanvas.height = gridSize.rows * TRACK_PART_SIZE_PX;
+
+    if (exportCanvas.width === 0 || exportCanvas.height === 0) {
+        alert("Cannot export an empty track (0 width or height).");
+        return null;
+    }
+
     const exportCtx = exportCanvas.getContext('2d');
-    exportCtx.fillStyle = 'white'; 
+    exportCtx.fillStyle = 'white';
     exportCtx.fillRect(0,0, exportCanvas.width, exportCanvas.height);
 
     let hasContent = false;
