@@ -234,6 +234,8 @@ function generateRandomTrackWithRetry(maxRetries = 10) { // Increased retries fo
     renderEditor();
 }
 
+// In js/trackEditor.js
+
 function generateRandomLayout() {
     setupGrid();
     if (AVAILABLE_TRACK_PARTS.length === 0) {
@@ -241,47 +243,72 @@ function generateRandomLayout() {
         renderEditor();
         return false;
     }
-    console.log("Starting random path generation (Option 1 style)...");
+    console.log(`--- Starting Random Layout Generation (Grid: ${gridSize.rows}x${gridSize.cols}) ---`);
+    console.log("Available base parts:", JSON.parse(JSON.stringify(AVAILABLE_TRACK_PARTS)));
+
 
     const suitableParts = AVAILABLE_TRACK_PARTS.filter(p => {
         const connCount = Object.values(p.connections || {}).filter(conn => conn === true).length;
-        return connCount >= 1 && connCount <= 2; 
+        return connCount >= 1 && connCount <= 2; // Allows dead-ends and path segments
     });
 
     if (suitableParts.length === 0) {
         alert("No hay partes de pista adecuadas (con 1 o 2 conexiones) en config.js para generar la pista.");
+        console.error("No suitable parts (1-2 connections) found in AVAILABLE_TRACK_PARTS.");
         renderEditor();
         return false;
     }
+    console.log("Suitable base parts for path generation:", JSON.parse(JSON.stringify(suitableParts)));
+
 
     let currentR = Math.floor(gridSize.rows / 2);
     let currentC = Math.floor(gridSize.cols / 2);
 
     let startPieceInfo = suitableParts[Math.floor(Math.random() * suitableParts.length)];
     let startRotation = (Math.floor(Math.random() * 4)) * 90;
+    
+    if (!trackPartsImages[startPieceInfo.file]) {
+        console.error(`Image not found for starting piece: ${startPieceInfo.file}. Check asset loading and config.`);
+        renderEditor();
+        return false;
+    }
+
     grid[currentR][currentC] = {
         ...startPieceInfo,
         image: trackPartsImages[startPieceInfo.file],
         rotation_deg: startRotation
     };
-    console.log(`Placed starting piece ${startPieceInfo.name} at [${currentR},${currentC}] rot ${startRotation}`);
+    console.log(`Placed STARTING piece: ${startPieceInfo.name} at [${currentR},${currentC}] (Rotation: ${startRotation} deg)`);
+    console.log("Its 0-deg connections:", JSON.stringify(startPieceInfo.connections));
+    console.log("Its ROTATED connections:", JSON.stringify(getRotatedConnections(startPieceInfo, startRotation)));
+
+
     let placedCount = 1;
     const totalCells = gridSize.rows * gridSize.cols;
     let pathLength = 1;
-    const maxPathLength = Math.floor(totalCells * 0.9); // Try to fill more
+    const maxPathLength = Math.floor(totalCells * 0.9); 
 
-    let lastDirectionUsed = null; 
+    let lastExitDirectionNameFromPrevCell = null; // The direction taken from the *previous* cell to reach the current one
 
     for (let i = 0; i < maxPathLength && pathLength < totalCells; i++) {
+        console.log(`\nPATH STEP ${pathLength}: Current cell [${currentR},${currentC}]`);
         const currentPart = grid[currentR][currentC];
-        if (!currentPart) break; 
+        if (!currentPart) {
+            console.error("FATAL: currentPart is null, path broken.");
+            break; 
+        }
 
-        const currentConnections = getRotatedConnections(currentPart, currentPart.rotation_deg);
+        const currentActualConnections = getRotatedConnections(currentPart, currentPart.rotation_deg);
+        console.log(`  Current part: ${currentPart.name}, Rot: ${currentPart.rotation_deg} deg, Actual Connections: ${JSON.stringify(currentActualConnections)}`);
+        
         let possibleExits = [];
-
         DIRECTIONS.forEach(dir => {
-            if (currentConnections[dir.name]) {
-                if (lastDirectionUsed && dir.name === OPPOSITE_DIRECTIONS[lastDirectionUsed] && Object.keys(currentConnections).length > 1) {
+            if (currentActualConnections[dir.name]) {
+                // To avoid immediate U-turn: if the current part has an exit in a direction,
+                // that direction should not be the one we just entered from (unless it's a dead-end part with only one exit).
+                const entryDirectionToCurrentCell = lastExitDirectionNameFromPrevCell ? OPPOSITE_DIRECTIONS[lastExitDirectionNameFromPrevCell] : null;
+                if (entryDirectionToCurrentCell && dir.name === entryDirectionToCurrentCell && Object.keys(currentActualConnections).length > 1) {
+                    console.log(`    Skipping exit ${dir.name} because it's the entry point and not a dead-end.`);
                     return;
                 }
                 possibleExits.push(dir);
@@ -289,70 +316,100 @@ function generateRandomLayout() {
         });
 
         if (possibleExits.length === 0) {
-            console.log(`Path ended at [${currentR},${currentC}], no valid non-reversing exits from ${currentPart.name} (rot ${currentPart.rotation_deg}).`);
+            console.log(`  Path ended at [${currentR},${currentC}]. No valid non-reversing exits from ${currentPart.name}.`);
             break; 
         }
+        console.log(`  Possible exits from current cell: ${possibleExits.map(p=>p.name).join(', ')}`);
 
-        possibleExits.sort(() => 0.5 - Math.random());
+        possibleExits.sort(() => 0.5 - Math.random()); // Shuffle exits
         let placedNext = false;
 
         for (const exitDir of possibleExits) {
+            console.log(`    Trying exit: ${exitDir.name}`);
             const nextR = currentR + exitDir.dr;
             const nextC = currentC + exitDir.dc;
 
             if (nextR >= 0 && nextR < gridSize.rows && nextC >= 0 && nextC < gridSize.cols && !grid[nextR][nextC]) {
                 const requiredEntryForNewPart = OPPOSITE_DIRECTIONS[exitDir.name];
+                console.log(`      Target cell [${nextR},${nextC}] is empty. New part needs entry from: ${requiredEntryForNewPart}`);
                 
                 const candidatePlacements = [];
-                // Now suitableParts contains only pieces with 1 or 2 connections by default
-                suitableParts.forEach(pInfo => { 
+                suitableParts.forEach(pInfo => {
+                    if (!trackPartsImages[pInfo.file]) { // Check if image for this part is loaded
+                        console.warn(`Skipping candidate ${pInfo.name} as its image is not loaded.`);
+                        return;
+                    }
                     for (let rot = 0; rot < 360; rot += 90) {
-                        const newPartConns = getRotatedConnections(pInfo, rot);
-                        if (newPartConns[requiredEntryForNewPart]) {
-                            let validPlacement = true;
-                            Object.keys(newPartConns).forEach(newPartExitDir => {
-                                if (newPartConns[newPartExitDir] && newPartExitDir !== requiredEntryForNewPart) {
-                                    const checkR = nextR + DIRECTIONS.find(d=>d.name === newPartExitDir).dr;
-                                    const checkC = nextC + DIRECTIONS.find(d=>d.name === newPartExitDir).dc;
-                                    if (checkR === currentR && checkC === currentC) { 
-                                        validPlacement = false;
+                        const newPartActualConnections = getRotatedConnections(pInfo, rot);
+                        if (newPartActualConnections[requiredEntryForNewPart]) {
+                            // Further check: ensure its *other* exit doesn't immediately point to an occupied cell
+                            // or back to the cell we are coming from, unless it's a dead-end piece.
+                            let isValidCandidatePlacement = true;
+                            if (Object.keys(newPartActualConnections).length > 1) { // If not a dead-end piece
+                                for (const newPartExitDirName in newPartActualConnections) {
+                                    if (newPartActualConnections[newPartExitDirName] && newPartExitDirName !== requiredEntryForNewPart) {
+                                        const checkDirObj = DIRECTIONS.find(d => d.name === newPartExitDirName);
+                                        const checkFurtherR = nextR + checkDirObj.dr;
+                                        const checkFurtherC = nextC + checkDirObj.dc;
+                                        // Is it pointing back to the cell we just came from?
+                                        if (checkFurtherR === currentR && checkFurtherC === currentC) {
+                                            console.log(`        Candidate ${pInfo.name} (rot ${rot}) rejected: other exit ${newPartExitDirName} points back to [${currentR},${currentC}]`);
+                                            isValidCandidatePlacement = false;
+                                            break;
+                                        }
+                                        // Is it pointing to another *already filled* cell (that's not currentR,C)?
+                                        // This prevents forming tiny loops or running into existing track prematurely.
+                                        if (checkFurtherR >= 0 && checkFurtherR < gridSize.rows &&
+                                            checkFurtherC >= 0 && checkFurtherC < gridSize.cols &&
+                                            grid[checkFurtherR][checkFurtherC] ) {
+                                            console.log(`        Candidate ${pInfo.name} (rot ${rot}) rejected: other exit ${newPartExitDirName} points to occupied cell [${checkFurtherR},${checkFurtherC}]`);
+                                            isValidCandidatePlacement = false;
+                                            break;
+                                        }
                                     }
                                 }
-                            });
-                            if(validPlacement) candidatePlacements.push({ partInfo: pInfo, rotation: rot });
+                            }
+                            if (isValidCandidatePlacement) {
+                                candidatePlacements.push({ partInfo: pInfo, rotation: rot });
+                            }
                         }
                     }
                 });
 
                 if (candidatePlacements.length > 0) {
                     const chosenPlacement = candidatePlacements[Math.floor(Math.random() * candidatePlacements.length)];
+                    console.log(`        Found ${candidatePlacements.length} candidate placements. Chosen: ${chosenPlacement.partInfo.name} (Rot: ${chosenPlacement.rotation})`);
+                    
                     grid[nextR][nextC] = {
                         ...chosenPlacement.partInfo,
                         image: trackPartsImages[chosenPlacement.partInfo.file],
                         rotation_deg: chosenPlacement.rotation
                     };
-                    // console.log(`  Placed ${chosenPlacement.partInfo.name} at [${nextR},${nextC}] rot ${chosenPlacement.rotation} connecting from ${exitDir.name}`);
-                    currentR = nextR;
+                    
+                    currentR = nextR; // Move current position
                     currentC = nextC;
-                    lastDirectionUsed = exitDir.name;
+                    lastExitDirectionNameFromPrevCell = exitDir.name; // Record how we exited the *previous* cell
                     placedCount++;
                     pathLength++;
                     placedNext = true;
                     break; 
+                } else {
+                    console.log(`      No suitable candidate parts found for cell [${nextR},${nextC}] requiring entry ${requiredEntryForNewPart}.`);
                 }
+            } else {
+                 console.log(`      Target cell [${nextR},${nextC}] is out of bounds or occupied.`);
             }
         }
 
         if (!placedNext) {
-            console.log(`Path ended at [${currentR},${currentC}], could not find suitable part for any exit.`);
+            console.log(`  Path ended at [${grid[currentR][currentC]?.name || 'Unknown part'} at ${currentR},${currentC}]. Could not find a valid part for any exit.`);
             break; 
         }
     }
 
-    console.log(`Path generation finished. Path length: ${pathLength}, Parts placed: ${placedCount}`);
+    console.log(`--- Generation Finished. Path length: ${pathLength}, Parts placed: ${placedCount}/${totalCells} ---`);
     renderEditor();
-    // Success if it placed a reasonable number of parts for a path
-    return pathLength > Math.max(2, Math.floor(totalCells * 0.20)); 
+    return pathLength > 1; // Success if more than just the starting piece is placed
 }
 
 function validateTrack() {
