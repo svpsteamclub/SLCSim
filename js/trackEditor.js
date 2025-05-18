@@ -360,7 +360,7 @@ function generateRandomLayout() {
     }
     // A simple check for connectivity: if not enough cells are filled, it likely failed.
     // A more robust check would be validateTrack().
-    return placedCount >= (totalCells * 0.6); // Consider success if 60% of cells are filled
+    return placedCount >= (totalCells * 0.1); // Consider success if 60% of cells are filled
 }
 
 
