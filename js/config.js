@@ -39,13 +39,13 @@
     export const TRACK_PART_SIZE_PX = 350;
     // In js/config.js
 export const AVAILABLE_TRACK_PARTS = [
-    { name: "Chicana", file: "chicana.png", connections: { N: true, S: true } }, // Assuming straight_NS.png is vertical
+    //{ name: "Chicana", file: "chicana.png", connections: { N: true, S: true } }, // Assuming straight_NS.png is vertical
     { name: "Curva Amplia", file: "curva.png", connections: { S: true, W: true } }, // Assuming straight_EW.png is horizontal
-    { name: "Curva Cerrada",    file: "curva_cerrada.png",    connections: { S: true, E: true } },
-    { name: "Diagonal",    file: "diagonal.png",    connections: { S: true, W: true } },
-    { name: "Esquina",    file: "esquina.png",    connections: { S: true, W: true } },
-    { name: "Harpin",    file: "harpin.png",    connections: { S: true, W: true } },
-    { name: "Harpin Asimetrico", file: "harpin_asimetrico.png", connections: { S: true, W: true } },
+    //{ name: "Curva Cerrada",    file: "curva_cerrada.png",    connections: { S: true, E: true } },
+    //{ name: "Diagonal",    file: "diagonal.png",    connections: { S: true, W: true } },
+    //{ name: "Esquina",    file: "esquina.png",    connections: { S: true, W: true } },
+    //{ name: "Harpin",    file: "harpin.png",    connections: { S: true, W: true } },
+    //{ name: "Harpin Asimetrico", file: "harpin_asimetrico.png", connections: { S: true, W: true } },
     { name: "Recta", file: "recta.png", connections: { N: true, S: true } },
     // Add more parts. Ensure 'file' matches your PNGs in assets/track_parts/
     // and 'connections' accurately describe the openings for the 0-degree rotation of that image.
