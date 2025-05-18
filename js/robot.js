@@ -1,4 +1,3 @@
-javascript
     import { PIXELS_PER_METER, WHEEL_LENGTH_M, WHEEL_WIDTH_M, DEFAULT_ROBOT_GEOMETRY } from './config.js';
     import { clamp } from './utils.js';
 

@@ -1,4 +1,3 @@
-javascript
     // js/robotEditor.js
     import { getDOMElements } from './ui.js';
     import { PIXELS_PER_METER, DEFAULT_ROBOT_GEOMETRY } from './config.js';

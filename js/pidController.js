@@ -1,4 +1,3 @@
-javascript
     import { clamp } from './utils.js';
 
     export class PIDController {

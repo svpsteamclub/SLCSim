@@ -1,4 +1,3 @@
-javascript
     import { PIXELS_PER_METER } from './config.js';
 
     export class Track {

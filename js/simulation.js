@@ -1,4 +1,3 @@
-javascript
     import { Robot } from './robot.js';
     import { PIDController } from './pidController.js';
     import { Track } from './track.js';

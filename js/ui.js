@@ -1,4 +1,3 @@
-javascript
     import {
         MAX_BAR_HEIGHT_PX, currentMaxValError, currentMaxValPTerm, currentMaxValITerm,
         currentMaxValDTerm, currentMaxValAdjPID, MAX_VAL_PWM_BAR, AVAILABLE_TRACKS, PIXELS_PER_METER

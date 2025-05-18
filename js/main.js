@@ -1,4 +1,3 @@
-javascript
     import { Simulation } from './simulation.js';
     import * as Config from './config.js';
     import * as Utils from './utils.js';

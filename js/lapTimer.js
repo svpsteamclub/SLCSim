@@ -1,4 +1,3 @@
-javascript
     export class LapTimer {
         constructor(robotWidth_m, robotLength_m) {
             this.robotWidth_m = robotWidth_m;
