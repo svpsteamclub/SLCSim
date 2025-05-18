@@ -241,25 +241,36 @@ function getRotatedConnections(part, rotation_deg) {
     return rotated;
 }
 
-// --- MODIFIED LOGS in generateRandomTrackWithRetry ---
 function generateRandomTrackWithRetry(maxRetries = 10) {
-    console.log("generateRandomTrackWithRetry CALLED"); // LOG ADDED
+    console.log("generateRandomTrackWithRetry CALLED"); 
     for (let i = 0; i < maxRetries; i++) {
-        console.log(`--- generateRandomTrackWithRetry: Attempt ${i + 1} calling generateRandomLayout ---`); // LOG ADDED
+        console.log(`--- generateRandomTrackWithRetry: Attempt ${i + 1} calling generateRandomLayout ---`); 
         if (generateRandomLayout()) { 
             console.log(`Random track generated successfully on attempt ${i + 1}`);
             return;
         }
-        console.log(`generateRandomLayout attempt ${i + 1} returned false. Retrying...`); // LOG MODIFIED
+        console.log(`generateRandomLayout attempt ${i + 1} returned false. Retrying...`); 
     }
     alert("No se pudo generar una pista después de varios intentos. Verifica la definición de las partes (config.js), asegúrate que las imágenes de las partes estén cargadas (revisa la consola por errores de carga), o intenta de nuevo con un tamaño de cuadrícula mayor.");
     setupGrid();
     renderEditor();
 }
 
-// Heavily Instrumented generateRandomLayout for Debugging:
+// --- MINIMAL generateRandomLayout FOR DEBUGGING ---
 function generateRandomLayout() {
-    console.log("--- generateRandomLayout FUNCTION ENTERED ---"); // ***** NEW VERY FIRST LOG *****
+    console.log("--- generateRandomLayout MINIMAL TEST ENTERED ---"); // Key log
+    alert("generateRandomLayout (minimal version) was called!"); // Key alert for visibility
+    // setupGrid(); // Temporarily comment out to isolate
+    // renderEditor(); // Temporarily comment out to isolate
+    return false; // Force failure for retry loop, or true to stop immediately
+}
+// --- END OF MINIMAL generateRandomLayout ---
+
+
+// --- Original generateRandomLayout (commented out for this test) ---
+/*
+function generateRandomLayout() {
+    console.log("--- generateRandomLayout FUNCTION ENTERED ---"); 
     
     setupGrid(); 
     if (AVAILABLE_TRACK_PARTS.length === 0) {
@@ -426,6 +437,8 @@ function generateRandomLayout() {
     renderEditor();
     return pathLength > 1;
 }
+*/
+// --- End of Original generateRandomLayout ---
 
 
 function validateTrack() {
