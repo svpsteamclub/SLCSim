@@ -296,7 +296,6 @@ hr {
     box-shadow: 0 0 10px rgba(0,0,0,0.1);
     border: 1px solid #ccc;
 }
-#robotEditorCanvas { background-color: #lightgray; }
 #trackEditorCanvas { background-color: #ffffff; } /* Changed to white (#ffffff or white) */
 
 
