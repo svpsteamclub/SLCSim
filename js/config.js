@@ -8,7 +8,7 @@
 
     export const ROBOT_IMAGE_PATHS = {
         body: 'assets/robot_body.png',
-        wheel: 'assets/robot_wheel.png'r
+        wheel: 'assets/robot_wheel.png',
     };
     export const WATERMARK_IMAGE_PATH = 'assets/SVPSTEAM_Club.png';
 
