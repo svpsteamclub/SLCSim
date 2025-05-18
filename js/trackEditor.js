@@ -171,10 +171,12 @@ function onGridDoubleClick(event) {
     const r = Math.floor(y_canvas / TRACK_PART_SIZE_PX);
 
     if (r >= 0 && r < gridSize.rows && c >= 0 && c < gridSize.cols && grid[r][c]) {
-        grid[r][c].rotation_deg = (grid[r][c].rotation_deg + 90) % 360; // Cycle through 0, 90, 180, 270
+        console.log(`Before rotation: cell [${r},${c}], angle: ${grid[r][c].rotation_deg}`); // DEBUG
+        grid[r][c].rotation_deg = (grid[r][c].rotation_deg + 90) % 360;
+        console.log(`After rotation: cell [${r},${c}], angle: ${grid[r][c].rotation_deg}`);  // DEBUG
         renderEditor();
     }
-    event.preventDefault(); // Prevent single click from also firing if not desired, or other default actions
+    event.preventDefault();
 }
 
 function generateRandom() {
@@ -223,20 +225,4 @@ function exportTrackAsCanvas() {
         return null;
     }
     return exportCanvas;
-}
-function onGridDoubleClick(event) {
-    const rect = editorCanvas.getBoundingClientRect();
-    const x_canvas = event.clientX - rect.left;
-    const y_canvas = event.clientY - rect.top;
-
-    const c = Math.floor(x_canvas / TRACK_PART_SIZE_PX);
-    const r = Math.floor(y_canvas / TRACK_PART_SIZE_PX);
-
-    if (r >= 0 && r < gridSize.rows && c >= 0 && c < gridSize.cols && grid[r][c]) {
-        console.log(`Before rotation: cell [${r},${c}], angle: ${grid[r][c].rotation_deg}`); // DEBUG
-        grid[r][c].rotation_deg = (grid[r][c].rotation_deg + 90) % 360;
-        console.log(`After rotation: cell [${r},${c}], angle: ${grid[r][c].rotation_deg}`);  // DEBUG
-        renderEditor();
-    }
-    event.preventDefault();
 }
