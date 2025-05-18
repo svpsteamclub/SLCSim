@@ -1,99 +1,236 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Simulador Robot Seguidor de Línea</title>
+    <title>Simulador Seguidor de Lineas Modular</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="container">
-        <div class="simulation-area">
-            <canvas id="simulationCanvas"></canvas>
-        </div>
-
-        <div class="controls-area">
-            <div class="tab-buttons">
-                <button class="tab-button active" onclick="openTab(event, 'robotConfig')">Robot</button>
-                <button class="tab-button" onclick="openTab(event, 'trackConfig')">Pista</button>
-                <button class="tab-button" onclick="openTab(event, 'logicConfig')">Lógica (Arduino)</button>
-            </div>
-
-            <!-- Pestaña Configuración Robot -->
-            <div id="robotConfig" class="tab-content active">
-                <h3>Configuración del Robot</h3>
-                <label for="numSensors">Número de Sensores:</label>
-                <input type="number" id="numSensors" value="5" min="1" max="10">
-                <label for="sensorSpacing">Espaciado entre Sensores (px):</label>
-                <input type="number" id="sensorSpacing" value="10" min="1">
-                <label for="sensorOffset">Distancia Sensores al Eje (px):</label>
-                <input type="number" id="sensorOffset" value="15" min="0">
-                <label for="robotSpeed">Velocidad Máxima (px/ciclo):</label>
-                <input type="number" id="robotSpeed" value="2" min="0.1" step="0.1">
-                <!-- Más opciones: color del robot, dimensiones, etc. -->
-            </div>
-
-            <!-- Pestaña Configuración Pista -->
-            <div id="trackConfig" class="tab-content">
-                <h3>Configuración de la Pista</h3>
-                <button id="drawTrackButton">Dibujar Pista Manualmente</button>
-                <button id="loadPresetTrackButton">Cargar Pista Predefinida</button>
-                <label for="trackColor">Color de Línea:</label>
-                <input type="color" id="trackColor" value="#000000">
-                <label for="bgColor">Color de Fondo:</label>
-                <input type="color" id="bgColor" value="#FFFFFF">
-                <label for="lineWidth">Ancho de Línea (px):</label>
-                <input type="number" id="lineWidth" value="10" min="1">
-                <!-- Opciones para cargar/guardar pistas -->
-            </div>
-
-            <!-- Pestaña Configuración Lógica -->
-            <div id="logicConfig" class="tab-content">
-                <h3>Lógica del Robot (Estilo Arduino)</h3>
-                <p>Define tu función <code>loop()</code>. Puedes usar: <br>
-                   <code>readSensor(index)</code>: devuelve 0 (blanco) o 1 (línea). <br>
-                   <code>motor(leftSpeed, rightSpeed)</code>: -1 a 1 para cada motor.
-                </p>
-                <textarea id="robotLogicCode" rows="15" cols="50">
-// Ejemplo: Lógica simple proporcional
-function loop() {
-    let s0 = readSensor(0); // Izquierdo
-    let s1 = readSensor(1);
-    let s2 = readSensor(2); // Centro
-    let s3 = readSensor(3);
-    let s4 = readSensor(4); // Derecho
-
-    let error = 0;
-    // Esta lógica es muy básica, mejorarla es parte del reto
-    if (s0 === 1 && s1 === 0) error = -2;
-    else if (s1 === 1 && s2 === 0) error = -1;
-    else if (s2 === 1) error = 0; // Idealmente, este es el único activo
-    else if (s3 === 1 && s2 === 0) error = 1;
-    else if (s4 === 1 && s3 === 0) error = 2;
-    else if (s0===0 && s1===0 && s2===0 && s3===0 && s4===0) {
-        // Se perdió la línea, intentar girar o usar última dirección conocida
-        // Por ahora, parar o seguir recto (depende de la última acción)
-    }
-
-
-    const Kp = 0.4; // Constante proporcional
-    let correction = Kp * error;
-
-    let baseSpeed = 0.7; // Velocidad base
-
-    motor(baseSpeed - correction, baseSpeed + correction);
-}
-                </textarea>
-            </div>
-
-            <div class="simulation-controls">
-                <button id="startButton">Iniciar</button>
-                <button id="stopButton">Detener</button>
-                <button id="resetButton">Reiniciar</button>
-            </div>
-        </div>
+    <div class="header-logos">
+        <img src="assets/S_VICENTE_DE_PAUL.png" alt="S. Vicente De Paul Logo" id="logo-left">
+        <h1>Simulador de Seguidor de Lineas</h1>
+        <img src="assets/SVPSTEAM_Club.png" alt="SVP Steam Club Logo" id="logo-right">
     </div>
 
-    <script src="script.js"></script>
+    <!-- Tab Navigation for Editors (Optional UI enhancement) -->
+    <div class="tab-navigation">
+        <button class="tab-button active" data-tab="simulator">Simulador</button>
+        <button class="tab-button" data-tab="robotEditor">Editor de Robot</button>
+        <button class="tab-button" data-tab="trackEditor">Editor de Pistas</button>
+    </div>
+
+    <div id="simulatorContent" class="tab-content active">
+        <div class="controls-container">
+            <div class="track-selection controls">
+                <h3>Selecciona Pista Predefinida</h3>
+                <select id="trackImageSelector">
+                    <!-- Options will be populated by script -->
+                </select>
+                <p>Escala: Las pistas deben estar a 1000 pixeles/metro (e.g., un segmento de 0.35m en la vida real debe ser 350px en la imagen).</p>
+                <p>Para agregar pistas predefinidas, edite la variable <code>AVAILABLE_TRACKS</code> en <code>js/config.js</code>.</p>
+            </div>
+
+            <div class="custom-track-controls controls">
+                <h3>Cargar Pista Personalizada (PNG)</h3>
+                <input type="file" id="customTrackInput" accept=".png">
+                <p>La imagen de la pista debe estar escalada a 1000 píxeles/metro. Después de cargar, deberás establecer la posición y dirección inicial haciendo clic y arrastrando sobre la pista.</p>
+                <button id="clearCustomTrackButton" style="display:none; margin-top:10px;">Quitar Pista Personalizada</button>
+            </div>
+
+            <hr style="width:100%; margin: 10px 0;">
+
+            <div class="main-controls">
+                <div class="sim-controls controls">
+                    <h3 class="foldable-title">Parámetros de Simulación <span class="fold-indicator">[+]</span></h3>
+                    <div class="foldable-content" style="display: none;">
+                        <label for="timeStep">Pase de Tiempo en la Simulación (s):</label>
+                        <input type="number" id="timeStep" value="0.01" step="0.001">
+                        <label for="pixelsPerMeterDisplay">Pixeles por metro (Fijo):</label>
+                        <input type="text" id="pixelsPerMeterDisplay" value="1000" readonly>
+                        <label for="maxRobotSpeedMPS">Máxima Velocidad del Robot (m/s):</label>
+                        <input type="number" id="maxRobotSpeedMPS" value="1.0" step="0.05">
+                        <label for="motorResponseFactor">Factor de respuesta de los motores (0-1):</label>
+                        <input type="number" id="motorResponseFactor" value="0.03" step="0.01">
+                        <label for="sensorNoiseProb">Probabilidad de ruido en los sensores (0-1):</label>
+                        <input type="number" id="sensorNoiseProb" value="0.0" step="0.005">
+                        <label for="movementPerturbFactor">Factor de Perturbación de Movimientos (0-1):</label>
+                        <input type="number" id="movementPerturbFactor" value="0.5" step="0.005">
+                        <label for="motorDeadbandPWM">Deadband de Motores (PWM 0-255):</label>
+                        <input type="number" id="motorDeadbandPWM" value="5" step="1">
+                        <label for="lineThreshold">Sensibilidad a la línea (0-255):</label>
+                        <input type="number" id="lineThreshold" value="30" step="1">
+                    </div>
+                </div>
+                <div class="robot-geometry-controls controls">
+                    <h3 class="foldable-title">Geometría del robot <span class="fold-indicator">[+]</span></h3>
+                    <div class="foldable-content" style="display: none;">
+                        <p><i>La geometría del robot se edita en el "Editor de Robot". Estos son valores de solo lectura o por defecto.</i></p>
+                        <label for="robotWidthInput_actual">Ancho (m) (distancia entre ruedas):</label>
+                        <input type="number" id="robotWidthInput_actual" value="0.16" step="0.01" readonly>
+                        <label for="robotLengthInput_actual">Largo (m):</label>
+                        <input type="number" id="robotLengthInput_actual" value="0.34" step="0.01" readonly>
+                        <label for="sideSensorSpreadInput">Amplitud de los sensores laterales (m, desde el centro del array de sensores):</label>
+                        <input type="number" id="sideSensorSpreadInput" value="0.016" step="0.005" readonly>
+                        <label for="sensorForwardOffsetInput">Posición de los sensores (m, desde el centro del robot):</label>
+                        <input type="number" id="sensorForwardOffsetInput" value="0.14" step="0.01" readonly>
+                        <label for="sensorDiameterInput">Diámetro de los sensores (m):</label>
+                        <input type="number" id="sensorDiameterInput" value="0.012" step="0.001" readonly>
+                    </div>
+                </div>
+            </div>
+            <hr style="width:100%; margin: 15px 0;">
+            <div class="arduino-controls controls">
+                <h3 class="foldable-title">Parámetros del Código (PID) <span class="fold-indicator">[+]</span></h3>
+                 <div class="foldable-content" style="display: none;">
+                    <div style="display:flex; flex-wrap:wrap; gap: 15px;">
+                        <div><label for="arduino_kp">Arduino Kp:</label><input type="number" id="arduino_kp" value="120" step="1"></div>
+                        <div><label for="arduino_ki">Arduino Ki:</label><input type="number" id="arduino_ki" value="3" step="0.001"></div>
+                        <div><label for="arduino_kd">Arduino Kd:</label><input type="number" id="arduino_kd" value="15" step="0.1"></div>
+                        <div><label for="arduino_velBase">VELOCIDAD_BASE (0-255):</label><input type="number" id="arduino_velBase" value="110" step="1"></div>
+                        <div><label for="arduino_integralMax">INTEGRAL_MAX:</label><input type="number" id="arduino_integralMax" value="250" step="1.0"></div>
+                    </div>
+                </div>
+            </div>
+
+            <hr style="width:100%; margin: 15px 0;">
+            <div class="pid-explanation-container controls">
+                <h4 class="foldable-title">Entendiendo el Controlador PID y los Parámetros del Código <span class="fold-indicator">[+]</span></h4>
+                <div class="foldable-content" style="display: none;">
+                    <p>El robot utiliza un controlador <strong>PID (Proporcional-Integral-Derivativo)</strong> para seguir la línea...</p>
+                    <!-- Rest of PID explanation from original -->
+                </ul>
+                <p>Si el robot pierde completamente la línea (todos los sensores en blanco), el error PID se establece a un valor grande (positivo o negativo, dependiendo de la última dirección conocida de la línea) para forzar un giro e intentar reencontrarla. Ya no existe una lógica de "recuperación" separada.</p>
+                </div>
+            </div>
+
+            <div class="buttons">
+                <button id="startButton">Simular</button>
+                <button id="stopButton">Detener</button>
+                <button id="resetButton">Reiniciar</button>
+                <button id="setStartPositionButton" style="background-color: #6c757d; color: white;">Posición y Dirección Inicial</button>
+            </div>
+            <hr>
+            <div class="info">
+                <div class="info-item">
+                    <span class="info-label">Err:</span><span class="info-value" id="errorVal">0.00</span>
+                    <div class="bar-track"><div class="bar" id="errorBar"></div></div>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">P:</span><span class="info-value" id="pVal">0.00</span>
+                    <div class="bar-track"><div class="bar" id="pBar"></div></div>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">I:</span><span class="info-value" id="iVal">0.00</span>
+                    <div class="bar-track"><div class="bar" id="iBar"></div></div>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">D:</span><span class="info-value" id="dVal">0.00</span>
+                    <div class="bar-track"><div class="bar" id="dBar"></div></div>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">AdjPID:</span><span class="info-value" id="arduinoAjusteVal">N/A</span>
+                    <div class="bar-track"><div class="bar" id="adjPIDBar"></div></div>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">V<sub>L</sub>(PWM):</span><span class="info-value" id="vLeftVal">0</span>
+                    <div class="bar-track"><div class="bar" id="vLeftBar"></div></div>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">V<sub>R</sub>(PWM):</span><span class="info-value" id="vRightVal">0</span>
+                    <div class="bar-track"><div class="bar" id="vRightBar"></div></div>
+                </div>
+            </div>
+        </div>
+
+        <canvas id="simulationCanvas" width="800" height="600" style="background-color: #eee;"></canvas>
+
+        <div class="controls-container lap-times-container" style="margin-top: 20px;">
+            <h3>Tiempos de Vuelta</h3>
+            <div style="padding: 10px; background-color: #f9f9f9; border-radius: 6px;">
+                <div style="margin-bottom: 8px;"><strong>Vuelta Actual:</strong> <span id="currentLapTimeVal">0.000</span> s</div>
+                <div style="margin-bottom: 8px;"><strong>Mejor Vuelta:</strong> <span id="bestLapTimeVal">N/A</span></div>
+                <h4>Últimas 5 Vueltas:</h4>
+                <table id="lapTimesTable"><thead><tr><th>Vuelta #</th><th>Tiempo (s)</th></tr></thead><tbody></tbody></table>
+            </div>
+        </div>
+        
+        <div class="controls-container explanation-section" style="margin-top: 20px; padding: 15px;">
+            <h3 class="foldable-title">¿Cómo Funciona el Robot Seguidor de Líneas? <span class="fold-indicator">[+]</span></h3>
+            <div class="foldable-content" style="display: none;">
+                 <!-- Explanation from original -->
+            </div>
+        </div>
+        <div class="controls-container explanation-section" style="margin-top: 20px; padding: 15px;">
+            <h3 class="foldable-title">¿Cómo Usar el Simulador? <span class="fold-indicator">[+]</span></h3>
+            <div class="foldable-content" style="display: none;">
+                <!-- Explanation from original -->
+            </div>
+        </div>
+    </div> <!-- End of #simulatorContent -->
+
+    <div id="robotEditorContent" class="tab-content" style="display: none;">
+        <h2>Editor de Geometría del Robot</h2>
+        <div class="controls-container">
+            <p>Aquí podrás diseñar la forma y disposición de los componentes de tu robot.</p>
+            <!-- Robot Editor specific controls -->
+            <div>
+                <label for="robotName">Nombre del Diseño:</label>
+                <input type="text" id="robotName" value="MiRobot">
+                <button id="saveRobotDesign">Guardar Diseño</button>
+                <button id="loadRobotDesign">Cargar Diseño</button>
+            </div>
+            <div>
+                <h4>Componentes:</h4>
+                <select id="robotComponentSelector">
+                    <option value="body">Cuerpo Principal</option>
+                    <option value="wheel">Rueda</option>
+                    <option value="sensorArray">Array de Sensores</option>
+                    <!-- Add more components -->
+                </select>
+                <button id="addComponentToRobot">Añadir Componente</button>
+                <input type="file" id="customComponentImage" accept=".png" title="Cargar imagen para componente">
+            </div>
+        </div>
+        <canvas id="robotEditorCanvas" width="800" height="600" style="background-color: #lightgray; border: 1px solid #ccc;"></canvas>
+        <div class="controls-container">
+            <p>Usa este canvas para arrastrar, rotar y escalar componentes. Las propiedades del robot (ancho, largo, posición de sensores) se derivarán de este diseño.</p>
+        </div>
+    </div> <!-- End of #robotEditorContent -->
+
+    <div id="trackEditorContent" class="tab-content" style="display: none;">
+        <h2>Editor de Pistas</h2>
+        <div class="controls-container">
+            <p>Crea tus propias pistas colocando partes o generando una aleatoriamente.</p>
+            <!-- Track Editor specific controls -->
+            <div>
+                <label for="trackGridSize">Tamaño de Pista:</label>
+                <select id="trackGridSize">
+                    <option value="3x3">3x3 Partes</option>
+                    <option value="4x4">4x4 Partes</option>
+                    <option value="5x5">5x5 Partes</option>
+                </select>
+                <button id="generateRandomTrack">Generar Pista Aleatoria</button>
+                <button id="exportTrackFromEditor">Exportar Pista para Simulador</button>
+            </div>
+            <div>
+                <h4>Partes de Pista (350x350px):</h4>
+                <div id="trackPartsPalette" style="display: flex; flex-wrap: wrap; gap: 5px; border: 1px solid #ccc; padding: 5px;">
+                    <!-- Track parts will be populated here by trackEditor.js -->
+                </div>
+            </div>
+        </div>
+        <canvas id="trackEditorCanvas" width="700" height="700" style="background-color: #darkgray; border: 1px solid #ccc;"></canvas>
+        <p><i>Nota: El tamaño del canvas del editor de pistas se ajustará al tamaño de la cuadrícula seleccionada.</i></p>
+         <div class="controls-container">
+            <p>Haz clic en la paleta para seleccionar una parte, luego haz clic en la cuadrícula para colocarla. Haz clic derecho para rotar (funcionalidad futura).</p>
+        </div>
+    </div> <!-- End of #trackEditorContent -->
+
+    <footer style="text-align: center; margin-top: 30px; padding-bottom: 20px; font-size: 0.9em; color: #555;">
+        Desarrollado por Ing. Luis Fernando Corado y el equipo del SVP Steam Club, Mayo 2025
+    </footer>
+
+    <script type="module" src="js/main.js"></script>
 </body>
 </html>

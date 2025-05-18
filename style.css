@@ -11,3 +11,65 @@ body { font-family: sans-serif; margin: 0; display: flex; justify-content: cente
 .controls-area input[type="number"], .controls-area input[type="color"] { width: auto; }
 .simulation-controls button { margin-right: 10px; padding: 10px 15px; }
 textarea { font-family: monospace; }
+.tab-navigation {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.tab-button {
+    padding: 10px 20px;
+    cursor: pointer;
+    border: 1px solid #ccc;
+    background-color: #f0f0f0;
+    margin: 0 5px;
+    border-bottom: none;
+    border-radius: 5px 5px 0 0;
+}
+
+.tab-button.active {
+    background-color: #fff;
+    border-bottom: 1px solid #fff; /* To blend with content area */
+    font-weight: bold;
+}
+
+.tab-content {
+    display: none; /* Hidden by default */
+    /* Styles for tab content areas can be similar to .controls-container or specific */
+    /* background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    margin-bottom: 20px;
+    width: 90%;
+    max-width: 900px;
+    margin-left: auto;
+    margin-right: auto; */
+}
+
+.tab-content.active {
+    display: block; /* Show active tab */
+}
+
+/* Specific for editor canvases if needed */
+#robotEditorCanvas, #trackEditorCanvas {
+    display: block;
+    margin: 20px auto;
+    max-width: 100%;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+#trackPartsPalette img {
+    width: 70px; /* Smaller preview */
+    height: 70px;
+    border: 1px solid #eee;
+    cursor: pointer;
+}
+#trackPartsPalette img.selected {
+    border: 2px solid blue;
+}
+
+/* Make read-only inputs visually distinct */
+input[readonly] {
+    background-color: #e9ecef; /* A common Bootstrap read-only color */
+    opacity: 1; /* Ensure text is readable */
+    cursor: not-allowed;
+}
