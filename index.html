@@ -3,122 +3,97 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Simulador Robot Seguidor de Líneas Arduino</title>
+    <title>Simulador Robot Seguidor de Línea</title>
     <link rel="stylesheet" href="style.css">
-    <!-- Opcional: CodeMirror para el editor de código -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.0/codemirror.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.0/theme/material-darker.min.css">
 </head>
 <body>
     <div class="container">
-        <header>
-            <h1>Simulador Robot Seguidor de Líneas (Arduino)</h1>
-        </header>
+        <div class="simulation-area">
+            <canvas id="simulationCanvas"></canvas>
+        </div>
 
-        <main class="main-layout">
-            <section id="simulation-area" class="panel">
-                <h2>Simulación</h2>
-                <canvas id="simulationCanvas" width="600" height="400"></canvas>
-                <div class="simulation-controls">
-                    <button id="btnStart">Iniciar</button>
-                    <button id="btnPause">Pausar</button>
-                    <button id="btnReset">Reiniciar</button>
-                    <label for="simSpeed">Velocidad:</label>
-                    <input type="range" id="simSpeed" min="1" max="10" value="5">
-                </div>
-            </section>
+        <div class="controls-area">
+            <div class="tab-buttons">
+                <button class="tab-button active" onclick="openTab(event, 'robotConfig')">Robot</button>
+                <button class="tab-button" onclick="openTab(event, 'trackConfig')">Pista</button>
+                <button class="tab-button" onclick="openTab(event, 'logicConfig')">Lógica (Arduino)</button>
+            </div>
 
-            <aside class="sidebar">
-                <section id="robot-editor" class="panel">
-                    <h2>Editor de Robot</h2>
-                    <div>
-                        <label for="numSensors">Nº Sensores:</label>
-                        <input type="number" id="numSensors" value="5" min="1" max="8">
-                    </div>
-                    <div>
-                        <label for="sensorSpacing">Espaciado (px):</label>
-                        <input type="number" id="sensorSpacing" value="10" min="1" max="30">
-                    </div>
-                    <div>
-                        <label for="robotSpeed">Velocidad Base (px/tick):</label>
-                        <input type="number" id="robotSpeed" value="2" min="0.1" max="5" step="0.1">
-                    </div>
-                    <!-- Más parámetros del robot (ej. ancho, color) -->
-                </section>
+            <!-- Pestaña Configuración Robot -->
+            <div id="robotConfig" class="tab-content active">
+                <h3>Configuración del Robot</h3>
+                <label for="numSensors">Número de Sensores:</label>
+                <input type="number" id="numSensors" value="5" min="1" max="10">
+                <label for="sensorSpacing">Espaciado entre Sensores (px):</label>
+                <input type="number" id="sensorSpacing" value="10" min="1">
+                <label for="sensorOffset">Distancia Sensores al Eje (px):</label>
+                <input type="number" id="sensorOffset" value="15" min="0">
+                <label for="robotSpeed">Velocidad Máxima (px/ciclo):</label>
+                <input type="number" id="robotSpeed" value="2" min="0.1" step="0.1">
+                <!-- Más opciones: color del robot, dimensiones, etc. -->
+            </div>
 
-                <section id="track-editor" class="panel">
-                    <h2>Editor de Pista</h2>
-                    <canvas id="trackEditorCanvas" width="300" height="200"></canvas>
-                    <div class="track-tools">
-                        <button id="btnDrawLine">Dibujar Línea</button>
-                        <button id="btnClearTrack">Limpiar Pista</button>
-                        <label for="lineColor">Color Línea:</label>
-                        <input type="color" id="lineColor" value="#000000">
-                        <label for="trackBgColor">Color Fondo:</label>
-                        <input type="color" id="trackBgColor" value="#FFFFFF">
-                    </div>
-                </section>
+            <!-- Pestaña Configuración Pista -->
+            <div id="trackConfig" class="tab-content">
+                <h3>Configuración de la Pista</h3>
+                <button id="drawTrackButton">Dibujar Pista Manualmente</button>
+                <button id="loadPresetTrackButton">Cargar Pista Predefinida</button>
+                <label for="trackColor">Color de Línea:</label>
+                <input type="color" id="trackColor" value="#000000">
+                <label for="bgColor">Color de Fondo:</label>
+                <input type="color" id="bgColor" value="#FFFFFF">
+                <label for="lineWidth">Ancho de Línea (px):</label>
+                <input type="number" id="lineWidth" value="10" min="1">
+                <!-- Opciones para cargar/guardar pistas -->
+            </div>
 
-                <section id="code-editor" class="panel">
-                    <h2>Editor de Código (Arduino)</h2>
-                    <textarea id="arduinoCode">
-// Variables globales (si las necesitas)
-// int Kp = 10;
+            <!-- Pestaña Configuración Lógica -->
+            <div id="logicConfig" class="tab-content">
+                <h3>Lógica del Robot (Estilo Arduino)</h3>
+                <p>Define tu función <code>loop()</code>. Puedes usar: <br>
+                   <code>readSensor(index)</code>: devuelve 0 (blanco) o 1 (línea). <br>
+                   <code>motor(leftSpeed, rightSpeed)</code>: -1 a 1 para cada motor.
+                </p>
+                <textarea id="robotLogicCode" rows="15" cols="50">
+// Ejemplo: Lógica simple proporcional
+function loop() {
+    let s0 = readSensor(0); // Izquierdo
+    let s1 = readSensor(1);
+    let s2 = readSensor(2); // Centro
+    let s3 = readSensor(3);
+    let s4 = readSensor(4); // Derecho
 
-void setup() {
-  // Configuración inicial del robot
-  // Por ejemplo, definir pines de sensores/motores (simulado)
-  // pinMode(sensorIzquierdoPin, INPUT);
-  // pinMode(motorDerechoPin, OUTPUT);
-  Serial.begin(9600); // Simular Serial Monitor
-  Serial.println("Robot Iniciado");
+    let error = 0;
+    // Esta lógica es muy básica, mejorarla es parte del reto
+    if (s0 === 1 && s1 === 0) error = -2;
+    else if (s1 === 1 && s2 === 0) error = -1;
+    else if (s2 === 1) error = 0; // Idealmente, este es el único activo
+    else if (s3 === 1 && s2 === 0) error = 1;
+    else if (s4 === 1 && s3 === 0) error = 2;
+    else if (s0===0 && s1===0 && s2===0 && s3===0 && s4===0) {
+        // Se perdió la línea, intentar girar o usar última dirección conocida
+        // Por ahora, parar o seguir recto (depende de la última acción)
+    }
+
+
+    const Kp = 0.4; // Constante proporcional
+    let correction = Kp * error;
+
+    let baseSpeed = 0.7; // Velocidad base
+
+    motor(baseSpeed - correction, baseSpeed + correction);
 }
+                </textarea>
+            </div>
 
-void loop() {
-  // Lee los sensores (simulado)
-  // int sensorIzquierdo = digitalRead(0); // sensor 0
-  // int sensorCentro = digitalRead(1);   // sensor 1
-  // int sensorDerecho = digitalRead(2);  // sensor 2
-
-  // Lógica de control para seguir la línea
-  // if (sensorCentro == 1) {
-  //   // Avanzar
-  //   motorIzquierdo(100);
-  //   motorDerecho(100);
-  // } else if (sensorIzquierdo == 1) {
-  //   // Girar a la izquierda
-  //   motorIzquierdo(50);
-  //   motorDerecho(150);
-  // } else if (sensorDerecho == 1) {
-  //   // Girar a la derecha
-  //   motorIzquierdo(150);
-  //   motorDerecho(50);
-  // } else {
-  //   // Parar o buscar línea
-  //   motorIzquierdo(0);
-  //   motorDerecho(0);
-  // }
-
-  // Espera un poco para la siguiente iteración (simulado)
-  delay(20);
-}
-                    </textarea>
-                    <button id="btnUploadCode">Cargar Código al Robot</button>
-                    <div id="serialMonitorOutput" class="serial-monitor">
-                        <p><strong>Serial Monitor:</strong></p>
-                        <pre></pre>
-                    </div>
-                </section>
-            </aside>
-        </main>
+            <div class="simulation-controls">
+                <button id="startButton">Iniciar</button>
+                <button id="stopButton">Detener</button>
+                <button id="resetButton">Reiniciar</button>
+            </div>
+        </div>
     </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.0/codemirror.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.0/mode/clike/clike.min.js"></script>
-    <script src="js/robot.js"></script>
-    <script src="js/track.js"></script>
-    <script src="js/arduinoInterpreter.js"></script>
-    <script src="js/simulation.js"></script>
-    <script src="js/main.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
