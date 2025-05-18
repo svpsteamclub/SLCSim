@@ -7,126 +7,130 @@ class ArduinoInterpreter {
         this.serialMonitor = serialMonitorOutputElement;
         this.delayTime = 0; // Para simular delay()
         this.lastDelayCall = 0;
+
+        // Variables para los motores que el código de usuario modificará
+        // Se ponen aquí para que sean parte del 'this' del intérprete y
+        // las funciones API puedan accederlas si es necesario.
+        this.currentLeftMotorSpeed = 0;
+        this.currentRightMotorSpeed = 0;
     }
 
-    // Funciones que el código del usuario podrá llamar
-    // Estas se inyectarán en el scope de la función `eval` o `new Function`
-    // Se debe tener cuidado con el `this` context si se usan funciones de flecha o se hace bind.
-    // Para simplificar, las funciones se definirán dentro del scope de `compileAndRun`
-
     compileAndLoad(codeString) {
-        this.userVariables = {}; // Resetear variables del usuario
+        this.userVariables = {};
         this.pinModes = {};
-        this.serialMonitor.innerHTML = '<p><strong>Serial Monitor:</strong></p><pre></pre>'; // Limpiar monitor
+        if (this.serialMonitor.querySelector('pre')) {
+            this.serialMonitor.querySelector('pre').textContent = ''; // Limpiar monitor
+        } else {
+            // Si no existe el <pre>, lo creamos (por si acaso)
+            this.serialMonitor.innerHTML = '<p><strong>Serial Monitor:</strong></p><pre></pre>';
+        }
 
-        // Funciones simuladas de Arduino disponibles para el usuario
+
         const simulatedAPI = {
             pinMode: (pin, mode) => {
-                // console.log(`pinMode(${pin}, ${mode === 0 ? 'INPUT' : 'OUTPUT'})`);
-                this.pinModes[pin] = mode; // INPUT=0, OUTPUT=1 (simplificado)
+                this.pinModes[pin] = mode;
             },
             digitalRead: (pin) => {
-                // Asumimos que los pines 0 a N-1 son los sensores del robot
                 if (pin >= 0 && pin < this.robot.numSensors) {
                     return this.robot.getSensorValue(pin);
                 }
-                // console.warn(`digitalRead en pin no configurado como sensor: ${pin}`);
-                return 0; // Valor por defecto
+                return 0;
             },
-            analogRead: (pin) => { // Podría ser similar a digitalRead para sensores analógicos
-                return this.robot.getSensorValue(pin); // Simplificado
+            analogRead: (pin) => {
+                return this.robot.getSensorValue(pin);
             },
             digitalWrite: (pin, value) => {
-                // Simular control de motores, LEDs, etc.
-                // console.log(`digitalWrite(${pin}, ${value})`);
-                // Aquí podrías mapear pines a acciones específicas del robot si lo expandes
+                // Implementar si es necesario para otros actuadores
             },
             analogWrite: (pin, value) => {
-                // Asumimos pines específicos para motores
-                // Ej: pin 10 = motor izquierdo, pin 11 = motor derecho
-                // Esto es una convención que debes establecer.
-                if (pin === 'MOTOR_LEFT' || pin === 10) { // Ejemplo de mapeo
-                    // this.robot.leftMotorSpeed = value; // Directo si ya normalizas
-                    // O si value es 0-255, normalizar aquí
-                } else if (pin === 'MOTOR_RIGHT' || pin === 11) {
-                    // this.robot.rightMotorSpeed = value;
-                }
-                // console.log(`analogWrite(${pin}, ${value})`);
-                // Lo haremos más genérico con un método en robot:
-                // this.robot.setMotorSpeeds(...) // Pero esto no es como Arduino real.
-                // Vamos a usar una convención para este simulador:
-                // Se llamará a una función específica del robot desde el código del usuario.
+                // Implementar si es necesario, podría mapear a setMotorSpeeds
+                // Por ejemplo, si el usuario usa analogWrite(MOTOR_L_PIN, speed)
             },
-            motorIzquierdo: (speed) => { // Función helper personalizada
+            motorIzquierdo: (speed) => {
                 this.currentLeftMotorSpeed = speed;
             },
-            motorDerecho: (speed) => { // Función helper personalizada
+            motorDerecho: (speed) => {
                 this.currentRightMotorSpeed = speed;
             },
             delay: (ms) => {
                 this.delayTime = ms;
-                this.lastDelayCall = Date.now();
-                // console.log(`delay(${ms})`);
-                // La simulación debe manejar esto y pausar la ejecución del loop
+                this.lastDelayCall = performance.now(); // Usar performance.now() para más precisión
             },
-            Serial: { // Objeto Serial simulado
-                begin: (baud) => { /* console.log(`Serial.begin(${baud})`); */ },
+            Serial: {
+                begin: (baud) => {},
                 print: (msg) => {
-                    this.serialMonitor.querySelector('pre').textContent += msg;
+                    if (this.serialMonitor.querySelector('pre')) {
+                        this.serialMonitor.querySelector('pre').textContent += String(msg);
+                    }
                 },
                 println: (msg) => {
-                    this.serialMonitor.querySelector('pre').textContent += msg + '\n';
-                    // Auto-scroll
-                    this.serialMonitor.scrollTop = this.serialMonitor.scrollHeight;
+                    if (this.serialMonitor.querySelector('pre')) {
+                        this.serialMonitor.querySelector('pre').textContent += String(msg) + '\n';
+                        this.serialMonitor.scrollTop = this.serialMonitor.scrollHeight;
+                    }
                 }
             },
-            // Constantes de Arduino (simplificado)
-            HIGH: 1,
-            LOW: 0,
-            INPUT: 0,
-            OUTPUT: 1,
-            // Puedes añadir más funciones y constantes aquí
+            HIGH: 1, LOW: 0, INPUT: 0, OUTPUT: 1,
         };
 
-        // Variables para los motores que el código de usuario modificará
+        // Resetear velocidades antes de cada compilación
         this.currentLeftMotorSpeed = 0;
         this.currentRightMotorSpeed = 0;
 
         try {
-            // Aislar el código del usuario. Usar 'use strict';
+            // --- NUEVA FORMA DE EXTRAER EL CÓDIGO ---
+            let setupCode = '';
+            const setupMatch = codeString.match(/void\s+setup\s*\(\s*\)\s*\{([\s\S]*?)\}/);
+            if (setupMatch && setupMatch[1]) {
+                setupCode = setupMatch[1];
+            } else {
+                simulatedAPI.Serial.println("Error: Función setup() no encontrada o con formato incorrecto.");
+                throw new Error("Función setup() no encontrada o con formato incorrecto.");
+            }
+
+            let loopCode = '';
+            const loopMatch = codeString.match(/void\s+loop\s*\(\s*\)\s*\{([\s\S]*?)\}/);
+            if (loopMatch && loopMatch[1]) {
+                loopCode = loopMatch[1];
+            } else {
+                simulatedAPI.Serial.println("Error: Función loop() no encontrada o con formato incorrecto.");
+                throw new Error("Función loop() no encontrada o con formato incorrecto.");
+            }
+            // --- FIN DE LA NUEVA FORMA ---
+
+
             // Crear funciones setup y loop a partir del string.
-            // Es una forma más segura que eval directo.
-            // Las funciones del API se pasan como argumentos para que estén disponibles en el scope.
-            const userCodeSetup = new Function(...Object.keys(simulatedAPI), ...Object.keys(this.userVariables), `
-                'use strict';
-                ${codeString.substring(codeString.indexOf("void setup()"), codeString.indexOf("void loop()"))}
-                setup(); // Llama a la función setup definida por el usuario
-            `);
-            
-            const userCodeLoop = new Function(...Object.keys(simulatedAPI), ...Object.keys(this.userVariables), `
-                'use strict';
-                ${codeString.substring(codeString.indexOf("void loop()"))}
-                loop(); // Llama a la función loop definida por el usuario
-            `);
+            // Pasamos las claves de simulatedAPI como nombres de argumentos,
+            // y sus valores correspondientes al llamar a la función.
+            // También pasamos 'this.userVariables' si quisiéramos que el usuario
+            // acceda a ellas como variables globales (requeriría más trabajo).
+            // Por ahora, las variables globales de C++ no se simulan directamente.
+            const setupFnArgs = Object.keys(simulatedAPI);
+            const loopFnArgs = Object.keys(simulatedAPI);
+
+            const userSetupFunction = new Function(...setupFnArgs, `'use strict'; ${setupCode}`);
+            const userLoopFunction = new Function(...loopFnArgs, `'use strict'; ${loopCode}`);
             
             this.code.setup = () => {
-                // Antes de cada setup/loop, resetear velocidades para que el código de usuario las establezca
-                this.currentLeftMotorSpeed = 0;
+                this.currentLeftMotorSpeed = 0; // Resetear para el setup
                 this.currentRightMotorSpeed = 0;
-                userCodeSetup(...Object.values(simulatedAPI), ...Object.values(this.userVariables));
-                this.robot.setMotorSpeeds(this.currentLeftMotorSpeed, this.currentRightMotorSpeed); // Aplicar al final del setup
+                // Llamar a la función del usuario con la API como contexto/argumentos
+                userSetupFunction.apply(this.userVariables, Object.values(simulatedAPI));
+                this.robot.setMotorSpeeds(this.currentLeftMotorSpeed, this.currentRightMotorSpeed);
             };
+
             this.code.loop = () => {
                 if (this.delayTime > 0) {
-                    if (Date.now() - this.lastDelayCall < this.delayTime) {
+                    if (performance.now() - this.lastDelayCall < this.delayTime) {
                         return false; // Todavía en delay
                     }
                     this.delayTime = 0; // Delay cumplido
                 }
-                this.currentLeftMotorSpeed = 0;
+                this.currentLeftMotorSpeed = 0; // Resetear para cada loop
                 this.currentRightMotorSpeed = 0;
-                userCodeLoop(...Object.values(simulatedAPI), ...Object.values(this.userVariables));
-                this.robot.setMotorSpeeds(this.currentLeftMotorSpeed, this.currentRightMotorSpeed); // Aplicar al final de cada loop
+                // Llamar a la función del usuario con la API como contexto/argumentos
+                userLoopFunction.apply(this.userVariables, Object.values(simulatedAPI));
+                this.robot.setMotorSpeeds(this.currentLeftMotorSpeed, this.currentRightMotorSpeed);
                 return true; // Loop ejecutado
             };
 
@@ -138,15 +142,26 @@ class ArduinoInterpreter {
         } catch (e) {
             simulatedAPI.Serial.println("Error en el código del usuario: " + e.message);
             console.error("Error en el código del usuario:", e);
-            this.code = { setup: () => {}, loop: () => {} }; // Deshabilitar código si hay error
+            this.code = { setup: () => {}, loop: () => {} };
             return false;
         }
     }
 
     runLoop() {
         if (this.code.loop) {
-            return this.code.loop();
+            try {
+                return this.code.loop();
+            } catch (e) {
+                // Capturar errores durante la ejecución del loop también
+                if (this.serialMonitor.querySelector('pre')) {
+                    this.serialMonitor.querySelector('pre').textContent += "Error en loop(): " + e.message + '\n';
+                    this.serialMonitor.scrollTop = this.serialMonitor.scrollHeight;
+                }
+                console.error("Error en loop():", e);
+                this.code.loop = () => {}; // Detener ejecución del loop si hay error
+                return false;
+            }
         }
-        return false; // No hay loop para ejecutar
+        return false;
     }
 }
