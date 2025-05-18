@@ -297,7 +297,7 @@ hr {
     border: 1px solid #ccc;
 }
 #robotEditorCanvas { background-color: #lightgray; }
-#trackEditorCanvas { background-color: #darkgray; }
+#trackEditorCanvas { background-color: #ffffff; } /* Changed to white (#ffffff or white) */
 
 
 /* Track Editor Palette */
