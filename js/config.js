@@ -53,4 +53,3 @@ export const AVAILABLE_TRACK_PARTS = [
     // Add more parts. Ensure 'file' matches your PNGs in assets/track_parts/
     // and 'connections' accurately describe the openings for the 0-degree rotation of that image.
 ];
-    ];
