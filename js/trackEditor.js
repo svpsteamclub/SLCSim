@@ -1,7 +1,7 @@
     // js/trackEditor.js
-    import { getDOMElements } from './ui.js';
-    import { TRACK_PART_SIZE_PX, AVAILABLE_TRACK_PARTS } from './config.js';
-    import { loadAndScaleImage } from './utils.js';
+import { getDOMElements } from './ui.js';
+import { TRACK_PART_SIZE_PX, AVAILABLE_TRACK_PARTS, PIXELS_PER_METER } from './config.js'; // <--- AFTER
+import { loadAndScaleImage } from './utils.js';
 
 
     let editorCanvas, ctx;
