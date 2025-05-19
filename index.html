@@ -189,27 +189,38 @@
     <div id="robotEditorContent" class="tab-content" style="display: none;">
         <div class="controls-container"> 
             <h2>Editor de Geometría del Robot</h2>
-            <p>Aquí podrás diseñar la forma y disposición de los componentes de tu robot.</p>
-            <div class="robot-editor-controls-group">
-                <label for="robotName">Nombre del Diseño:</label>
-                <input type="text" id="robotName" value="MiRobot">
+            <p>Arrastra componentes desde la paleta al canvas para diseñar tu robot. Escala: 1 px = 1 mm.</p>
+            <div class="robot-editor-palette-group">
+                <h4>Chasis</h4>
+                <div class="robot-parts-palette" id="robotChassisPalette">
+                    <img src="assets/robot_parts/robot_body.png" alt="Chasis" draggable="true" data-type="chassis" data-file="robot_body.png" style="width:70px;height:70px;">
+                </div>
+                <h4>Ruedas</h4>
+                <div class="robot-parts-palette" id="robotWheelPalette">
+                    <img src="assets/robot_parts/robot_wheel.png" alt="Rueda" draggable="true" data-type="wheel" data-file="robot_wheel.png" style="width:70px;height:70px;">
+                </div>
+                <h4>Sensores</h4>
+                <div class="robot-parts-palette" id="robotSensorPalette">
+                    <img src="assets/robot_parts/sensor.png" alt="Sensor" draggable="true" data-type="sensor" data-file="sensor.png" style="width:70px;height:70px;">
+                </div>
+                <h4>Arduino</h4>
+                <div class="robot-parts-palette" id="robotArduinoPalette">
+                    <img src="https://via.placeholder.com/70x70?text=Arduino" alt="Arduino" draggable="true" data-type="arduino" data-file="arduino_placeholder.png" style="width:70px;height:70px;">
+                </div>
+                <h4>Driver de Motores</h4>
+                <div class="robot-parts-palette" id="robotDriverPalette">
+                    <img src="https://via.placeholder.com/70x70?text=Driver" alt="Driver" draggable="true" data-type="driver" data-file="driver_placeholder.png" style="width:70px;height:70px;">
+                </div>
+            </div>
+            <div class="robot-editor-buttons" style="margin-top: 15px;">
                 <button id="saveRobotDesign">Guardar Diseño</button>
                 <button id="loadRobotDesign">Cargar Diseño</button>
-            </div>
-            <div class="robot-editor-controls-group">
-                <h4>Componentes:</h4>
-                <select id="robotComponentSelector">
-                    <option value="body">Cuerpo Principal</option>
-                    <option value="wheel">Rueda</option>
-                    <option value="sensor">Sensor</option>
-                </select>
-                <button id="addComponentToRobot">Añadir Componente</button>
+                <input type="file" id="loadRobotDesignInput" accept=".robotdesign,.json,.txt" style="display:none;">
+                <button id="exportRobotDesign">Exportar para Simulador</button>
                 <button id="toggleEraseComponentButton">Activar Modo Borrar</button>
-                <input type="file" id="customComponentImage" accept=".png" title="Cargar imagen para componente">
             </div>
-             <p style="margin-top: 15px;">Usa el canvas para arrastrar, rotar y escalar componentes. Las propiedades del robot (ancho, largo, posición de sensores) se derivarán de este diseño.</p>
         </div>
-        <canvas id="robotEditorCanvas" width="800" height="600"></canvas>
+        <canvas id="robotEditorCanvas" width="800" height="600" style="border:1px solid #ccc; background:#fff;"></canvas>
     </div> 
 
     <div id="trackEditorContent" class="tab-content" style="display: none;">
@@ -252,5 +263,13 @@
     </footer>
 
     <script type="module" src="js/main.js"></script>
+    <script type="module">
+      import { initRobotEditorV2 } from './js/robotEditorV2.js';
+      document.addEventListener('DOMContentLoaded', () => {
+        if (document.getElementById('robotEditorCanvas')) {
+          initRobotEditorV2();
+        }
+      });
+    </script>
 </body>
 </html>
