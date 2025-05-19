@@ -6,16 +6,16 @@ import { loadAndScaleImage } from './utils.js';
 
 let editorCanvas, ctx;
 let grid = [];
-let gridSize = { rows: 4, cols: 4 }; 
+let gridSize = { rows: 4, cols: 4 };
 let trackPartsImages = {};
 let selectedTrackPart = null;
 
 const OPPOSITE_DIRECTIONS = { N: 'S', S: 'N', E: 'W', W: 'E' };
 const DIRECTIONS = [
-    { name: 'N', dr: -1, dc: 0 }, 
-    { name: 'E', dr: 0, dc: 1 },  
-    { name: 'S', dr: 1, dc: 0 },  
-    { name: 'W', dr: 0, dc: -1 }  
+    { name: 'N', dr: -1, dc: 0 },
+    { name: 'E', dr: 0, dc: 1 },
+    { name: 'S', dr: 1, dc: 0 },
+    { name: 'W', dr: 0, dc: -1 }
 ];
 
 
@@ -45,12 +45,12 @@ export function initTrackEditor(mainAppInterface) {
         renderEditor();
     });
 
-    elems.generateRandomTrack.addEventListener('click', () => { 
-        generateRandomTrackWithRetry(); 
+    elems.generateRandomTrack.addEventListener('click', () => {
+        generateRandomTrackWithRetry();
     });
 
     elems.exportTrackFromEditor.addEventListener('click', () => {
-        if (!validateTrack()) { 
+        if (!validateTrack()) {
             if (!confirm("La pista puede tener problemas (desconexiones o callejones sin salida). ¿Exportar de todos modos?")) {
                 return;
             }
@@ -122,10 +122,10 @@ function populateTrackPartsPalette(paletteElement) {
         imgElement.addEventListener('click', () => {
             document.querySelectorAll('#trackPartsPalette img').forEach(p => p.classList.remove('selected'));
             imgElement.classList.add('selected');
-            if (trackPartsImages[partInfo.file]) { 
+            if (trackPartsImages[partInfo.file]) {
                  selectedTrackPart = { ...partInfo, image: trackPartsImages[partInfo.file] };
             } else {
-                selectedTrackPart = null; 
+                selectedTrackPart = null;
                 alert(`La imagen para la parte '${partInfo.name}' no está cargada. No se puede seleccionar.`);
                 console.warn(`Cannot select part ${partInfo.name}, image not loaded from cache.`);
             }
@@ -140,14 +140,14 @@ function setupGrid() {
     if (editorCanvas) {
         editorCanvas.width = gridSize.cols * TRACK_PART_SIZE_PX;
         editorCanvas.height = gridSize.rows * TRACK_PART_SIZE_PX;
-         if (ctx) { 
-            renderEditor(); 
+         if (ctx) {
+            renderEditor();
         }
     }
 }
 
 function renderEditor() {
-    if (!ctx || !editorCanvas || editorCanvas.width === 0 || editorCanvas.height === 0) return; 
+    if (!ctx || !editorCanvas || editorCanvas.width === 0 || editorCanvas.height === 0) return;
     ctx.clearRect(0, 0, editorCanvas.width, editorCanvas.height);
     ctx.fillStyle = '#ffffff';
     ctx.fillRect(0,0,editorCanvas.width, editorCanvas.height);
@@ -181,7 +181,7 @@ function renderEditor() {
 }
 
 function onGridSingleClick(event) {
-    if (!selectedTrackPart || !selectedTrackPart.image) { 
+    if (!selectedTrackPart || !selectedTrackPart.image) {
         return;
     }
     if (!editorCanvas) return;
@@ -227,7 +227,7 @@ function getRotatedConnections(part, rotation_deg) {
         return {};
     }
     const rotated = {};
-    const numRotations = Math.round(rotation_deg / 90); 
+    const numRotations = Math.round(rotation_deg / 90);
 
     for (const dirKey in part.connections) {
         if (part.connections[dirKey]) {
@@ -247,14 +247,14 @@ function generateRandomTrackWithRetry(maxRetries = 5) {
     console.log("generateRandomTrackWithRetry CALLED for LOOP track. maxRetries:", maxRetries);
     for (let i = 0; i < maxRetries; i++) {
         console.log(`--- generateRandomTrackWithRetry: Attempt ${i + 1} / ${maxRetries} calling generateRandomLoopTrack ---`);
-        if (generateRandomLoopTrack()) { 
+        if (generateRandomLoopTrack()) {
             console.log(`Random loop track generated successfully on attempt ${i + 1}`);
             return;
         }
         console.log(`generateRandomLoopTrack attempt ${i + 1} returned false or incomplete. Retrying...`);
     }
     alert("No se pudo generar una pista en bucle después de varios intentos. Verifica las partes de pista disponibles o el tamaño de la cuadrícula.");
-    setupGrid(); 
+    setupGrid();
     renderEditor();
 }
 
@@ -277,24 +277,23 @@ function generateRandomLoopTrack() {
     const stack = [];
     const visited = new Set();
 
-    let startR_dfs = Math.floor(Math.random() * gridSize.rows); // Renamed to avoid conflict
-    let startC_dfs = Math.floor(Math.random() * gridSize.cols); // Renamed to avoid conflict
+    let startR_dfs = Math.floor(Math.random() * gridSize.rows);
+    let startC_dfs = Math.floor(Math.random() * gridSize.cols);
 
-    // Variables to track the current head of DFS path, scoped to this function
     let currentPathR = startR_dfs;
     let currentPathC = startC_dfs;
 
-    stack.push({ r: currentPathR, c: currentPathC, fromDir: null }); 
+    stack.push({ r: currentPathR, c: currentPathC, fromDir: null });
     visited.add(`${currentPathR},${currentPathC}`);
     let placedCount = 0;
-    let lastPlacedPartForLoopObject = null; 
+    let lastPlacedPartForLoopObject = null;
+
+    const totalCells = gridSize.rows * gridSize.cols; // DEFINED totalCells
 
     while (stack.length > 0) {
-        const currentStackItem = stack[stack.length - 1]; 
-        // Update currentPathR and currentPathC from the stack item we are currently processing
+        const currentStackItem = stack[stack.length - 1];
         currentPathR = currentStackItem.r;
         currentPathC = currentStackItem.c;
-        // const { fromDir } = currentStackItem; // fromDir is actually on currentStackItem, not directly used here for piece placement
 
         let moved = false;
         const shuffledDirections = [...DIRECTIONS].sort(() => 0.5 - Math.random());
@@ -314,7 +313,7 @@ function generateRandomLoopTrack() {
                         const conns = getRotatedConnections(pInfo, rot);
                         if (conns[OPPOSITE_DIRECTIONS[dirInfo.name]]) {
                             let currentCellConnects = true;
-                            if (grid[currentPathR][currentPathC]) { 
+                            if (grid[currentPathR][currentPathC]) {
                                 const currentCellConns = getRotatedConnections(grid[currentPathR][currentPathC], grid[currentPathR][currentPathC].rotation_deg);
                                 if (!currentCellConns[dirInfo.name]) {
                                     currentCellConnects = false;
@@ -326,10 +325,10 @@ function generateRandomLoopTrack() {
                         }
                     }
                 });
-                
+
                 if (candidatePlacements.length > 0) {
                     const chosenNextPlacement = candidatePlacements[Math.floor(Math.random() * candidatePlacements.length)];
-                    
+
                     grid[nextR][nextC] = {
                         ...chosenNextPlacement.partInfo,
                         image: trackPartsImages[chosenNextPlacement.partInfo.file],
@@ -338,14 +337,14 @@ function generateRandomLoopTrack() {
                     if(!grid[nextR][nextC].image) console.error("Image missing for placed part in nextCell:", grid[nextR][nextC]);
                     placedCount++;
                     // console.log(`DFS: Placed ${grid[nextR][nextC].name} at [${nextR},${nextC}] (rot ${grid[nextR][nextC].rotation_deg}) connecting from [${currentPathR},${currentPathC}] via ${OPPOSITE_DIRECTIONS[dirInfo.name]}`);
-                    
-                    if (!grid[currentPathR][currentPathC]) { 
+
+                    if (!grid[currentPathR][currentPathC]) {
                         const currentCellCandidates = [];
                         loopParts.forEach(pInfoCurrent => {
                              if (!trackPartsImages[pInfoCurrent.file]) return;
                              for (let rotCurrent = 0; rotCurrent < 360; rotCurrent +=90) {
                                  const connsCurrent = getRotatedConnections(pInfoCurrent, rotCurrent);
-                                 if (connsCurrent[dirInfo.name]) { 
+                                 if (connsCurrent[dirInfo.name]) {
                                      currentCellCandidates.push({partInfo: pInfoCurrent, rotation: rotCurrent});
                                  }
                              }
@@ -359,36 +358,38 @@ function generateRandomLoopTrack() {
                             };
                              if(!grid[currentPathR][currentPathC].image) console.error("Image missing for placed part in currentCell:", grid[currentPathR][currentPathC]);
                             // console.log(`DFS: Finalized/Placed START piece ${grid[currentPathR][currentPathC].name} at [${currentPathR},${currentPathC}] (rot ${grid[currentPathR][currentPathC].rotation_deg})`);
-                            if (placedCount === 0) placedCount++; 
+                            if (placedCount === 0 && !(currentPathR === nextR && currentPathC === nextC)) placedCount++; // Ensure starting piece is counted
+                                else if (currentPathR === startR_dfs && currentPathC === startC_dfs && placedCount === 0) placedCount++;
+
                         } else {
-                            console.error(`DFS Error: Could not find a starting piece for [${currentPathR},${currentPathC}] to connect to ${dirInfo.name}`);
-                            grid[nextR][nextC] = null; 
-                            placedCount--;
-                            continue; 
+                            console.error(`DFS Error: Could not find a suitable piece for current cell [${currentPathR},${currentPathC}] to connect to ${dirInfo.name}`);
+                            grid[nextR][nextC] = null;
+                            placedCount--; // Rollback placement of next cell's part
+                            continue;
                         }
                     }
 
                     visited.add(`${nextR},${nextC}`);
-                    stack.push({ r: nextR, c: nextC, fromDir: dirInfo.name }); 
+                    stack.push({ r: nextR, c: nextC, fromDir: dirInfo.name });
                     moved = true;
-                    lastPlacedPartForLoopObject = { ...grid[nextR][nextC], r_val: nextR, c_val: nextC }; 
-                    break; 
+                    lastPlacedPartForLoopObject = { ...grid[nextR][nextC], r_val: nextR, c_val: nextC };
+                    break;
                 }
             }
         }
 
-        if (!moved) { 
-            stack.pop(); 
+        if (!moved) {
+            stack.pop();
+            // console.log(`DFS: Backtracking from [${currentPathR},${currentPathC}]`);
         }
     }
-    
-    // --- Corrected Loop Closing Logic Scope ---
-    if (placedCount > 2 && grid[startR_dfs][startC_dfs] && lastPlacedPartForLoopObject) {
-        const lastR = lastPlacedPartForLoopObject.r_val; // Use coordinates from the explicitly stored last part
-        const lastC = lastPlacedPartForLoopObject.c_val;
-        const lastPart = grid[lastR][lastC]; // Get the actual part object from the grid
 
-        if (lastPart) { 
+    if (placedCount > 2 && grid[startR_dfs][startC_dfs] && lastPlacedPartForLoopObject) {
+        const lastR = lastPlacedPartForLoopObject.r_val;
+        const lastC = lastPlacedPartForLoopObject.c_val;
+        const lastPart = grid[lastR][lastC];
+
+        if (lastPart) {
             console.log(`DFS: Attempting to close loop from last placed [${lastR},${lastC}] (part: ${lastPart.name}) to start [${startR_dfs},${startC_dfs}]`);
             const lastPartConns = getRotatedConnections(lastPart, lastPart.rotation_deg);
 
@@ -402,7 +403,7 @@ function generateRandomLoopTrack() {
                         const startPartConns = getRotatedConnections(startPart, startPart.rotation_deg);
                         if (startPartConns[requiredStartConn]) {
                             console.log(`DFS: Loop closed successfully to start cell!`);
-                            break; 
+                            break;
                         } else {
                             console.log(`DFS: Start cell [${startR_dfs},${startC_dfs}] part ${startPart.name} (rot ${startPart.rotation_deg}) does not have required connection ${requiredStartConn} to close loop.`);
                         }
@@ -411,20 +412,17 @@ function generateRandomLoopTrack() {
             }
         }
     }
-    // --- End of Corrected Loop Closing Logic Scope ---
-
 
     console.log(`DFS generation finished. Parts placed: ${placedCount}`);
     renderEditor();
-    
-    const success = placedCount >= Math.floor(totalCells * 0.4); 
+
+    const success = placedCount >= Math.floor(totalCells * 0.4);
     if (!success) console.warn("DFS generated track might be too short or incomplete.");
     return success;
 }
 
 
 function validateTrack() {
-    // ... (validateTrack function remains the same)
     let partCount = 0;
     let danglingConnections = 0;
     let connectionMismatches = 0;
@@ -468,7 +466,7 @@ function validateTrack() {
     if (connectionMismatches > 0) {
         console.warn(`Validación: Encontradas ${connectionMismatches / 2} conexiones incompatibles.`);
     }
-    if (danglingConnections > 2 && partCount > 1 && connectionMismatches === 0) { 
+    if (danglingConnections > 2 && partCount > 1 && connectionMismatches === 0) {
          console.warn(`Validación: Encontradas ${danglingConnections} conexiones abiertas/colgando.`);
     }
     console.log(`Validación básica: Partes=${partCount}, Incompatibles=${connectionMismatches}, Abiertas=${danglingConnections}`);
@@ -477,7 +475,6 @@ function validateTrack() {
 }
 
 function saveTrackDesign() {
-    // ... (saveTrackDesign function remains the same)
     const { trackEditorTrackName } = getDOMElements();
     const trackName = trackEditorTrackName.value.trim() || "MiPistaEditada";
     const designData = { gridSize: { ...gridSize }, gridParts: [] };
@@ -498,7 +495,6 @@ function saveTrackDesign() {
 }
 
 function loadTrackDesign(event) {
-    // ... (loadTrackDesign function remains the same)
     const file = event.target.files[0];
     if (!file) return;
     const reader = new FileReader();
@@ -533,7 +529,6 @@ function loadTrackDesign(event) {
 }
 
 function exportTrackAsCanvas() {
-    // ... (exportTrackAsCanvas function remains the same)
     if (gridSize.rows === 0 || gridSize.cols === 0) { alert("Grid size is invalid."); return null; }
     const exportCanvas = document.createElement('canvas');
     exportCanvas.width = gridSize.cols * TRACK_PART_SIZE_PX;
