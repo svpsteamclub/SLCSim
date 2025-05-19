@@ -1,9 +1,10 @@
+// js/ui.js
 import {
     MAX_BAR_HEIGHT_PX, currentMaxValError, currentMaxValPTerm, currentMaxValITerm,
     currentMaxValDTerm, currentMaxValAdjPID, MAX_VAL_PWM_BAR, AVAILABLE_TRACKS, PIXELS_PER_METER
 } from './config.js';
 
-let domElements = {}; // To store cached DOM elements
+let domElements = {}; 
 
 export function cacheDOMElements() {
     domElements = {
@@ -54,24 +55,19 @@ export function cacheDOMElements() {
         addComponentToRobot: document.getElementById('addComponentToRobot'),
         customComponentImage: document.getElementById('customComponentImage'),
         
-        // Track Editor specific elements
-        trackEditorTrackName: document.getElementById('trackEditorTrackName'),      // NEW
-        saveTrackDesignButton: document.getElementById('saveTrackDesignButton'),  // NEW
-        loadTrackDesignInput: document.getElementById('loadTrackDesignInput'),    // NEW
+        trackEditorTrackName: document.getElementById('trackEditorTrackName'),      
+        saveTrackDesignButton: document.getElementById('saveTrackDesignButton'),  
+        loadTrackDesignInput: document.getElementById('loadTrackDesignInput'),    
         trackGridSize: document.getElementById('trackGridSize'),
         generateRandomTrack: document.getElementById('generateRandomTrack'),
         exportTrackFromEditor: document.getElementById('exportTrackFromEditor'),
         trackPartsPalette: document.getElementById('trackPartsPalette'),
+        toggleEraseModeButton: document.getElementById('toggleEraseModeButton'), // <<<< NEWLY ADDED >>>>
     };
-    // Sanity checks (optional but helpful for debugging missing elements)
-    if (!domElements.trackEditorTrackName) console.warn("UI_CACHE: trackEditorTrackName not found!");
-    if (!domElements.saveTrackDesignButton) console.warn("UI_CACHE: saveTrackDesignButton not found!");
-    if (!domElements.loadTrackDesignInput) console.warn("UI_CACHE: loadTrackDesignInput not found!");
-    
     return domElements;
 }
 
-// ... (rest of ui.js remains the same as previously provided)
+// ... (Rest of ui.js: getDOMElements, populateTrackSelector, updateBar, etc. as previously provided) ...
 export function getDOMElements() {
     if (Object.keys(domElements).length === 0) {
         cacheDOMElements();
