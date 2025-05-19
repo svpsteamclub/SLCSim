@@ -175,6 +175,8 @@ function setupCanvasEvents(canvas, ctx) {
 
   // Double-click to rotate component 90 degrees
   canvas.addEventListener('dblclick', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
     const rect = canvas.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
@@ -182,7 +184,10 @@ function setupCanvasEvents(canvas, ctx) {
     for (let i = placedComponents.length - 1; i >= 0; i--) {
       const comp = placedComponents[i];
       if (isPointInComponent(x, y, comp)) {
-        comp.angle = ((comp.angle || 0) + Math.PI / 2) % (2 * Math.PI);
+        if (typeof comp.angle !== 'number') comp.angle = 0;
+        console.log('Before:', comp.angle);
+        comp.angle = ((comp.angle + Math.PI / 2) % (2 * Math.PI));
+        console.log('After:', comp.angle);
         render(ctx, canvas);
         break;
       }
