@@ -48,7 +48,38 @@ export const AVAILABLE_TRACK_PARTS = [
         name: "Curva 90°", 
         file: "curva_base.png", // Assume this PNG is a North-to-East curve
         connections: { N: true, E: true } 
-    }
+    },
+	{ 
+        name: "Chicana", 
+        file: "chicana.png", // Assume this PNG is a North-South straight line
+        connections: { N: true, S: true } 
+    },
+	{ 
+        name: "Curva 90° abierta", 
+        file: "curva.png", // Assume this PNG is a North-South straight line
+        connections: { N: true, E: true } 
+    },
+	{ 
+        name: "Diagonal", 
+        file: "diagonal.png", // Assume this PNG is a North-South straight line
+        connections: { N: true, E: true } 
+    },
+	{ 
+        name: "Esquina", 
+        file: "esquina.png", // Assume this PNG is a North-South straight line
+        connections: { N: true, E: true } 
+    },
+	{ 
+        name: "Harpin", 
+        file: "harpin.png", // Assume this PNG is a North-South straight line
+        connections: { N: true, E: true } 
+    },
+	{ 
+        name: "Harpin Asimetrico", 
+        file: "harpin_asimetrico.png", // Assume this PNG is a North-South straight line
+        connections: { N: true, E: true } 
+    },
+	
     // You can add other *structurally different* pieces here if needed,
     // e.g., a chicana that isn't just two curves, or a special bridge piece.
     // But for basic path generation, the above two are the minimum for Option 1.
