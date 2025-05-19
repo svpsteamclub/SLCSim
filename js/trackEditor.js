@@ -6,16 +6,16 @@ import { loadAndScaleImage } from './utils.js';
 
 let editorCanvas, ctx;
 let grid = [];
-let gridSize = { rows: 4, cols: 4 }; 
+let gridSize = { rows: 4, cols: 4 };
 let trackPartsImages = {};
 let selectedTrackPart = null;
 
 const OPPOSITE_DIRECTIONS = { N: 'S', S: 'N', E: 'W', W: 'E' };
 const DIRECTIONS = [
-    { name: 'N', dr: -1, dc: 0 }, 
-    { name: 'E', dr: 0, dc: 1 },  
-    { name: 'S', dr: 1, dc: 0 },  
-    { name: 'W', dr: 0, dc: -1 }  
+    { name: 'N', dr: -1, dc: 0 },
+    { name: 'E', dr: 0, dc: 1 },
+    { name: 'S', dr: 1, dc: 0 },
+    { name: 'W', dr: 0, dc: -1 }
 ];
 
 
@@ -46,11 +46,11 @@ export function initTrackEditor(mainAppInterface) {
     });
 
     elems.generateRandomTrack.addEventListener('click', () => {
-        generateRandomTrackWithRetry(); 
+        generateRandomTrackWithRetry();
     });
 
     elems.exportTrackFromEditor.addEventListener('click', () => {
-        if (!validateTrack()) { 
+        if (!validateTrack()) {
             if (!confirm("La pista puede tener problemas (desconexiones o callejones sin salida). ¿Exportar de todos modos?")) {
                 return;
             }
@@ -122,10 +122,10 @@ function populateTrackPartsPalette(paletteElement) {
         imgElement.addEventListener('click', () => {
             document.querySelectorAll('#trackPartsPalette img').forEach(p => p.classList.remove('selected'));
             imgElement.classList.add('selected');
-            if (trackPartsImages[partInfo.file]) { 
+            if (trackPartsImages[partInfo.file]) {
                  selectedTrackPart = { ...partInfo, image: trackPartsImages[partInfo.file] };
             } else {
-                selectedTrackPart = null; 
+                selectedTrackPart = null;
                 alert(`La imagen para la parte '${partInfo.name}' no está cargada. No se puede seleccionar.`);
                 console.warn(`Cannot select part ${partInfo.name}, image not loaded from cache.`);
             }
@@ -140,14 +140,14 @@ function setupGrid() {
     if (editorCanvas) {
         editorCanvas.width = gridSize.cols * TRACK_PART_SIZE_PX;
         editorCanvas.height = gridSize.rows * TRACK_PART_SIZE_PX;
-         if (ctx) { 
-            renderEditor(); 
+         if (ctx) {
+            renderEditor();
         }
     }
 }
 
 function renderEditor() {
-    if (!ctx || !editorCanvas || editorCanvas.width === 0 || editorCanvas.height === 0) return; 
+    if (!ctx || !editorCanvas || editorCanvas.width === 0 || editorCanvas.height === 0) return;
     ctx.clearRect(0, 0, editorCanvas.width, editorCanvas.height);
     ctx.fillStyle = '#ffffff';
     ctx.fillRect(0,0,editorCanvas.width, editorCanvas.height);
@@ -181,7 +181,7 @@ function renderEditor() {
 }
 
 function onGridSingleClick(event) {
-    if (!selectedTrackPart || !selectedTrackPart.image) { 
+    if (!selectedTrackPart || !selectedTrackPart.image) {
         return;
     }
     if (!editorCanvas) return;
@@ -227,7 +227,7 @@ function getRotatedConnections(part, rotation_deg) {
         return {};
     }
     const rotated = {};
-    const numRotations = Math.round(rotation_deg / 90); 
+    const numRotations = Math.round(rotation_deg / 90);
 
     for (const dirKey in part.connections) {
         if (part.connections[dirKey]) {
@@ -243,13 +243,11 @@ function getRotatedConnections(part, rotation_deg) {
     return rotated;
 }
 
-// --- NEW/REVISED RANDOM GENERATION FUNCTIONS ---
-
-function generateRandomTrackWithRetry(maxRetries = 10) { // Increased retries for this new approach
+function generateRandomTrackWithRetry(maxRetries = 10) { 
     console.log("generateRandomTrackWithRetry CALLED for Predefined Path track. maxRetries:", maxRetries);
     for (let i = 0; i < maxRetries; i++) {
         console.log(`--- generateRandomTrackWithRetry: Attempt ${i + 1} / ${maxRetries} calling generateRandomLoopTrack ---`);
-        if (generateRandomLoopTrack()) { // Calls the new "Path First" generator
+        if (generateRandomLoopTrack()) { 
             console.log(`Random Predefined Path track generated successfully on attempt ${i + 1}`);
             return;
         }
@@ -260,7 +258,6 @@ function generateRandomTrackWithRetry(maxRetries = 10) { // Increased retries fo
     renderEditor();
 }
 
-// Helper to determine the direction from cell1 to cell2
 function getDirectionFromTo(r1, c1, r2, c2) {
     const dr = r2 - r1;
     const dc = c2 - c1;
@@ -269,16 +266,15 @@ function getDirectionFromTo(r1, c1, r2, c2) {
             return dir.name;
         }
     }
-    // console.warn(`Could not determine direction from [${r1},${c1}] to [${r2},${c2}]`);
-    return null; 
+    return null;
 }
 
 
 function generateCellPathAndConnections() {
     console.log("--- Attempting to generate a cell path ---");
     let path = [];
-    let visitedOnPath = new Set(); 
-    const minPathLength = Math.max(3, Math.floor((gridSize.rows * gridSize.cols) * 0.3)); 
+    let visitedOnPath = new Set();
+    const minPathLength = Math.max(3, Math.floor((gridSize.rows * gridSize.cols) * 0.3));
     const maxPathLength = Math.floor((gridSize.rows * gridSize.cols) * 0.8);
 
     let startR = Math.floor(Math.random() * gridSize.rows);
@@ -290,7 +286,7 @@ function generateCellPathAndConnections() {
     visitedOnPath.add(`${currentR},${currentC}`);
 
     let attemptsToExtend = 0;
-    const maxAttemptsToExtendPath = (gridSize.rows * gridSize.cols) * 3; // Limit extension attempts
+    const maxAttemptsToExtendPath = (gridSize.rows * gridSize.cols) * 3;
 
     while (path.length < maxPathLength && attemptsToExtend < maxAttemptsToExtendPath) {
         attemptsToExtend++;
@@ -303,7 +299,7 @@ function generateCellPathAndConnections() {
             if (nextR >= 0 && nextR < gridSize.rows &&
                 nextC >= 0 && nextC < gridSize.cols &&
                 !visitedOnPath.has(`${nextR},${nextC}`)) {
-                
+
                 currentR = nextR;
                 currentC = nextC;
                 path.push({ r: currentR, c: currentC });
@@ -312,9 +308,9 @@ function generateCellPathAndConnections() {
                 break;
             }
         }
-        if (!moved && path.length < minPathLength) { // If got stuck too early, retry path generation might be needed or a different strategy
+        if (!moved && path.length < minPathLength) {
             console.log("Path generation got stuck too early before reaching min length.");
-            break; 
+            break;
         } else if (!moved) {
             console.log("Path generation got stuck before max length, but met min length. Will try to close.");
             break;
@@ -322,7 +318,7 @@ function generateCellPathAndConnections() {
     }
 
     let loopClosed = false;
-    if (path.length >= minPathLength) { // Only try to close if path is somewhat substantial
+    if (path.length >= minPathLength) {
         for (const dir of DIRECTIONS) {
             if (currentR + dir.dr === startR && currentC + dir.dc === startC) {
                 path.push({ r: startR, c: startC });
@@ -333,34 +329,33 @@ function generateCellPathAndConnections() {
         }
     }
 
-
     if (!loopClosed || path.length < minPathLength) {
         console.warn(`Generated path did not close or was too short (Length: ${path.length}). Path:`, JSON.parse(JSON.stringify(path)));
-        return null; 
+        return null;
     }
 
     console.log("Generated cell path (length " + path.length + "):", JSON.parse(JSON.stringify(path.map(p => `[${p.r},${p.c}]`))));
 
     const pathWithConnections = [];
-    for (let i = 0; i < path.length - 1; i++) { 
+    for (let i = 0; i < path.length - 1; i++) {
         const cell = path[i];
-        const prevCellInLogic = (i === 0) ? path[path.length - 2] : path[i - 1]; // For cell 0, its "previous" is the one before the closing "start"
+        const prevCellInLogic = (i === 0) ? path[path.length - 2] : path[i - 1];
         const nextCellInLogic = path[i + 1];
 
-        const dirFromPrev = getDirectionFromTo(prevCellInLogic.r, prevCellInLogic.c, cell.r, cell.c);
-        const dirToNext = getDirectionFromTo(cell.r, cell.c, nextCellInLogic.r, nextCellInLogic.c);
-        
-        if (!dirFromPrev || !dirToNext) {
-            console.error("Error determining directions for path connections.", {cell, prevCellInLogic, nextCellInLogic, dirFromPrev, dirToNext});
-            return null; 
+        const dirFromPrevToCell = getDirectionFromTo(prevCellInLogic.r, prevCellInLogic.c, cell.r, cell.c);
+        const dirFromCellToNext = getDirectionFromTo(cell.r, cell.c, nextCellInLogic.r, nextCellInLogic.c);
+
+        if (!dirFromPrevToCell || !dirFromCellToNext) {
+            console.error("Error determining directions for path connections.", {i, cell, prevCellInLogic, nextCellInLogic, dirFromPrevToCell, dirFromCellToNext});
+            return null;
         }
-        
+
         pathWithConnections.push({
             r: cell.r,
             c: cell.c,
-            connections: { 
-                [OPPOSITE_DIRECTIONS[dirFromPrev]]: true,
-                [dirToNext]: true
+            connections: {
+                [OPPOSITE_DIRECTIONS[dirFromPrevToCell]]: true,
+                [dirFromCellToNext]: true
             }
         });
     }
@@ -388,7 +383,7 @@ function generateRandomLoopTrack() {
 
     if (!cellPathWithConnections || cellPathWithConnections.length === 0) {
         console.error("Failed to generate a valid cell path for the loop.");
-        renderEditor(); // Show empty grid
+        renderEditor(); 
         return false;
     }
 
@@ -398,22 +393,22 @@ function generateRandomLoopTrack() {
         const r = cellInfo.r;
         const c = cellInfo.c;
         const requiredConns = cellInfo.connections;
-        // console.log(`Filling cell [${r},${c}], needs connections:`, JSON.stringify(requiredConns));
+        console.log(`Attempting to fill cell [${r},${c}]. Required connections: ${JSON.stringify(requiredConns)}`); // ADDED LOG
 
         let placedPiece = false;
         const shuffledLoopParts = [...loopParts].sort(() => 0.5 - Math.random());
 
         for (const partDef of shuffledLoopParts) {
             if (!trackPartsImages[partDef.file]) {
-                console.warn(`Image for ${partDef.file} not loaded, skipping part.`);
+                console.warn(`  Skipping part ${partDef.name}: Image for ${partDef.file} not loaded.`);
                 continue;
             }
             const shuffledRotations = [0, 90, 180, 270].sort(() => 0.5 - Math.random());
             for (const rot of shuffledRotations) {
                 const actualConns = getRotatedConnections(partDef, rot);
-                
+
                 let match = true;
-                if (Object.keys(actualConns).length !== 2 || Object.keys(requiredConns).length !== 2) { // Both must be 2-way connections
+                if (Object.keys(actualConns).length !== 2 || Object.keys(requiredConns).length !== 2) {
                     match = false;
                 } else {
                     for (const reqDir in requiredConns) {
@@ -423,6 +418,9 @@ function generateRandomLoopTrack() {
                         }
                     }
                 }
+                // Log every attempt for the current cell
+                console.log(`  Trying Part: ${partDef.name}, Rot: ${rot} deg. Actual Conns: ${JSON.stringify(actualConns)}. Match? ${match}`);
+
 
                 if (match) {
                     grid[r][c] = {
@@ -430,18 +428,17 @@ function generateRandomLoopTrack() {
                         image: trackPartsImages[partDef.file],
                         rotation_deg: rot
                     };
-                    // console.log(`  Placed ${partDef.name} (rot ${rot}) in [${r},${c}]`);
+                    console.log(`    >>> PLACED ${partDef.name} (rot ${rot} deg) in [${r},${c}] with connections ${JSON.stringify(actualConns)}`);
                     placedPiece = true;
                     placedCount++;
-                    break; 
+                    break;
                 }
             }
-            if (placedPiece) break; 
+            if (placedPiece) break;
         }
         if (!placedPiece) {
-            console.error(`Could not find any suitable part from AVAILABLE_TRACK_PARTS to fit required connections ${JSON.stringify(requiredConns)} at cell [${r},${c}]`);
+            console.error(`===> FAILURE: Could not find ANY suitable part from AVAILABLE_TRACK_PARTS to fit required connections ${JSON.stringify(requiredConns)} at cell [${r},${c}]`);
             allPartsPlaced = false;
-            // break; // Option: Stop if one part can't be placed
         }
     }
 
@@ -449,7 +446,6 @@ function generateRandomLoopTrack() {
     if (!allPartsPlaced) {
         console.warn("Not all parts in the generated path could be filled with available track pieces.");
     }
-    // Success if all parts of the defined path were placed
     return allPartsPlaced && cellPathWithConnections.length > 0 && placedCount === cellPathWithConnections.length;
 }
 
@@ -459,8 +455,8 @@ function validateTrack() {
     let danglingConnections = 0;
     let connectionMismatches = 0;
 
-    for (let r_idx = 0; r_idx < gridSize.rows; r_idx++) { // Renamed to avoid conflict with 'r'
-        for (let c_idx = 0; c_idx < gridSize.cols; c_idx++) { // Renamed to avoid conflict with 'c'
+    for (let r_idx = 0; r_idx < gridSize.rows; r_idx++) { 
+        for (let c_idx = 0; c_idx < gridSize.cols; c_idx++) { 
             const currentPart = grid[r_idx][c_idx];
             if (currentPart) {
                 partCount++;
@@ -498,8 +494,7 @@ function validateTrack() {
     if (connectionMismatches > 0) {
         console.warn(`Validación: Encontradas ${connectionMismatches / 2} conexiones incompatibles.`);
     }
-    if (danglingConnections > 0 && partCount > 1 && connectionMismatches === 0) { 
-         // For a perfect loop, danglingConnections should be 0.
+    if (danglingConnections > 0 && partCount > 1 && connectionMismatches === 0) {
          console.warn(`Validación: Encontradas ${danglingConnections} conexiones abiertas/colgando. Un bucle perfecto no debería tener ninguna.`);
     }
     console.log(`Validación básica: Partes=${partCount}, Incompatibles=${connectionMismatches}, Abiertas=${danglingConnections}`);
@@ -570,8 +565,8 @@ function exportTrackAsCanvas() {
     const exportCtx = exportCanvas.getContext('2d');
     exportCtx.fillStyle = 'white'; exportCtx.fillRect(0,0, exportCanvas.width, exportCanvas.height);
     let hasContent = false;
-    for (let r_idx = 0; r_idx < gridSize.rows; r_idx++) { // Renamed to avoid conflict
-        for (let c_idx = 0; c_idx < gridSize.cols; c_idx++) { // Renamed to avoid conflict
+    for (let r_idx = 0; r_idx < gridSize.rows; r_idx++) { 
+        for (let c_idx = 0; c_idx < gridSize.cols; c_idx++) { 
             if (grid[r_idx][c_idx] && grid[r_idx][c_idx].image) {
                 hasContent = true; const part = grid[r_idx][c_idx];
                 const x_center = c_idx * TRACK_PART_SIZE_PX + TRACK_PART_SIZE_PX / 2;
