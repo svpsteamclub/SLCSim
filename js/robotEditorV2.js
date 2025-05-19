@@ -179,7 +179,8 @@ function setupButtons() {
     return;
   }
 
-  eraseBtn.addEventListener('click', () => {
+  eraseBtn.addEventListener('click', (e) => {
+    e.preventDefault();
     isEraseModeActive = !isEraseModeActive;
     const canvas = document.getElementById('robotEditorCanvas');
     
