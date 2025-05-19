@@ -405,14 +405,6 @@ select {
 }
 
 /* Optimize info display */
-.info {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 10px;
-    padding: 10px;
-    will-change: transform;
-}
-
 .info-item {
     transition: background-color 0.2s ease;
     will-change: background-color;
