@@ -9,7 +9,6 @@ let selectedComponent = null;
 let offsetX = 0, offsetY = 0;
 
 function getPaletteComponentsFromFiles() {
-  // List of files in assets/robot_parts (update this list if new files are added)
   const files = [
     'robot_body1.png',
     'robot_wheel.png',
@@ -24,20 +23,12 @@ function getPaletteComponentsFromFiles() {
     else if (file.startsWith('sensor')) { type = 'sensor'; name = 'Sensor'; }
     else if (file.startsWith('arduino')) { type = 'arduino'; name = 'Arduino'; }
     else if (file.startsWith('l298n') || file.startsWith('driver')) { type = 'driver'; name = 'Driver'; }
-    // Default sizes (can be improved by reading from a config file)
-    let width = 50, height = 50;
-    if (type === 'chassis') { width = 340; height = 160; }
-    if (type === 'wheel') { width = 50; height = 50; }
-    if (type === 'sensor') { width = 12; height = 12; }
-    if (type === 'arduino') { width = 68; height = 53; }
-    if (type === 'driver') { width = 60; height = 40; }
     return {
       type,
       name,
       file,
-      src: `assets/robot_parts/${file}`,
-      width,
-      height
+      src: `assets/robot_parts/${file}`
+      // width/height will be set dynamically
     };
   });
 }
@@ -46,27 +37,36 @@ export function initRobotEditorV2() {
   const canvas = document.getElementById('robotEditorCanvas');
   const ctx = canvas.getContext('2d');
   window.PALETTE_COMPONENTS = getPaletteComponentsFromFiles();
-  buildPalette();
-  setupPaletteDrag();
-  setupCanvasEvents(canvas, ctx);
-  setupButtons();
-  render(ctx, canvas);
+  buildPalette(() => {
+    setupPaletteDrag();
+    setupCanvasEvents(canvas, ctx);
+    setupButtons();
+    render(ctx, canvas);
+  });
 }
 
-function buildPalette() {
+function buildPalette(callback) {
   // Clear existing palettes
   document.getElementById('robotChassisPalette').innerHTML = '';
   document.getElementById('robotWheelPalette').innerHTML = '';
   document.getElementById('robotSensorPalette').innerHTML = '';
   document.getElementById('robotArduinoPalette').innerHTML = '';
   document.getElementById('robotDriverPalette').innerHTML = '';
-  (window.PALETTE_COMPONENTS || []).forEach(comp => {
+  let loaded = 0;
+  const comps = window.PALETTE_COMPONENTS || [];
+  comps.forEach(comp => {
     const img = document.createElement('img');
     img.src = comp.src;
     img.alt = comp.name;
     img.draggable = true;
     img.dataset.type = comp.type;
     img.dataset.file = comp.file;
+    img.onload = () => {
+      comp.width = img.naturalWidth;
+      comp.height = img.naturalHeight;
+      loaded++;
+      if (loaded === comps.length && typeof callback === 'function') callback();
+    };
     img.style.width = '70px';
     img.style.height = '70px';
     if (comp.type === 'chassis') document.getElementById('robotChassisPalette').appendChild(img);
@@ -80,12 +80,14 @@ function buildPalette() {
 function setupPaletteDrag() {
   document.querySelectorAll('.robot-parts-palette img').forEach(img => {
     img.addEventListener('dragstart', (e) => {
+      // Find the palette component by file
+      const comp = (window.PALETTE_COMPONENTS || []).find(c => c.file === img.dataset.file);
       dragData = {
         type: img.dataset.type,
         file: img.dataset.file,
         src: img.src,
-        width: getPaletteComponent(img.dataset.type).width,
-        height: getPaletteComponent(img.dataset.type).height
+        width: comp.width,
+        height: comp.height
       };
     });
   });
