@@ -238,7 +238,16 @@ hr.internal-separator { margin-top: 20px; margin-bottom:10px; width: 95%; backgr
 
 .foldable-title { cursor: pointer; display: flex; justify-content: space-between; align-items: center; width: 100%; }
 .fold-indicator { font-weight: bold; margin-left: 10px; user-select: none; font-size: 0.9em; }
-.foldable-content { margin-top: 10px; width: 100%; box-sizing: border-box; }
+.foldable-content {
+    display: none;
+    transition: max-height 0.3s ease;
+    overflow: hidden;
+    max-height: 0;
+}
+.foldable-content.open {
+    display: block;
+    max-height: 1000px; /* Large enough for content */
+}
 .foldable-content label, .foldable-content input, .foldable-content ul, .foldable-content ol { flex-basis: auto; flex-grow: 0; flex-shrink: 1; }
 .foldable-content p { text-align: left; }
 

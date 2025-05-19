@@ -284,11 +284,8 @@ export function setupFoldableSections() {
             console.log('Next element sibling:', content);
             const indicator = title.querySelector('.fold-indicator');
             if (content && content.classList.contains('foldable-content')) {
-                // Cast to HTMLElement for style
-                const contentDiv = content;
-                const isHidden = getComputedStyle(contentDiv).display === 'none';
-                contentDiv.style.display = isHidden ? 'block' : 'none';
-                if (indicator) indicator.textContent = isHidden ? '[-]' : '[+]';
+                content.classList.toggle('open');
+                if (indicator) indicator.textContent = content.classList.contains('open') ? '[-]' : '[+]';
             } else {
                 console.warn('Foldable content not found or not the expected element:', content);
             }
