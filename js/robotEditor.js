@@ -257,23 +257,43 @@
     }
 
     function drawGrid() {
-        ctx.strokeStyle = '#aaaaaa';
+        // Draw 5x5 pixel grid
+        ctx.strokeStyle = '#cccccc';
+        ctx.lineWidth = 0.5;
+        
+        // Draw vertical grid lines
+        for (let x = 0; x < editorCanvas.width; x += 5) {
+            ctx.beginPath();
+            ctx.moveTo(x, 0);
+            ctx.lineTo(x, editorCanvas.height);
+            ctx.stroke();
+        }
+        
+        // Draw horizontal grid lines
+        for (let y = 0; y < editorCanvas.height; y += 5) {
+            ctx.beginPath();
+            ctx.moveTo(0, y);
+            ctx.lineTo(editorCanvas.width, y);
+            ctx.stroke();
+        }
+
+        // Draw center lines
+        ctx.strokeStyle = '#ff0000';
         ctx.lineWidth = 1;
-        const gridSize_m = 0.1; // 10cm grid
         
-        for (let x = 0; x < editorCanvas.width / (gridSize_m * PIXELS_PER_METER); x++) {
-            ctx.beginPath();
-            ctx.moveTo(x * gridSize_m * PIXELS_PER_METER, 0);
-            ctx.lineTo(x * gridSize_m * PIXELS_PER_METER, editorCanvas.height);
-            ctx.stroke();
-        }
+        // Vertical center line
+        const centerX = editorCanvas.width / 2;
+        ctx.beginPath();
+        ctx.moveTo(centerX, 0);
+        ctx.lineTo(centerX, editorCanvas.height);
+        ctx.stroke();
         
-        for (let y = 0; y < editorCanvas.height / (gridSize_m * PIXELS_PER_METER); y++) {
-            ctx.beginPath();
-            ctx.moveTo(0, y * gridSize_m * PIXELS_PER_METER);
-            ctx.lineTo(editorCanvas.width, y * gridSize_m * PIXELS_PER_METER);
-            ctx.stroke();
-        }
+        // Horizontal center line
+        const centerY = editorCanvas.height / 2;
+        ctx.beginPath();
+        ctx.moveTo(0, centerY);
+        ctx.lineTo(editorCanvas.width, centerY);
+        ctx.stroke();
     }
 
     function drawComponent(component) {
