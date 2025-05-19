@@ -116,6 +116,8 @@ function setupCanvasEvents(canvas, ctx) {
     const rect = canvas.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
+    
+    // Check components in reverse order (top to bottom)
     for (let i = placedComponents.length - 1; i >= 0; i--) {
       const comp = placedComponents[i];
       if (isPointInComponent(x, y, comp)) {
@@ -167,13 +169,15 @@ function getPaletteComponent(type) {
 }
 
 function isPointInComponent(x, y, comp) {
-  // Simple bounding box, no rotation
-  return (
-    x >= comp.x - comp.width / 2 &&
-    x <= comp.x + comp.width / 2 &&
-    y >= comp.y - comp.height / 2 &&
-    y <= comp.y + comp.height / 2
-  );
+    // Calculate the rotated point coordinates
+    const dx = x - comp.x;
+    const dy = y - comp.y;
+    const rotatedX = dx * Math.cos(-comp.angle) - dy * Math.sin(-comp.angle);
+    const rotatedY = dx * Math.sin(-comp.angle) + dy * Math.cos(-comp.angle);
+    
+    // Check if the point is within the component's bounds
+    return Math.abs(rotatedX) <= comp.width / 2 &&
+           Math.abs(rotatedY) <= comp.height / 2;
 }
 
 function render(ctx, canvas) {
