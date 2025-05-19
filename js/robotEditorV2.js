@@ -217,11 +217,28 @@ function setupButtons() {
   eraseBtn.addEventListener('click', toggleEraseMode);
 }
 
+function toggleEraseMode() {
+  isEraseModeActive = !isEraseModeActive;
+  const eraseBtn = document.getElementById('toggleEraseComponentButton');
+  if (eraseBtn) {
+    eraseBtn.textContent = isEraseModeActive ? 'Desactivar Modo Borrar' : 'Activar Modo Borrar';
+    eraseBtn.style.backgroundColor = isEraseModeActive ? '#d9534f' : '';
+    eraseBtn.style.borderColor = isEraseModeActive ? '#d43f3a' : '';
+  }
+  const canvas = document.getElementById('robotEditorCanvas');
+  if (canvas) {
+    canvas.style.cursor = isEraseModeActive ? 'not-allowed' : 'crosshair';
+  }
+}
+
 function exportRobotDesign() {
   if (isEraseModeActive) toggleEraseMode(); // Exit erase mode before export
-  
+
+  console.log('Placed components:', placedComponents);
+
   // Calculate robot geometry from placed components
   const geometry = calculateRobotGeometry();
+  console.log('Calculated geometry:', geometry);
   if (!geometry) {
     alert("No se puede exportar el robot: No hay componentes colocados o la geometría no es válida.");
     return;
