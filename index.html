@@ -5,6 +5,42 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Simulador Seguidor de Lineas Modular</title>
     <link rel="stylesheet" href="style.css">
+    <!-- Add TypeScript support -->
+    <script type="module">
+        import { uiManager } from './js/uiManager.js';
+        import { assetManager } from './js/assetManager.js';
+        import Renderer from './js/renderer.js';
+        
+        // Initialize UI
+        document.addEventListener('DOMContentLoaded', () => {
+            uiManager.init();
+            
+            // Preload assets
+            const assets = {
+                'robot': 'assets/robot_parts/robot_body.png',
+                'wheel': 'assets/robot_parts/robot_wheel.png',
+                'sensor': 'assets/robot_parts/sensor.png'
+            };
+            
+            assetManager.preloadAssets(assets)
+                .then(() => {
+                    uiManager.showNotification('Assets loaded successfully', 'success');
+                })
+                .catch(error => {
+                    uiManager.showNotification('Failed to load assets: ' + error.message, 'error');
+                });
+            
+            // Initialize renderer
+            const canvas = document.getElementById('simulationCanvas');
+            const renderer = new Renderer(canvas);
+            
+            // Cleanup on page unload
+            window.addEventListener('unload', () => {
+                uiManager.destroy();
+                renderer.destroy();
+            });
+        });
+    </script>
 </head>
 <body>
     <div class="header-logos">

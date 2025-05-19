@@ -1,6 +1,18 @@
-// js/config.js
+/**
+ * Configuration settings for the line follower simulator
+ * @module config
+ */
 
+// Available predefined tracks
 export const AVAILABLE_TRACKS = [
+    {
+        name: "Pista Simple",
+        file: "assets/tracks/simple_track.png",
+        scale: 1000, // pixels per meter
+        startX: 100,
+        startY: 300,
+        startAngle: 0
+    },
     { displayName: "Pista 1 (1050x1050)", fileName: "assets/tracks/track1_1050.png", width: 1050, height: 1050, startX: 500, startY: 875, startAngle: 0 },
     { displayName: "Pista 2 (1400x1400)", fileName: "assets/tracks/track2_1400.png", width: 1400, height: 1400, startX: 500, startY: 1225, startAngle: 0 },
     { displayName: "Pista 3 (1750x1750)", fileName: "assets/tracks/track3_1750.png", width: 1750, height: 1750, startX: 400, startY: 175, startAngle: 0 },
@@ -77,3 +89,42 @@ export const AVAILABLE_TRACK_PARTS = [
     // { name: "Curva SW", file: "curva_sw.png", connections: { S: true, W: true } },
     // { name: "Curva NW", file: "curva_nw.png", connections: { N: true, W: true } },
 ];
+
+// Default robot configuration
+export const DEFAULT_ROBOT_CONFIG = {
+    width: 0.16, // meters
+    length: 0.34, // meters
+    sensorSpread: 0.016, // meters
+    sensorOffset: 0.14, // meters
+    sensorDiameter: 0.012, // meters
+    maxSpeed: 1.0, // meters per second
+    motorResponse: 0.03,
+    sensorNoise: 0.0,
+    movementPerturbation: 0.5,
+    motorDeadband: 5,
+    lineThreshold: 30
+};
+
+// PID controller default settings
+export const DEFAULT_PID_CONFIG = {
+    kp: 120,
+    ki: 3,
+    kd: 15,
+    baseSpeed: 110,
+    integralMax: 250
+};
+
+// Simulation settings
+export const SIMULATION_CONFIG = {
+    timeStep: 0.01,
+    pixelsPerMeter: 1000,
+    canvasWidth: 800,
+    canvasHeight: 600
+};
+
+// UI settings
+export const UI_CONFIG = {
+    foldableAnimationDuration: 300,
+    debounceDelay: 150,
+    maxLapHistory: 5
+};

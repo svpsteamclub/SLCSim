@@ -1,0 +1,31 @@
+{
+    "name": "line-follower-simulator",
+    "version": "1.0.0",
+    "description": "A modular line follower robot simulator",
+    "main": "dist/main.js",
+    "type": "module",
+    "scripts": {
+        "build": "tsc",
+        "watch": "tsc -w",
+        "dev": "tsc && serve",
+        "clean": "rimraf dist",
+        "lint": "eslint js/**/*.{js,ts}",
+        "format": "prettier --write \"js/**/*.{js,ts}\"",
+        "test": "jest"
+    },
+    "dependencies": {
+        "serve": "^14.2.1"
+    },
+    "devDependencies": {
+        "@types/jest": "^29.5.12",
+        "@types/node": "^20.11.19",
+        "@typescript-eslint/eslint-plugin": "^7.0.1",
+        "@typescript-eslint/parser": "^7.0.1",
+        "eslint": "^8.56.0",
+        "jest": "^29.7.0",
+        "prettier": "^3.2.5",
+        "rimraf": "^5.0.5",
+        "ts-jest": "^29.1.2",
+        "typescript": "^5.3.3"
+    }
+} 
