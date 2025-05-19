@@ -39,16 +39,16 @@ body {
 }
 
 .controls-container,
-.foldable-container { 
+.foldable-container { /* Common style for main content blocks */
     background-color: #fff;
     padding: 20px;
     border-radius: 8px;
     box-shadow: 0 2px 10px rgba(0,0,0,0.1);
     margin-bottom: 20px;
     width: 90%;
-    max-width: 900px;
-    margin-left: auto;  
-    margin-right: auto; 
+    max-width: 900px; /* Ensures consistent max width for these blocks */
+    margin-left: auto;   
+    margin-right: auto;  
     box-sizing: border-box; 
 }
 
@@ -56,7 +56,7 @@ body {
 .track-selection {
     display: flex;
     flex-direction: column;
-    align-items: center;
+    align-items: center; /* Center items within track-selection */
     padding: 15px;
     border: 1px solid #e0e0e0;
     border-radius: 6px;
@@ -82,6 +82,13 @@ body {
     flex: 1 1 280px; min-width: 250px; box-sizing: border-box;
 }
 
+/* Specific styling for PID explanation if it uses .controls class directly for its card appearance */
+.pid-explanation-container.controls {
+    flex-basis: 100%; /* Allow it to take full basis if in a flex row like .main-controls */
+    min-width: auto;  /* Override the min-width from .controls that might keep it small */
+}
+
+
 .controls h3 { margin-top: 0; margin-bottom: 12px; font-size: 1.1em; color: #444; border-bottom: 1px solid #ddd; padding-bottom: 6px; width: 100%; }
 .controls h4 { margin-top: 0; margin-bottom: 12px; font-size: 1.0em; color: #444; border-bottom: 1px solid #ddd; padding-bottom: 6px; width: 100%; }
 .controls label { margin-bottom: 4px; font-weight: bold; font-size: 0.9em; color: #555; display: block; }
@@ -92,17 +99,18 @@ body {
     width: 80px; padding: 6px 8px; border: 1px solid #ccc;
     border-radius: 4px; margin-bottom: 10px; box-sizing: border-box; font-size: 0.9em; 
 }
-.custom-track-controls input[type="file"],
-#robotName, /* Give robot name input a bit more space */
-#trackEditorTrackName, /* Give track name input a bit more space */
+
+.custom-track-controls input[type="file"], /* For file input in custom track section */
+#robotName, 
+#trackEditorTrackName, 
 #robotComponentSelector,
 #trackGridSize {
     width: auto; 
-    min-width: 150px; 
+    min-width: 180px; 
 }
-input[type="file"]#customComponentImage { /* Keep this one smaller if desired */
+input[type="file"]#customComponentImage { 
     width: auto;
-    min-width: unset; /* Override previous min-width */
+    min-width: unset; 
 }
 
 
@@ -112,44 +120,36 @@ input[readonly] { background-color: #e9ecef; opacity: 1; cursor: not-allowed; }
 .arduino-controls .foldable-content > div { display: flex; flex-wrap: wrap; gap: 10px 15px; justify-content: flex-start; }
 .arduino-controls .foldable-content > div > div { display: flex; flex-direction: column; align-items: flex-start; }
 
+/* Custom Track Controls text alignment and general paragraph styling inside controls */
+.custom-track-controls p,
+.controls p { /* Generalize for any <p> inside a .controls block if needed */
+    font-size: 0.9em;
+    color: #666;
+    margin-top: 5px;
+    text-align: left; 
+    width: 100%; 
+    padding-left: 0px; /* No extra padding unless desired for specific cases */
+    padding-right: 0px;
+}
+.track-selection p { /* Keep track selection text centered if it was intentional */
+    text-align: center;
+}
+
+
 .buttons { text-align: center; margin-bottom: 15px; padding-top: 10px; }
 
-/* General Button Styling */
 button, .button-like-label {
-    padding: 8px 15px; 
-    margin: 5px;       
-    border: 1px solid #ccc; 
-    border-radius: 5px;
-    cursor: pointer;
-    font-weight: bold;
-    font-size: 0.9em;  
+    padding: 8px 15px; margin: 5px; border: 1px solid #ccc; border-radius: 5px;
+    cursor: pointer; font-weight: bold; font-size: 0.9em;  
     transition: background-color 0.2s ease-in-out, transform 0.1s ease, box-shadow 0.2s ease;
-    min-width: 100px;
-    background-color: #f0f0f0; 
-    color: #333; 
-    text-decoration: none; 
-    display: inline-block; 
-    text-align: center;
-    line-height: normal; /* Ensure consistent line height */
+    min-width: 100px; background-color: #f0f0f0; color: #333; 
+    text-decoration: none; display: inline-block; text-align: center; line-height: normal; 
 }
+button:hover:not(:disabled), .button-like-label:hover { transform: translateY(-1px); box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+button:active:not(:disabled), .button-like-label:active { transform: translateY(0px); box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
 
-button:hover:not(:disabled), .button-like-label:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-button:active:not(:disabled), .button-like-label:active {
-    transform: translateY(0px);
-    box-shadow: 0 1px 2px rgba(0,0,0,0.1);
-}
+.buttons button { border: none; padding: 10px 18px; margin: 5px 8px; }
 
-/* Override for buttons inside the main ".buttons" div (Simular, Detener, etc.) */
-.buttons button {
-    border: none; 
-    padding: 10px 18px; 
-    margin: 5px 8px;
-}
-
-/* Specific Themed Buttons */
 #startButton { background-color: #4CAF50; color: white; border-color: #4CAF50;}
 #startButton:hover:not(:disabled) { background-color: #45a049; }
 #stopButton { background-color: #f44336; color: white; border-color: #f44336;}
@@ -160,36 +160,28 @@ button:active:not(:disabled), .button-like-label:active {
 #setStartPositionButton:hover:not(:disabled) { background-color: #5a6268; }
 #setStartPositionButton.active { background-color: #ffc107; color: black; border-color: #ffc107;}
 
-/* Styling for Track Editor Buttons */
 #saveTrackDesignButton,
 #generateRandomTrack,
-#exportTrackFromEditor {
-    background-color: #5bc0de; /* Info blue */
-    color: white;
-    border-color: #46b8da; /* Slightly darker border */
+#exportTrackFromEditor,
+#toggleEraseModeButton { /* Added erase mode button here */
+    background-color: #5bc0de; color: white; border-color: #46b8da;
 }
 #saveTrackDesignButton:hover:not(:disabled),
 #generateRandomTrack:hover:not(:disabled),
-#exportTrackFromEditor:hover:not(:disabled) {
-    background-color: #31b0d5; /* Darker info blue on hover */
+#exportTrackFromEditor:hover:not(:disabled),
+#toggleEraseModeButton:hover:not(:disabled) {
+    background-color: #31b0d5;
 }
+/* Active state for erase button is handled by JS directly setting style.backgroundColor */
 
-/* Style for the "Cargar Diseño de Pista" label */
+
 .button-like-label[for="loadTrackDesignInput"] { 
-    background-color: #007bff; /* Bootstrap primary blue */
-    color: white;
-    border-color: #007bff;
+    background-color: #007bff; color: white; border-color: #007bff;
 }
-.button-like-label[for="loadTrackDesignInput"]:hover {
-    background-color: #0056b3;
-}
+.button-like-label[for="loadTrackDesignInput"]:hover { background-color: #0056b3; }
 
-/* Robot Editor Buttons - can theme them similarly or keep default */
 #saveRobotDesign, #loadRobotDesign, #addComponentToRobot {
-    /* Example: using a secondary theme */
-    background-color: #6c757d; /* Secondary/grey */
-    color: white;
-    border-color: #5a6268;
+    background-color: #6c757d; color: white; border-color: #5a6268;
 }
 #saveRobotDesign:hover:not(:disabled), 
 #loadRobotDesign:hover:not(:disabled), 
@@ -197,14 +189,10 @@ button:active:not(:disabled), .button-like-label:active {
     background-color: #545b62;
 }
 
-
 button:disabled {
-    background-color: #cccccc !important; 
-    color: #666666 !important;
-    border-color: #bbb !important;
-    cursor: not-allowed;
-    box-shadow: none;
-    transform: none;
+    background-color: #cccccc !important; color: #666666 !important;
+    border-color: #bbb !important; cursor: not-allowed;
+    box-shadow: none; transform: none;
 }
 
 hr { border: 0; height: 1px; background: #ccc; margin: 20px 0; }
@@ -229,7 +217,11 @@ hr { border: 0; height: 1px; background: #ccc; margin: 20px 0; }
 .foldable-title { cursor: pointer; display: flex; justify-content: space-between; align-items: center; width: 100%; }
 .fold-indicator { font-weight: bold; margin-left: 10px; user-select: none; font-size: 0.9em; }
 .foldable-content { margin-top: 10px; width: 100%; box-sizing: border-box; }
-.foldable-content label, .foldable-content input, .foldable-content p, .foldable-content ul, .foldable-content ol { flex-basis: auto; flex-grow: 0; flex-shrink: 1; }
+.foldable-content label, .foldable-content input, /*.foldable-content p,*/ .foldable-content ul, .foldable-content ol { flex-basis: auto; flex-grow: 0; flex-shrink: 1; }
+/* Paragraphs within foldable content should also generally be left-aligned */
+.foldable-content p { text-align: left; }
+
+
 .explanation-section ul, .explanation-section ol { text-align: left; margin-left: 20px; }
 .explanation-section ul ul, .explanation-section ol ul { margin-left: 20px; }
 
@@ -241,7 +233,7 @@ hr { border: 0; height: 1px; background: #ccc; margin: 20px 0; }
 
 #robotEditorCanvas, #trackEditorCanvas { display: block; margin: 20px auto; max-width: 100%; box-shadow: 0 0 10px rgba(0,0,0,0.1); border: 1px solid #ccc; }
 #robotEditorCanvas { background-color: #lightgray; }
-#trackEditorCanvas { background-color: #ffffff; } /* Set to white */
+#trackEditorCanvas { background-color: #ffffff; } 
 
 #trackPartsPalette { display: flex; flex-wrap: wrap; gap: 5px; border: 1px solid #ccc; padding: 10px; background-color: #f9f9f9; border-radius: 4px; margin-top: 10px; }
 #trackPartsPalette img { width: 70px; height: 70px; border: 1px solid #ddd; cursor: pointer; object-fit: contain; background-color: #fff; padding: 2px; border-radius: 3px; }
@@ -250,19 +242,15 @@ hr { border: 0; height: 1px; background: #ccc; margin: 20px 0; }
 
 .custom-track-controls { align-items: center; }
 .custom-track-controls input[type="file"] { width: auto; max-width: 100%; margin-bottom: 10px; }
-.custom-track-controls p { font-size: 0.9em; color: #666; margin-top: 5px; text-align: center; }
+/* .custom-track-controls p is now handled by .controls p */
 
-/* Controls within editor tabs */
+
 .track-editor-file-controls, .track-editor-grid-controls {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center; /* Align items vertically */
-    gap: 10px; /* Space between items */
-    margin-bottom: 15px; /* Space below control group */
+    display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-bottom: 15px; 
 }
 #robotEditorContent .controls-container div,
 #trackEditorContent .controls-container div { /* For specific groups if needed */
-    margin-bottom: 10px; /* Reduced margin for tighter groups */
+    margin-bottom: 10px; 
 }
 #robotEditorContent .controls-container label,
 #trackEditorContent .controls-container label {
