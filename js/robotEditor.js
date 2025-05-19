@@ -27,6 +27,8 @@
         sensor: null
     };
 
+    let isEraseModeActive = false;
+
     export function initRobotEditor(mainAppInterface) {
         const elems = getDOMElements();
         editorCanvas = elems.robotEditorCanvas;
@@ -114,6 +116,21 @@
                 reader.readAsDataURL(file);
             }
         });
+
+        elems.toggleEraseComponentButton.addEventListener('click', () => {
+            isEraseModeActive = !isEraseModeActive;
+            if (isEraseModeActive) {
+                elems.toggleEraseComponentButton.textContent = 'Desactivar Modo Borrar';
+                elems.toggleEraseComponentButton.style.backgroundColor = '#d9534f';
+                elems.toggleEraseComponentButton.style.borderColor = '#d43f3a';
+                editorCanvas.style.cursor = 'not-allowed';
+            } else {
+                elems.toggleEraseComponentButton.textContent = 'Activar Modo Borrar';
+                elems.toggleEraseComponentButton.style.backgroundColor = '';
+                elems.toggleEraseComponentButton.style.borderColor = '';
+                editorCanvas.style.cursor = 'crosshair';
+            }
+        });
     }
 
     function addComponent(type) {
@@ -141,6 +158,13 @@
         for (let i = robotDesign.components.length - 1; i >= 0; i--) {
             const comp = robotDesign.components[i];
             if (isPointInComponent(x, y, comp)) {
+                if (isEraseModeActive) {
+                    robotDesign.components.splice(i, 1);
+                    activeComponent = null;
+                    calculateDerivedGeometry();
+                    renderEditor();
+                    return;
+                }
                 activeComponent = comp;
                 dragState = {
                     isDragging: true,
