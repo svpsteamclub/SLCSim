@@ -199,17 +199,22 @@ function setupCanvasEvents(canvas, ctx) {
 }
 
 function setupButtons() {
-  const elems = getDOMElements();
-  if (!elems.saveRobotDesign || !elems.loadRobotDesign || !elems.exportRobotDesign || !elems.toggleEraseComponentButton) {
+  const saveBtn = document.getElementById('saveRobotDesign');
+  const loadBtn = document.getElementById('loadRobotDesign');
+  const exportBtn = document.getElementById('exportRobotDesign');
+  const eraseBtn = document.getElementById('toggleEraseComponentButton');
+
+  if (!saveBtn || !loadBtn || !exportBtn || !eraseBtn) {
     console.error('One or more robot editor buttons are missing in the DOM.');
     return;
   }
-  elems.saveRobotDesign.addEventListener('click', saveRobotDesign);
-  elems.loadRobotDesign.addEventListener('click', () => {
+
+  saveBtn.addEventListener('click', saveRobotDesign);
+  loadBtn.addEventListener('click', () => {
     document.getElementById('loadRobotDesignInput').click();
   });
-  elems.exportRobotDesign.addEventListener('click', exportRobotDesign);
-  elems.toggleEraseComponentButton.addEventListener('click', toggleEraseMode);
+  exportBtn.addEventListener('click', exportRobotDesign);
+  eraseBtn.addEventListener('click', toggleEraseMode);
 }
 
 function exportRobotDesign() {
