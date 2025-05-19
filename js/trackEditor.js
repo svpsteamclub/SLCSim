@@ -6,7 +6,7 @@ import { loadAndScaleImage } from './utils.js';
 
 let editorCanvas, ctx;
 let grid = [];
-let gridSize = { rows: 4, cols: 4 };
+let gridSize = { rows: 4, cols: 4 }; // Default to 4x4 to match HTML selected
 let trackPartsImages = {};
 let selectedTrackPart = null;
 
@@ -35,7 +35,7 @@ export function initTrackEditor(mainAppInterface) {
 
     loadTrackPartAssets(() => {
         populateTrackPartsPalette(elems.trackPartsPalette);
-        setupGrid();
+        setupGrid(); // setupGrid will use the gridSize set above
         renderEditor();
     });
 
@@ -46,12 +46,11 @@ export function initTrackEditor(mainAppInterface) {
         renderEditor();
     });
 
-    elems.generateRandomTrack.addEventListener('click', () => { 
-        generateRandomTrackWithRetry(); 
+    elems.generateRandomTrack.addEventListener('click', () => {
+        generateRandomTrackWithRetry(); // Calls the new retry function
     });
-
     elems.exportTrackFromEditor.addEventListener('click', () => {
-        if (!validateTrack()) { 
+        if (!validateTrack()) { // Basic validation before export
             if (!confirm("La pista puede tener problemas (desconexiones o callejones sin salida). ¿Exportar de todos modos?")) {
                 return;
             }
@@ -123,10 +122,10 @@ function populateTrackPartsPalette(paletteElement) {
         imgElement.addEventListener('click', () => {
             document.querySelectorAll('#trackPartsPalette img').forEach(p => p.classList.remove('selected'));
             imgElement.classList.add('selected');
-            if (trackPartsImages[partInfo.file]) { 
+            if (trackPartsImages[partInfo.file]) {
                  selectedTrackPart = { ...partInfo, image: trackPartsImages[partInfo.file] };
             } else {
-                selectedTrackPart = null; 
+                selectedTrackPart = null;
                 alert(`La imagen para la parte '${partInfo.name}' no está cargada. No se puede seleccionar.`);
                 console.warn(`Cannot select part ${partInfo.name}, image not loaded from cache.`);
             }
@@ -142,15 +141,15 @@ function setupGrid() {
         editorCanvas.width = gridSize.cols * TRACK_PART_SIZE_PX;
         editorCanvas.height = gridSize.rows * TRACK_PART_SIZE_PX;
          if (ctx) { 
-            renderEditor(); 
+            renderEditor();
         }
     }
 }
 
 function renderEditor() {
-    if (!ctx || !editorCanvas || editorCanvas.width === 0 || editorCanvas.height === 0) return; 
+    if (!ctx || !editorCanvas || editorCanvas.width === 0 || editorCanvas.height === 0) return;
     ctx.clearRect(0, 0, editorCanvas.width, editorCanvas.height);
-    ctx.fillStyle = '#ffffff';
+    ctx.fillStyle = '#ffffff'; 
     ctx.fillRect(0,0,editorCanvas.width, editorCanvas.height);
 
     for (let r = 0; r < gridSize.rows; r++) {
@@ -182,7 +181,7 @@ function renderEditor() {
 }
 
 function onGridSingleClick(event) {
-    if (!selectedTrackPart || !selectedTrackPart.image) { 
+    if (!selectedTrackPart || !selectedTrackPart.image) {
         return;
     }
     if (!editorCanvas) return;
@@ -228,7 +227,7 @@ function getRotatedConnections(part, rotation_deg) {
         return {};
     }
     const rotated = {};
-    const numRotations = Math.round(rotation_deg / 90); 
+    const numRotations = Math.round(rotation_deg / 90);
 
     for (const dirKey in part.connections) {
         if (part.connections[dirKey]) {
@@ -244,192 +243,198 @@ function getRotatedConnections(part, rotation_deg) {
     return rotated;
 }
 
-function generateRandomTrackWithRetry(maxRetries = 10) {
-    console.log("generateRandomTrackWithRetry CALLED. maxRetries:", maxRetries); 
+// --- NEW/REVISED RANDOM GENERATION FUNCTIONS ---
+
+function generateRandomTrackWithRetry(maxRetries = 5) { // Can reduce retries if DFS is more robust
+    console.log("generateRandomTrackWithRetry CALLED for LOOP track. maxRetries:", maxRetries);
     for (let i = 0; i < maxRetries; i++) {
-        console.log(`--- generateRandomTrackWithRetry: Attempt ${i + 1} / ${maxRetries} calling generateRandomLayout ---`); 
-        if (generateRandomLayout()) { // Now calling the *actual* complex layout function
-            console.log(`Random track generated successfully on attempt ${i + 1}`);
-            return; 
+        console.log(`--- generateRandomTrackWithRetry: Attempt ${i + 1} / ${maxRetries} calling generateRandomLoopTrack ---`);
+        if (generateRandomLoopTrack()) { // Calls the new DFS-based generator
+            console.log(`Random loop track generated successfully on attempt ${i + 1}`);
+            return;
         }
-        console.log(`generateRandomLayout attempt ${i + 1} returned false. Retrying...`); 
+        console.log(`generateRandomLoopTrack attempt ${i + 1} returned false or incomplete. Retrying...`);
     }
-    alert("No se pudo generar una pista después de varios intentos. Verifica la definición de las partes (config.js), asegúrate que las imágenes de las partes estén cargadas (revisa la consola por errores de carga), o intenta de nuevo con un tamaño de cuadrícula mayor.");
+    alert("No se pudo generar una pista en bucle después de varios intentos. Verifica las partes de pista disponibles o el tamaño de la cuadrícula.");
     setupGrid(); 
     renderEditor();
 }
 
-// --- FULL, COMPLEX generateRandomLayout with detailed logs ---
-function generateRandomLayout() {
-    console.log("--- generateRandomLayout FUNCTION ENTERED ---"); 
-    
-    setupGrid(); 
-    if (AVAILABLE_TRACK_PARTS.length === 0) {
-        alert("No hay partes de pista disponibles para generar una pista.");
-        console.error("generateRandomLayout: AVAILABLE_TRACK_PARTS is empty.");
-        return false;
-    }
-    console.log(`--- Starting Random Layout Generation (Grid: ${gridSize.rows}x${gridSize.cols}) ---`);
-    console.log("Available base parts in config:", JSON.parse(JSON.stringify(AVAILABLE_TRACK_PARTS)));
+function generateRandomLoopTrack() {
+    setupGrid();
+    console.log(`--- Starting Random Loop Track Generation (Grid: ${gridSize.rows}x${gridSize.cols}) ---`);
 
-
-    const suitableParts = AVAILABLE_TRACK_PARTS.filter(p => {
-        const connCount = Object.values(p.connections || {}).filter(conn => conn === true).length;
-        return connCount >= 1 && connCount <= 2;
+    const loopParts = AVAILABLE_TRACK_PARTS.filter(p => {
+        if (!p.connections) return false;
+        return Object.values(p.connections).filter(conn => conn === true).length === 2;
     });
 
-    if (suitableParts.length === 0) {
-        alert("No hay partes de pista adecuadas (con 1 o 2 conexiones) en config.js para generar la pista.");
-        console.error("No suitable parts (1-2 connections) found in AVAILABLE_TRACK_PARTS. Check 'connections' definitions.");
+    if (loopParts.length === 0) {
+        alert("No hay partes de pista adecuadas (con exactamente 2 conexiones) en config.js para generar un bucle.");
+        console.error("No suitable parts (exactly 2 connections) found for loop generation.");
+        renderEditor();
         return false;
     }
-    console.log("Suitable base parts for path generation (1-2 connections):", JSON.parse(JSON.stringify(suitableParts)));
+    // console.log("Suitable parts for loop generation:", JSON.parse(JSON.stringify(loopParts))); // Can be verbose
 
+    const stack = [];
+    const visited = new Set();
 
-    let currentR = Math.floor(gridSize.rows / 2);
-    let currentC = Math.floor(gridSize.cols / 2);
+    let startR = Math.floor(Math.random() * gridSize.rows);
+    let startC = Math.floor(Math.random() * gridSize.cols);
 
-    let startPieceInfo = suitableParts[Math.floor(Math.random() * suitableParts.length)];
-    let startRotation = (Math.floor(Math.random() * 4)) * 90;
+    stack.push({ r: startR, c: startC, fromDir: null }); 
+    visited.add(`${startR},${startC}`);
+    let placedCount = 0;
+    let lastPlacedPartForLoopAttempt = null; // To potentially connect back to start
 
-    if (!trackPartsImages[startPieceInfo.file]) {
-        console.error(`Image not found for starting piece: ${startPieceInfo.file}. Check asset loading (paths in config.js, files in assets/track_parts/) and console for image load errors from loadAndScaleImage.`);
-        alert(`Error: Imagen no encontrada para la pieza inicial: ${startPieceInfo.file}. Revisa la carpeta assets/track_parts/ y config.js. Mira la consola para errores de carga de imágenes.`);
-        return false;
-    }
+    while (stack.length > 0) {
+        const current = stack[stack.length - 1]; 
+        const { r, c } = current; // We don't strictly need fromDir from stack for this DFS part placement logic
 
-    grid[currentR][currentC] = {
-        ...startPieceInfo,
-        image: trackPartsImages[startPieceInfo.file],
-        rotation_deg: startRotation
-    };
-    console.log(`Placed STARTING piece: ${startPieceInfo.name} (File: ${startPieceInfo.file}) at [${currentR},${currentC}] (Rotation: ${startRotation} deg)`);
-    console.log("Its 0-deg connections (from config):", JSON.stringify(startPieceInfo.connections));
-    console.log("Its ROTATED connections (actual on grid):", JSON.stringify(getRotatedConnections(startPieceInfo, startRotation)));
+        let moved = false;
+        const shuffledDirections = [...DIRECTIONS].sort(() => 0.5 - Math.random());
 
+        for (const dirInfo of shuffledDirections) {
+            const nextR = r + dirInfo.dr;
+            const nextC = c + dirInfo.dc;
 
-    let placedCount = 1;
-    const totalCells = gridSize.rows * gridSize.cols;
-    let pathLength = 1;
-    const maxPathLength = Math.floor(totalCells * 0.9); // Target up to 90% fill
+            if (nextR >= 0 && nextR < gridSize.rows &&
+                nextC >= 0 && nextC < gridSize.cols &&
+                !visited.has(`${nextR},${nextC}`)) {
 
-    let lastExitDirectionNameFromPrevCell = null;
-
-    for (let i = 0; i < maxPathLength && pathLength < totalCells; i++) { // Loop to build the path
-        console.log(`\nPATH STEP ${pathLength}: Current cell [${currentR},${currentC}]`);
-        const currentPart = grid[currentR][currentC];
-        if (!currentPart) {
-            console.error("FATAL: currentPart is null at current cell, path broken.");
-            break;
-        }
-
-        const currentActualConnections = getRotatedConnections(currentPart, currentPart.rotation_deg);
-        console.log(`  Current part: ${currentPart.name}, Rot: ${currentPart.rotation_deg} deg, Actual Connections: ${JSON.stringify(currentActualConnections)}`);
-
-        let possibleExits = [];
-        DIRECTIONS.forEach(dir => {
-            if (currentActualConnections[dir.name]) {
-                const entryDirectionToCurrentCell = lastExitDirectionNameFromPrevCell ? OPPOSITE_DIRECTIONS[lastExitDirectionNameFromPrevCell] : null;
-                if (entryDirectionToCurrentCell && dir.name === entryDirectionToCurrentCell && Object.keys(currentActualConnections).length > 1) {
-                    // console.log(`    Skipping exit ${dir.name} because it's the entry point and not a dead-end.`);
-                    return;
-                }
-                possibleExits.push(dir);
-            }
-        });
-
-        if (possibleExits.length === 0) {
-            console.log(`  Path ended at [${currentR},${currentC}]. No valid non-reversing exits from ${currentPart.name}.`);
-            break;
-        }
-        console.log(`  Possible exits from current cell: ${possibleExits.map(p=>p.name).join(', ')}`);
-
-        possibleExits.sort(() => 0.5 - Math.random());
-        let placedNext = false;
-
-        for (const exitDir of possibleExits) {
-            console.log(`    Trying exit: ${exitDir.name} from [${currentR},${currentC}]`);
-            const nextR = currentR + exitDir.dr;
-            const nextC = currentC + exitDir.dc;
-
-            if (nextR >= 0 && nextR < gridSize.rows && nextC >= 0 && nextC < gridSize.cols && !grid[nextR][nextC]) {
-                const requiredEntryForNewPart = OPPOSITE_DIRECTIONS[exitDir.name];
-                console.log(`      Target cell [${nextR},${nextC}] is empty. New part needs entry from: ${requiredEntryForNewPart}`);
+                // Current cell (r,c) needs to connect towards dirInfo.name
+                // Next cell (nextR, nextC) needs to connect towards OPPOSITE_DIRECTIONS[dirInfo.name]
 
                 const candidatePlacements = [];
-                suitableParts.forEach(pInfo => {
-                    if (!trackPartsImages[pInfo.file]) {
-                        console.warn(`Skipping candidate ${pInfo.name} (file: ${pInfo.file}) as its image is not loaded from trackPartsImages.`);
-                        return;
-                    }
+                loopParts.forEach(pInfo => {
+                    if (!trackPartsImages[pInfo.file]) return;
                     for (let rot = 0; rot < 360; rot += 90) {
-                        const newPartActualConnections = getRotatedConnections(pInfo, rot);
-                        if (newPartActualConnections[requiredEntryForNewPart]) {
-                            let isValidCandidatePlacement = true;
-                            if (Object.keys(newPartActualConnections).length > 1) {
-                                for (const newPartExitDirName in newPartActualConnections) {
-                                    if (newPartActualConnections[newPartExitDirName] && newPartExitDirName !== requiredEntryForNewPart) {
-                                        const checkDirObj = DIRECTIONS.find(d => d.name === newPartExitDirName);
-                                        if (!checkDirObj) { console.error(`Invalid direction name ${newPartExitDirName}`); continue; }
-                                        const checkFurtherR = nextR + checkDirObj.dr;
-                                        const checkFurtherC = nextC + checkDirObj.dc;
-                                        if (checkFurtherR === currentR && checkFurtherC === currentC) {
-                                            isValidCandidatePlacement = false;
-                                            break;
-                                        }
-                                        if (checkFurtherR >= 0 && checkFurtherR < gridSize.rows &&
-                                            checkFurtherC >= 0 && checkFurtherC < gridSize.cols &&
-                                            grid[checkFurtherR][checkFurtherC] ) {
-                                            isValidCandidatePlacement = false;
-                                            break;
-                                        }
-                                    }
+                        const conns = getRotatedConnections(pInfo, rot);
+                        // The piece at (r,c) needs to connect to (nextR,nextC) via dirInfo.name
+                        // This means the piece we are *about to choose* for (r,c) must have an opening in dirInfo.name
+                        // AND if (r,c) is not the start cell, it must also connect to where it came from.
+                        
+                        // For this DFS: we "carve" by finding a piece for the *next* cell (nextR, nextC)
+                        // that connects back to the *current* cell (r,c)
+                        if (conns[OPPOSITE_DIRECTIONS[dirInfo.name]]) {
+                             // And the piece at (r,c), if already placed (not the very first piece), must be able to connect to this new piece
+                            let currentCellConnects = true;
+                            if (grid[r][c]) { // If current cell already has a piece from a previous step/backtrack
+                                const currentCellConns = getRotatedConnections(grid[r][c], grid[r][c].rotation_deg);
+                                if (!currentCellConns[dirInfo.name]) {
+                                    currentCellConnects = false;
                                 }
                             }
-                            if (isValidCandidatePlacement) {
+                            if (currentCellConnects) {
                                 candidatePlacements.push({ partInfo: pInfo, rotation: rot });
                             }
                         }
                     }
                 });
-
+                
                 if (candidatePlacements.length > 0) {
-                    const chosenPlacement = candidatePlacements[Math.floor(Math.random() * candidatePlacements.length)];
-                    console.log(`        Found ${candidatePlacements.length} candidate placements. Chosen: ${chosenPlacement.partInfo.name} (Rot: ${chosenPlacement.rotation})`);
-
+                    const chosenNextPlacement = candidatePlacements[Math.floor(Math.random() * candidatePlacements.length)];
+                    
+                    // Place part in NEXT cell
                     grid[nextR][nextC] = {
-                        ...chosenPlacement.partInfo,
-                        image: trackPartsImages[chosenPlacement.partInfo.file],
-                        rotation_deg: chosenPlacement.rotation
+                        ...chosenNextPlacement.partInfo,
+                        image: trackPartsImages[chosenNextPlacement.partInfo.file],
+                        rotation_deg: chosenNextPlacement.rotation
                     };
-
-                    currentR = nextR;
-                    currentC = nextC;
-                    lastExitDirectionNameFromPrevCell = exitDir.name;
+                    if(!grid[nextR][nextC].image) console.error("Image missing for placed part in nextCell:", grid[nextR][nextC]);
                     placedCount++;
-                    pathLength++;
-                    placedNext = true;
-                    break;
-                } else {
-                    console.log(`      No suitable candidate parts found for cell [${nextR},${nextC}] requiring entry ${requiredEntryForNewPart}.`);
+                    console.log(`DFS: Placed ${grid[nextR][nextC].name} at [${nextR},${nextC}] (rot ${grid[nextR][nextC].rotation_deg}) connecting from [${r},${c}] via ${OPPOSITE_DIRECTIONS[dirInfo.name]}`);
+                    
+                    // Now, ensure/place the piece in the CURRENT cell (r,c) that connects to this new piece
+                    // This logic is tricky because the current cell might already be set if backtracking.
+                    // A simpler DFS just "carves" by choosing the next cell and assumes the connection.
+                    // The visual representation is what matters. We primarily care about filling nextR, nextC.
+                    // The part at r,c (if it's the first piece, or if this is the first exit from it) needs to be set.
+                    if (!grid[r][c]) { // If starting piece hasn't been finalized based on an exit
+                        const currentCellCandidates = [];
+                        loopParts.forEach(pInfoCurrent => {
+                             if (!trackPartsImages[pInfoCurrent.file]) return;
+                             for (let rotCurrent = 0; rotCurrent < 360; rotCurrent +=90) {
+                                 const connsCurrent = getRotatedConnections(pInfoCurrent, rotCurrent);
+                                 if (connsCurrent[dirInfo.name]) { // Must connect to the chosen next cell
+                                     currentCellCandidates.push({partInfo: pInfoCurrent, rotation: rotCurrent});
+                                 }
+                             }
+                        });
+                        if (currentCellCandidates.length > 0) {
+                            const chosenCurrent = currentCellCandidates[Math.floor(Math.random() * currentCellCandidates.length)];
+                            grid[r][c] = {
+                                ...chosenCurrent.partInfo,
+                                image: trackPartsImages[chosenCurrent.partInfo.file],
+                                rotation_deg: chosenCurrent.rotation
+                            };
+                             if(!grid[r][c].image) console.error("Image missing for placed part in currentCell:", grid[r][c]);
+                            console.log(`DFS: Finalized/Placed START piece ${grid[r][c].name} at [${r},${c}] (rot ${grid[r][c].rotation_deg})`);
+                            if (placedCount === 0) placedCount++; // If it was the very first piece
+                        } else {
+                            console.error(`DFS Error: Could not find a starting piece for [${r},${c}] to connect to ${dirInfo.name}`);
+                            grid[nextR][nextC] = null; // Rollback
+                            placedCount--;
+                            continue; // Try another direction from current cell
+                        }
+                    }
+
+
+                    visited.add(`${nextR},${nextC}`);
+                    stack.push({ r: nextR, c: nextC, fromDir: dirInfo.name }); // Note: fromDir is how we entered nextR,nextC
+                    moved = true;
+                    lastPlacedPartForLoopAttempt = grid[nextR][nextC]; // Keep track for potential loop closing
+                    break; 
                 }
-            } else {
-                 console.log(`      Target cell [${nextR},${nextC}] is out of bounds or occupied.`);
             }
         }
 
-        if (!placedNext) {
-            const partNameAtStall = grid[currentR] && grid[currentR][currentC] ? grid[currentR][currentC].name : 'Unknown part';
-            console.log(`  Path ended at [${partNameAtStall} at ${currentR},${currentC}]. Could not find a valid part for any remaining exit.`);
-            break;
+        if (!moved) { 
+            stack.pop(); 
+            // console.log(`DFS: Backtracking from [${r},${c}]`);
+        }
+    }
+    
+    // Attempt to close loop to the starting cell (startR, startC)
+    // This is a very basic attempt and might not always work or look good.
+    if (placedCount > 2 && lastPlacedPartForLoopAttempt && grid[startR][startC]) {
+        const lastR = stack.length > 0 ? stack[stack.length-1].r : currentR; // currentR might be from a popped stack
+        const lastC = stack.length > 0 ? stack[stack.length-1].c : currentC; // So use the top of stack if available
+        const lastPart = grid[lastR][lastC];
+
+        if (lastPart) { // Ensure there's a part at the end of the DFS path
+            console.log(`DFS: Attempting to close loop from [${lastR},${lastC}] to start [${startR},${startC}]`);
+            const lastPartConns = getRotatedConnections(lastPart, lastPart.rotation_deg);
+            for (const dir of DIRECTIONS) {
+                if (lastPartConns[dir.name]) {
+                    const potentialLoopR = lastR + dir.dr;
+                    const potentialLoopC = lastC + dir.dc;
+                    if (potentialLoopR === startR && potentialLoopC === startC) {
+                        const startPart = grid[startR][startC];
+                        const requiredStartConn = OPPOSITE_DIRECTIONS[dir.name];
+                        const startPartConns = getRotatedConnections(startPart, startPart.rotation_deg);
+                        if (startPartConns[requiredStartConn]) {
+                            console.log(`DFS: Loop closed successfully to start cell!`);
+                            // The connection is valid. Nothing more to place, loop is formed.
+                            break; 
+                        } else {
+                            console.log(`DFS: Start cell [${startR},${startC}] part ${startPart.name} (rot ${startPart.rotation_deg}) does not have required connection ${requiredStartConn} to close loop.`);
+                        }
+                    }
+                }
+            }
         }
     }
 
-    console.log(`--- Generation Finished. Path length: ${pathLength}, Parts placed: ${placedCount}/${totalCells} ---`);
+
+    console.log(`DFS generation finished. Parts placed: ${placedCount}`);
     renderEditor();
-    return pathLength > Math.max(2, Math.floor(totalCells * 0.20));
+    
+    const success = placedCount >= Math.floor(totalCells * 0.4); // Success if 40% filled for DFS
+    if (!success) console.warn("DFS generated track might be too short or incomplete.");
+    return success;
 }
-// --- END OF FULL generateRandomLayout ---
 
 
 function validateTrack() {
@@ -476,8 +481,10 @@ function validateTrack() {
     if (connectionMismatches > 0) {
         console.warn(`Validación: Encontradas ${connectionMismatches / 2} conexiones incompatibles.`);
     }
-    if (danglingConnections > 2 && partCount > 1) {
-         console.warn(`Validación: Encontradas ${danglingConnections} conexiones abiertas/colgando (más de 2 para un camino simple).`);
+    if (danglingConnections > 2 && partCount > 1 && connectionMismatches === 0) { 
+         // If there are no mismatches, more than 2 dangling ends means it's not a simple loop/line.
+         // This might be okay for a path, but for a loop, ideally danglingConnections would be 0 or 2 (if it's a line that just didn't close)
+         console.warn(`Validación: Encontradas ${danglingConnections} conexiones abiertas/colgando.`);
     }
     console.log(`Validación básica: Partes=${partCount}, Incompatibles=${connectionMismatches}, Abiertas=${danglingConnections}`);
     if (partCount > 0) return true;
