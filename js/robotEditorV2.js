@@ -178,6 +178,46 @@ function isPointInComponent(x, y, comp) {
 
 function render(ctx, canvas) {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
+  
+  // Draw 5x5 pixel grid
+  ctx.strokeStyle = '#cccccc';
+  ctx.lineWidth = 0.5;
+  
+  // Draw vertical grid lines
+  for (let x = 0; x < canvas.width; x += 5) {
+    ctx.beginPath();
+    ctx.moveTo(x, 0);
+    ctx.lineTo(x, canvas.height);
+    ctx.stroke();
+  }
+  
+  // Draw horizontal grid lines
+  for (let y = 0; y < canvas.height; y += 5) {
+    ctx.beginPath();
+    ctx.moveTo(0, y);
+    ctx.lineTo(canvas.width, y);
+    ctx.stroke();
+  }
+
+  // Draw center lines
+  ctx.strokeStyle = '#ff0000';
+  ctx.lineWidth = 1;
+  
+  // Vertical center line
+  const centerX = canvas.width / 2;
+  ctx.beginPath();
+  ctx.moveTo(centerX, 0);
+  ctx.lineTo(centerX, canvas.height);
+  ctx.stroke();
+  
+  // Horizontal center line
+  const centerY = canvas.height / 2;
+  ctx.beginPath();
+  ctx.moveTo(0, centerY);
+  ctx.lineTo(canvas.width, centerY);
+  ctx.stroke();
+
+  // Draw components
   placedComponents.forEach(comp => {
     const img = new window.Image();
     img.src = comp.src;

@@ -38,6 +38,10 @@
         }
         ctx = editorCanvas.getContext('2d');
         
+        // Set canvas size
+        editorCanvas.width = 800;  // Set a default width
+        editorCanvas.height = 600; // Set a default height
+        
         // Load component images
         loadComponentImages().then(() => {
             console.log("Robot Editor Initialized");
@@ -257,6 +261,8 @@
     }
 
     function drawGrid() {
+        if (!ctx) return;
+        
         // Draw 5x5 pixel grid
         ctx.strokeStyle = '#cccccc';
         ctx.lineWidth = 0.5;
