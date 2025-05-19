@@ -279,6 +279,7 @@ export function setupFoldableSections() {
     const foldableTitles = document.querySelectorAll('.foldable-title');
     foldableTitles.forEach(title => {
         title.addEventListener('click', () => {
+            console.log('Foldable section clicked:', title.textContent.trim()); // Debug log
             const content = title.nextElementSibling;
             const indicator = title.querySelector('.fold-indicator');
             if (content && content.classList.contains('foldable-content')) {
