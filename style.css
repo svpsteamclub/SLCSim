@@ -3,7 +3,7 @@ body {
     font-family: Arial, sans-serif;
     display: flex;
     flex-direction: column;
-    align-items: center; /* This centers direct children of body if they are not full width */
+    align-items: center; 
     margin: 0;
     padding: 20px;
     background-color: #f0f0f0;
@@ -15,7 +15,7 @@ body {
     align-items: center;
     width: 90%;
     max-width: 960px;
-    margin: 0 auto 20px auto; /* Centering the header itself */
+    margin: 0 auto 20px auto; 
     padding: 5px 0;
 }
 
@@ -26,13 +26,8 @@ body {
     flex-shrink: 0;
 }
 
-#logo-left {
-    margin-right: 15px;
-}
-
-#logo-right {
-    margin-left: 15px;
-}
+#logo-left { margin-right: 15px; }
+#logo-right { margin-left: 15px; }
 
 .header-logos h1 {
     color: #333;
@@ -43,9 +38,8 @@ body {
     min-width: 0;
 }
 
-/* This class will now be used by multiple top-level containers for consistent styling and centering */
 .controls-container,
-.foldable-container { /* foldable-container can be used for explanation sections if they don't need all .controls-container styles but need centering */
+.foldable-container { 
     background-color: #fff;
     padding: 20px;
     border-radius: 8px;
@@ -53,9 +47,9 @@ body {
     margin-bottom: 20px;
     width: 90%;
     max-width: 900px;
-    margin-left: auto;   /* Centers the container */
-    margin-right: auto;  /* Centers the container */
-    box-sizing: border-box; /* Include padding and border in the element's total width and height */
+    margin-left: auto;  
+    margin-right: auto; 
+    box-sizing: border-box; 
 }
 
 
@@ -70,182 +64,152 @@ body {
     margin-bottom: 15px;
 }
 
-.track-selection h3 {
-    margin-top: 0;
-    margin-bottom: 10px;
-    color: #444;
-    font-size: 1.1em;
-}
+.track-selection h3 { margin-top: 0; margin-bottom: 10px; color: #444; font-size: 1.1em; }
 
 #trackImageSelector {
-    padding: 8px 12px;
-    border-radius: 4px;
-    border: 1px solid #ccc;
-    font-size: 1em;
-    margin-bottom: 10px;
-    min-width: 280px;
-    max-width: 100%;
-    box-sizing: border-box;
+    padding: 8px 12px; border-radius: 4px; border: 1px solid #ccc; font-size: 1em;
+    margin-bottom: 10px; min-width: 280px; max-width: 100%; box-sizing: border-box;
 }
 
-.track-selection p {
-    font-size: 0.9em;
-    color: #666;
-    margin-top: 5px;
-    text-align: center;
+.track-selection p { font-size: 0.9em; color: #666; margin-top: 5px; text-align: center; }
+
+
+.main-controls { display: flex; flex-wrap: wrap; gap: 20px; margin-bottom: 15px; justify-content: space-around; }
+
+.controls { 
+    display: flex; flex-direction: column; align-items: flex-start; padding: 15px;
+    border: 1px solid #e0e0e0; border-radius: 6px; background-color: #f9f9f9;
+    flex: 1 1 280px; min-width: 250px; box-sizing: border-box;
 }
 
-
-.main-controls {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 20px;
-    margin-bottom: 15px;
-    justify-content: space-around;
-}
-
-.controls { /* This is for inner control groups like sim-controls, robot-geometry-controls */
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    padding: 15px;
-    border: 1px solid #e0e0e0;
-    border-radius: 6px;
-    background-color: #f9f9f9;
-    flex: 1 1 280px;
-    min-width: 250px;
-    box-sizing: border-box;
-}
-
-.controls h3 {
-    margin-top: 0;
-    margin-bottom: 12px;
-    font-size: 1.1em;
-    color: #444;
-    border-bottom: 1px solid #ddd;
-    padding-bottom: 6px;
-    width: 100%;
-}
-
-.controls h4 { /* For PID explanation title */
-    margin-top: 0;
-    margin-bottom: 12px;
-    font-size: 1.0em;
-    color: #444;
-    border-bottom: 1px solid #ddd;
-    padding-bottom: 6px;
-    width: 100%;
-}
-
-
-.controls label {
-    margin-bottom: 4px;
-    font-weight: bold;
-    font-size: 0.9em;
-    color: #555;
-    display: block;
-}
+.controls h3 { margin-top: 0; margin-bottom: 12px; font-size: 1.1em; color: #444; border-bottom: 1px solid #ddd; padding-bottom: 6px; width: 100%; }
+.controls h4 { margin-top: 0; margin-bottom: 12px; font-size: 1.0em; color: #444; border-bottom: 1px solid #ddd; padding-bottom: 6px; width: 100%; }
+.controls label { margin-bottom: 4px; font-weight: bold; font-size: 0.9em; color: #555; display: block; }
 
 .controls input[type="number"],
 .controls input[type="text"],
-.controls select { /* Apply consistent styling to selects as well */
-    width: 80px; /* Default width, can be overridden for specific inputs */
-    padding: 6px 8px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    margin-bottom: 10px;
-    box-sizing: border-box;
-    font-size: 0.9em; /* Consistent font size for inputs */
+.controls select { 
+    width: 80px; padding: 6px 8px; border: 1px solid #ccc;
+    border-radius: 4px; margin-bottom: 10px; box-sizing: border-box; font-size: 0.9em; 
 }
-/* Specific widths for certain inputs if needed */
 .custom-track-controls input[type="file"],
+#robotName, /* Give robot name input a bit more space */
+#trackEditorTrackName, /* Give track name input a bit more space */
 #robotComponentSelector,
 #trackGridSize {
-    width: auto; /* Allow these to size based on content or larger min-width */
-    min-width: 180px; /* Example min-width */
+    width: auto; 
+    min-width: 150px; 
+}
+input[type="file"]#customComponentImage { /* Keep this one smaller if desired */
+    width: auto;
+    min-width: unset; /* Override previous min-width */
 }
 
 
-#pixelsPerMeterDisplay {
-    background-color: #eee;
-    cursor: not-allowed;
-    color: #333;
-}
-input[readonly] {
-    background-color: #e9ecef;
-    opacity: 1;
-    cursor: not-allowed;
-}
+#pixelsPerMeterDisplay { background-color: #eee; cursor: not-allowed; color: #333; }
+input[readonly] { background-color: #e9ecef; opacity: 1; cursor: not-allowed; }
 
-/* PID Parameters Layout */
-.arduino-controls .foldable-content > div {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px 15px;
-    justify-content: flex-start;
-}
-.arduino-controls .foldable-content > div > div {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-}
-/* .arduino-controls input[type="number"] is covered by general .controls input */
+.arduino-controls .foldable-content > div { display: flex; flex-wrap: wrap; gap: 10px 15px; justify-content: flex-start; }
+.arduino-controls .foldable-content > div > div { display: flex; flex-direction: column; align-items: flex-start; }
 
+.buttons { text-align: center; margin-bottom: 15px; padding-top: 10px; }
 
-.buttons {
-    text-align: center;
-    margin-bottom: 15px;
-    padding-top: 10px;
-}
-
-.buttons button {
-    padding: 10px 18px;
-    margin: 5px 8px;
-    border: none;
+/* General Button Styling */
+button, .button-like-label {
+    padding: 8px 15px; 
+    margin: 5px;       
+    border: 1px solid #ccc; 
     border-radius: 5px;
     cursor: pointer;
     font-weight: bold;
-    transition: background-color 0.2s ease-in-out, transform 0.1s ease;
+    font-size: 0.9em;  
+    transition: background-color 0.2s ease-in-out, transform 0.1s ease, box-shadow 0.2s ease;
     min-width: 100px;
+    background-color: #f0f0f0; 
+    color: #333; 
+    text-decoration: none; 
+    display: inline-block; 
+    text-align: center;
+    line-height: normal; /* Ensure consistent line height */
 }
 
-.buttons button:hover:not(:disabled) { transform: translateY(-1px); }
-.buttons button:active:not(:disabled) { transform: translateY(0px); }
+button:hover:not(:disabled), .button-like-label:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+button:active:not(:disabled), .button-like-label:active {
+    transform: translateY(0px);
+    box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
 
-#startButton { background-color: #4CAF50; color: white; }
+/* Override for buttons inside the main ".buttons" div (Simular, Detener, etc.) */
+.buttons button {
+    border: none; 
+    padding: 10px 18px; 
+    margin: 5px 8px;
+}
+
+/* Specific Themed Buttons */
+#startButton { background-color: #4CAF50; color: white; border-color: #4CAF50;}
 #startButton:hover:not(:disabled) { background-color: #45a049; }
-#stopButton { background-color: #f44336; color: white; }
+#stopButton { background-color: #f44336; color: white; border-color: #f44336;}
 #stopButton:hover:not(:disabled) { background-color: #da190b; }
-#resetButton { background-color: #008CBA; color: white; }
+#resetButton { background-color: #008CBA; color: white; border-color: #008CBA;}
 #resetButton:hover:not(:disabled) { background-color: #007ba7; }
-#setStartPositionButton { background-color: #6c757d; color: white; }
+#setStartPositionButton { background-color: #6c757d; color: white; border-color: #6c757d;}
 #setStartPositionButton:hover:not(:disabled) { background-color: #5a6268; }
-#setStartPositionButton.active { background-color: #ffc107; color: black; }
+#setStartPositionButton.active { background-color: #ffc107; color: black; border-color: #ffc107;}
+
+/* Styling for Track Editor Buttons */
+#saveTrackDesignButton,
+#generateRandomTrack,
+#exportTrackFromEditor {
+    background-color: #5bc0de; /* Info blue */
+    color: white;
+    border-color: #46b8da; /* Slightly darker border */
+}
+#saveTrackDesignButton:hover:not(:disabled),
+#generateRandomTrack:hover:not(:disabled),
+#exportTrackFromEditor:hover:not(:disabled) {
+    background-color: #31b0d5; /* Darker info blue on hover */
+}
+
+/* Style for the "Cargar Diseño de Pista" label */
+.button-like-label[for="loadTrackDesignInput"] { 
+    background-color: #007bff; /* Bootstrap primary blue */
+    color: white;
+    border-color: #007bff;
+}
+.button-like-label[for="loadTrackDesignInput"]:hover {
+    background-color: #0056b3;
+}
+
+/* Robot Editor Buttons - can theme them similarly or keep default */
+#saveRobotDesign, #loadRobotDesign, #addComponentToRobot {
+    /* Example: using a secondary theme */
+    background-color: #6c757d; /* Secondary/grey */
+    color: white;
+    border-color: #5a6268;
+}
+#saveRobotDesign:hover:not(:disabled), 
+#loadRobotDesign:hover:not(:disabled), 
+#addComponentToRobot:hover:not(:disabled) {
+    background-color: #545b62;
+}
 
 
 button:disabled {
-    background-color: #cccccc;
-    color: #666666;
+    background-color: #cccccc !important; 
+    color: #666666 !important;
+    border-color: #bbb !important;
     cursor: not-allowed;
+    box-shadow: none;
+    transform: none;
 }
 
-hr {
-    border: 0;
-    height: 1px;
-    background: #ccc;
-    margin: 20px 0;
-}
+hr { border: 0; height: 1px; background: #ccc; margin: 20px 0; }
 
-.info {
-    background-color: #e9e9e9;
-    padding: 10px;
-    border-radius: 6px;
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-around;
-    align-items: flex-end;
-}
-
+.info { background-color: #e9e9e9; padding: 10px; border-radius: 6px; display: flex; flex-wrap: wrap; justify-content: space-around; align-items: flex-end; }
 .info-item { display: flex; flex-direction: column; align-items: center; margin: 5px 8px; min-width: 60px; }
 .info-label { font-size: 0.8em; color: #555; margin-bottom: 2px; text-align: center; }
 .info-value { font-weight: bold; color: #222; background-color: #fff; padding: 2px 5px; border-radius: 3px; border: 1px solid #ddd; font-size: 0.9em; margin-bottom: 4px; min-width: 35px; text-align: center; display: inline-block; }
@@ -254,17 +218,7 @@ hr {
 #errorBar  { background-color: #f44336; } #pBar { background-color: #2196F3; } #iBar { background-color: #FFC107; }
 #dBar { background-color: #9C27B0; } #adjPIDBar { background-color: #009688; } #vLeftBar, #vRightBar { background-color: #795548; }
 
-
-#simulationCanvas { /* Centering is handled by margin: auto */
-    border: 2px solid #333;
-    background-color: #eee; /* Canvas background */
-    display: block;
-    margin: 20px auto;
-    max-width: 100%;
-    box-shadow: 0 0 10px rgba(0,0,0,0.1);
-    image-rendering: pixelated;
-}
-
+#simulationCanvas { border: 2px solid #333; background-color: #eee; display: block; margin: 20px auto; max-width: 100%; box-shadow: 0 0 10px rgba(0,0,0,0.1); image-rendering: pixelated; }
 .lap-times-container h3 { margin-top: 0; margin-bottom: 15px; color: #444; font-size: 1.2em; border-bottom: 1px solid #ddd; padding-bottom: 8px; }
 #lapTimesTable { width: 100%; border-collapse: collapse; margin-top: 10px; }
 #lapTimesTable th, #lapTimesTable td { border: 1px solid #ddd; padding: 8px 10px; text-align: left; }
@@ -276,73 +230,44 @@ hr {
 .fold-indicator { font-weight: bold; margin-left: 10px; user-select: none; font-size: 0.9em; }
 .foldable-content { margin-top: 10px; width: 100%; box-sizing: border-box; }
 .foldable-content label, .foldable-content input, .foldable-content p, .foldable-content ul, .foldable-content ol { flex-basis: auto; flex-grow: 0; flex-shrink: 1; }
-
 .explanation-section ul, .explanation-section ol { text-align: left; margin-left: 20px; }
 .explanation-section ul ul, .explanation-section ol ul { margin-left: 20px; }
 
-
-/* Tab Navigation */
 .tab-navigation { text-align: center; margin-bottom: 20px; }
 .tab-button { padding: 10px 20px; cursor: pointer; border: 1px solid #ccc; background-color: #f0f0f0; margin: 0 5px; border-bottom: none; border-radius: 5px 5px 0 0; }
 .tab-button.active { background-color: #fff; border-bottom: 1px solid #fff; font-weight: bold; }
 .tab-content { display: none; }
 .tab-content.active { display: block; }
 
-/* Editor Canvases */
-#robotEditorCanvas, #trackEditorCanvas {
-    display: block;
-    margin: 20px auto; /* Centering */
-    max-width: 100%;
-    box-shadow: 0 0 10px rgba(0,0,0,0.1);
-    border: 1px solid #ccc;
-}
-#trackEditorCanvas { background-color: #ffffff; } /* Changed to white (#ffffff or white) */
+#robotEditorCanvas, #trackEditorCanvas { display: block; margin: 20px auto; max-width: 100%; box-shadow: 0 0 10px rgba(0,0,0,0.1); border: 1px solid #ccc; }
+#robotEditorCanvas { background-color: #lightgray; }
+#trackEditorCanvas { background-color: #ffffff; } /* Set to white */
 
-
-/* Track Editor Palette */
 #trackPartsPalette { display: flex; flex-wrap: wrap; gap: 5px; border: 1px solid #ccc; padding: 10px; background-color: #f9f9f9; border-radius: 4px; margin-top: 10px; }
 #trackPartsPalette img { width: 70px; height: 70px; border: 1px solid #ddd; cursor: pointer; object-fit: contain; background-color: #fff; padding: 2px; border-radius: 3px; }
 #trackPartsPalette img.selected { border: 2px solid blue; box-shadow: 0 0 5px rgba(0,0,255,0.5); }
 #trackPartsPalette img:hover { border-color: #aaa; }
 
-
-/* Custom Track Controls specific styling if different from .controls */
 .custom-track-controls { align-items: center; }
 .custom-track-controls input[type="file"] { width: auto; max-width: 100%; margin-bottom: 10px; }
 .custom-track-controls p { font-size: 0.9em; color: #666; margin-top: 5px; text-align: center; }
 
-/* Editor specific controls (inside their .controls-container) */
-#robotEditorContent .controls-container div, /* For sections within editor controls */
-#trackEditorContent .controls-container div {
-    margin-bottom: 15px; /* Space between control groups */
+/* Controls within editor tabs */
+.track-editor-file-controls, .track-editor-grid-controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center; /* Align items vertically */
+    gap: 10px; /* Space between items */
+    margin-bottom: 15px; /* Space below control group */
+}
+#robotEditorContent .controls-container div,
+#trackEditorContent .controls-container div { /* For specific groups if needed */
+    margin-bottom: 10px; /* Reduced margin for tighter groups */
 }
 #robotEditorContent .controls-container label,
 #trackEditorContent .controls-container label {
-    margin-right: 8px; /* Space after labels if they are inline with inputs */
+    margin-right: 5px; 
 }
-#robotEditorContent .controls-container button,
-#trackEditorContent .controls-container button {
-    margin-left: 5px; /* Space before buttons */
-}
-
 
 footer { text-align: center; margin-top: 30px; padding-bottom: 20px; font-size: 0.9em; color: #555; }
-
-.button-like-label {
-    display: inline-block; /* Or inline-flex for better alignment if needed */
-    padding: 8px 12px; /* Adjust padding to match your buttons */
-    background-color: #007bff; /* Example: Bootstrap primary blue */
-    color: white;
-    border: 1px solid transparent;
-    border-radius: 4px; /* Match your button border-radius */
-    cursor: pointer;
-    font-size: 0.9em; /* Match your button font size */
-    text-align: center;
-    user-select: none; /* Prevent text selection */
-    margin-left: 10px; /* Example margin */
-}
-
-.button-like-label:hover {
-    background-color: #0056b3; /* Darker shade on hover */
-}
 /* END OF FILE style.css */
