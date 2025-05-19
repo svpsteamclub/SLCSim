@@ -5,14 +5,6 @@
 
 // Available predefined tracks
 export const AVAILABLE_TRACKS = [
-    {
-        name: "Pista Simple",
-        file: "assets/tracks/simple_track.png",
-        scale: 1000, // pixels per meter
-        startX: 100,
-        startY: 300,
-        startAngle: 0
-    },
     { displayName: "Pista 1 (1050x1050)", fileName: "assets/tracks/track1_1050.png", width: 1050, height: 1050, startX: 500, startY: 875, startAngle: 0 },
     { displayName: "Pista 2 (1400x1400)", fileName: "assets/tracks/track2_1400.png", width: 1400, height: 1400, startX: 500, startY: 1225, startAngle: 0 },
     { displayName: "Pista 3 (1750x1750)", fileName: "assets/tracks/track3_1750.png", width: 1750, height: 1750, startX: 400, startY: 175, startAngle: 0 },
