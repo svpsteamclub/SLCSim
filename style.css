@@ -85,7 +85,7 @@ body {
 /* Specific styling for PID explanation if it uses .controls class directly for its card appearance */
 .pid-explanation-container.controls {
     flex-basis: 100%; /* Allow it to take full basis if in a flex row like .main-controls */
-    min-width: auto;  /* Override the min-width from .controls that might keep it small */
+    min-width: unset;  /* Override the min-width from .controls that might keep it small */
 }
 
 
