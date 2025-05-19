@@ -39,7 +39,37 @@ export const TRACK_PART_SIZE_PX = 350;
 
 export const AVAILABLE_TRACK_PARTS = [
     { name: "Recta", file: "recta.png", connections: { N: true, S: true } },
-    { name: "Curva90", file: "curva_base.png", connections: { N: true, E: true } }
+    { name: "Curva90", file: "curva_base.png", connections: { N: true, E: true } },
+	{ 
+        name: "Chicana", 
+        file: "chicana.png", // Assume this PNG is a North-South straight line
+        connections: { N: true, S: true } 
+    },
+	{ 
+        name: "Curva 90° abierta", 
+        file: "curva.png", // Assume this PNG is a North-South straight line
+        connections: { N: true, E: true } 
+    },
+	{ 
+        name: "Diagonal", 
+        file: "diagonal.png", // Assume this PNG is a North-South straight line
+        connections: { N: true, E: true } 
+    },
+	{ 
+        name: "Esquina", 
+        file: "esquina.png", // Assume this PNG is a North-South straight line
+        connections: { N: true, E: true } 
+    },
+	{ 
+        name: "Harpin", 
+        file: "harpin.png", // Assume this PNG is a North-South straight line
+        connections: { N: true, E: true } 
+    },
+	{ 
+        name: "Harpin Asimetrico", 
+        file: "harpin_asimetrico.png", // Assume this PNG is a North-South straight line
+        connections: { N: true, E: true } 
+    },
     // Add more 2-connection parts here for the generator
     // Example:
     // { name: "Recta Horizontal", file: "recta_horizontal.png", connections: { E: true, W: true } },
