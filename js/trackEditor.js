@@ -248,7 +248,7 @@ function generateRandomTrackWithRetry(maxRetries = 10) {
     console.log("generateRandomTrackWithRetry CALLED. maxRetries:", maxRetries); 
     for (let i = 0; i < maxRetries; i++) {
         console.log(`--- generateRandomTrackWithRetry: Attempt ${i + 1} / ${maxRetries} calling generateRandomLayout ---`); 
-        if (generateRandomLayout()) { 
+        if (generateRandomLayout()) { // Now calling the *actual* complex layout function
             console.log(`Random track generated successfully on attempt ${i + 1}`);
             return; 
         }
@@ -259,7 +259,7 @@ function generateRandomTrackWithRetry(maxRetries = 10) {
     renderEditor();
 }
 
-// --- THIS IS THE FULL, COMPLEX generateRandomLayout with detailed logs ---
+// --- FULL, COMPLEX generateRandomLayout with detailed logs ---
 function generateRandomLayout() {
     console.log("--- generateRandomLayout FUNCTION ENTERED ---"); 
     
@@ -311,11 +311,11 @@ function generateRandomLayout() {
     let placedCount = 1;
     const totalCells = gridSize.rows * gridSize.cols;
     let pathLength = 1;
-    const maxPathLength = Math.floor(totalCells * 0.9);
+    const maxPathLength = Math.floor(totalCells * 0.9); // Target up to 90% fill
 
     let lastExitDirectionNameFromPrevCell = null;
 
-    for (let i = 0; i < maxPathLength && pathLength < totalCells; i++) {
+    for (let i = 0; i < maxPathLength && pathLength < totalCells; i++) { // Loop to build the path
         console.log(`\nPATH STEP ${pathLength}: Current cell [${currentR},${currentC}]`);
         const currentPart = grid[currentR][currentC];
         if (!currentPart) {
@@ -331,6 +331,7 @@ function generateRandomLayout() {
             if (currentActualConnections[dir.name]) {
                 const entryDirectionToCurrentCell = lastExitDirectionNameFromPrevCell ? OPPOSITE_DIRECTIONS[lastExitDirectionNameFromPrevCell] : null;
                 if (entryDirectionToCurrentCell && dir.name === entryDirectionToCurrentCell && Object.keys(currentActualConnections).length > 1) {
+                    // console.log(`    Skipping exit ${dir.name} because it's the entry point and not a dead-end.`);
                     return;
                 }
                 possibleExits.push(dir);
@@ -426,7 +427,7 @@ function generateRandomLayout() {
 
     console.log(`--- Generation Finished. Path length: ${pathLength}, Parts placed: ${placedCount}/${totalCells} ---`);
     renderEditor();
-    return pathLength > 1; // Success if more than just the starting piece is placed
+    return pathLength > Math.max(2, Math.floor(totalCells * 0.20));
 }
 // --- END OF FULL generateRandomLayout ---
 
