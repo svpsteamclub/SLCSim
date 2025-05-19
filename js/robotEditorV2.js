@@ -173,27 +173,27 @@ function setupCanvasEvents(canvas, ctx) {
 }
 
 function setupButtons() {
-  const eraseBtn = document.getElementById('toggleEraseComponentButton');
+  let eraseBtn = document.getElementById('toggleEraseComponentButton');
   if (!eraseBtn) {
     console.error('Erase button not found!');
     return;
   }
 
+  // Remove any previous event listeners by replacing with a clone
+  const newEraseBtn = eraseBtn.cloneNode(true);
+  eraseBtn.parentNode.replaceChild(newEraseBtn, eraseBtn);
+  eraseBtn = newEraseBtn;
+
   eraseBtn.addEventListener('click', (e) => {
     e.preventDefault();
     isEraseModeActive = !isEraseModeActive;
     const canvas = document.getElementById('robotEditorCanvas');
-    
-    // Update button appearance
     eraseBtn.textContent = isEraseModeActive ? 'Desactivar Modo Borrar' : 'Activar Modo Borrar';
     eraseBtn.style.backgroundColor = isEraseModeActive ? '#d9534f' : '';
     eraseBtn.style.borderColor = isEraseModeActive ? '#d43f3a' : '';
-    
-    // Update canvas cursor
     if (canvas) {
       canvas.style.cursor = isEraseModeActive ? 'not-allowed' : 'crosshair';
     }
-    
     console.log('Erase mode:', isEraseModeActive ? 'activated' : 'deactivated');
   });
 }
