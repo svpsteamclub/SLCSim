@@ -270,7 +270,12 @@ hr.internal-separator { margin-top: 20px; margin-bottom:10px; width: 95%; backgr
 #trackPartsPalette img.selected { border: 2px solid blue; box-shadow: 0 0 5px rgba(0,0,255,0.5); }
 #trackPartsPalette img:hover { border-color: #aaa; }
 
-.custom-track-controls { align-items: center; }
+.custom-track-controls {
+    align-items: flex-start;
+}
+.custom-track-controls input[type="file"] {
+    margin-bottom: 8px;
+}
 
 .track-editor-file-controls, .track-editor-grid-controls {
     display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-bottom: 15px; 
