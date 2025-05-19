@@ -33,6 +33,7 @@ export function cacheDOMElements() {
         stopButton: document.getElementById('stopButton'),
         resetButton: document.getElementById('resetButton'),
         setStartPositionButton: document.getElementById('setStartPositionButton'),
+        restoreDefaultRobot: document.getElementById('restoreDefaultRobot'),
         errorValSpan: document.getElementById('errorVal'), errorBar: document.getElementById('errorBar'),
         pValSpan: document.getElementById('pVal'), pBar: document.getElementById('pBar'),
         iValSpan: document.getElementById('iVal'), iBar: document.getElementById('iBar'),
@@ -314,4 +315,35 @@ export function updateRobotGeometryDisplay(geometry) {
     elems.sideSensorSpreadInput.value = geometry.sensorSpread_m.toFixed(3);
     elems.sensorForwardOffsetInput.value = geometry.sensorOffset_m.toFixed(3);
     elems.sensorDiameterInput.value = geometry.sensorDiameter_m.toFixed(3);
+}
+
+export function initUI(mainAppInterface) {
+    const elems = getDOMElements();
+    
+    // ... existing code ...
+
+    // Handle custom robot design
+    elems.restoreDefaultRobot.addEventListener('click', () => {
+        localStorage.removeItem('customRobotDesign');
+        mainAppInterface.restoreDefaultRobot();
+        updateRobotGeometryDisplay(DEFAULT_ROBOT_GEOMETRY);
+        alert("Robot restaurado a la configuración por defecto.");
+    });
+
+    // Check for custom robot design on startup
+    const customRobotDesign = localStorage.getItem('customRobotDesign');
+    if (customRobotDesign) {
+        try {
+            const design = JSON.parse(customRobotDesign);
+            if (design.geometry) {
+                mainAppInterface.updateRobotGeometry(design.geometry);
+                updateRobotGeometryDisplay(design.geometry);
+            }
+        } catch (e) {
+            console.error('Error loading custom robot design:', e);
+            localStorage.removeItem('customRobotDesign');
+        }
+    }
+
+    // ... existing code ...
 }

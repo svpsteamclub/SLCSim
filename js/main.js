@@ -88,6 +88,14 @@ function checkAllAssetsLoadedAndInit() {
                     alert("Error al cargar la pista desde el editor.");
                     UI.updateUIForSimulationState(simulationRunning, isSettingStartPosition, false, true);
                 }
+            },
+            updateRobotGeometry: (geometry) => {
+                simulation.robot.updateGeometry(geometry);
+                simulation.resetRobotState();
+            },
+            restoreDefaultRobot: () => {
+                simulation.robot.updateGeometry(Config.DEFAULT_ROBOT_GEOMETRY);
+                simulation.resetRobotState();
             }
         };
         if (typeof initRobotEditorV2 === 'function') initRobotEditorV2();
@@ -580,3 +588,52 @@ document.addEventListener('DOMContentLoaded', () => {
     loadInitialAssets(); // This will trigger simulation init and first track load
     animationFrameId = requestAnimationFrame(gameLoop); // Start the main animation loop
 });
+
+export function createMainAppInterface(simulationCore, robot, lapTimer) {
+    return {
+        updateRobotGeometryInSimulator: (newGeometry) => {
+            robot.updateGeometry(newGeometry);
+            lapTimer.reset(newGeometry.width_m, newGeometry.length_m);
+            simulationCore.resetRobotState();
+        },
+        loadTrackFromEditorCanvas: async (trackCanvas, startX_m, startY_m, startAngle_rad) => {
+            stopSimulation(); // Stop any current simulation
+            currentTrackIsCustom = true; 
+            customTrackImageFilename = "Pista_del_Editor.png";
+            customTrackStart = { x_m: startX_m, y_m: startY_m, angle_rad: startAngle_rad }; // Store its start
+            UI.getDOMElements().customTrackInput.value = ''; 
+            UI.getDOMElements().trackImageSelector.selectedIndex = -1;
+
+            try {
+                if (await simulationCore.setTrackFromCanvas(trackCanvas, startX_m, startY_m, startAngle_rad)) {
+                    const {simulationCanvas} = UI.getDOMElements();
+                    simulationCanvas.width = trackCanvas.width;
+                    simulationCanvas.height = trackCanvas.height;
+                    
+                    // Force a render of the new state
+                    if (displayCtx && simulationCore) {
+                        simulationCore.draw(displayCtx, displayCanvas.width, displayCanvas.height, null);
+                    }
+                    UI.updateUIForSimulationState(simulationRunning, isSettingStartPosition, true, true);
+                } else {
+                    alert("Error al cargar la pista desde el editor.");
+                    UI.updateUIForSimulationState(simulationRunning, isSettingStartPosition, false, true);
+                }
+            } catch (error) {
+                console.error("Error loading track from editor:", error);
+                alert("Error al cargar la pista desde el editor.");
+                UI.updateUIForSimulationState(simulationRunning, isSettingStartPosition, false, true);
+            }
+        },
+        updateRobotGeometry: (geometry) => {
+            robot.updateGeometry(geometry);
+            lapTimer.reset(geometry.width_m, geometry.length_m);
+            simulationCore.resetRobotState();
+        },
+        restoreDefaultRobot: () => {
+            robot.updateGeometry(Config.DEFAULT_ROBOT_GEOMETRY);
+            lapTimer.reset(Config.DEFAULT_ROBOT_GEOMETRY.width_m, Config.DEFAULT_ROBOT_GEOMETRY.length_m);
+            simulationCore.resetRobotState();
+        }
+    };
+}

@@ -199,29 +199,101 @@ function setupCanvasEvents(canvas, ctx) {
 }
 
 function setupButtons() {
-  let eraseBtn = document.getElementById('toggleEraseComponentButton');
-  if (!eraseBtn) {
-    console.error('Erase button not found!');
+  const elems = getDOMElements();
+  
+  elems.saveRobotDesign.addEventListener('click', saveRobotDesign);
+  elems.loadRobotDesign.addEventListener('click', () => {
+    document.getElementById('loadRobotDesignInput').click();
+  });
+  elems.exportRobotDesign.addEventListener('click', exportRobotDesign);
+  elems.toggleEraseComponentButton.addEventListener('click', toggleEraseMode);
+}
+
+function exportRobotDesign() {
+  if (isEraseModeActive) toggleEraseMode(); // Exit erase mode before export
+  
+  // Calculate robot geometry from placed components
+  const geometry = calculateRobotGeometry();
+  if (!geometry) {
+    alert("No se puede exportar el robot: No hay componentes colocados o la geometría no es válida.");
     return;
   }
 
-  // Remove any previous event listeners by replacing with a clone
-  const newEraseBtn = eraseBtn.cloneNode(true);
-  eraseBtn.parentNode.replaceChild(newEraseBtn, eraseBtn);
-  eraseBtn = newEraseBtn;
+  // Create export data
+  const exportData = {
+    geometry: geometry,
+    components: placedComponents.map(comp => ({
+      type: comp.type,
+      x: comp.x,
+      y: comp.y,
+      width: comp.width,
+      height: comp.height,
+      rotation: comp.rotation || 0
+    }))
+  };
 
-  eraseBtn.addEventListener('click', (e) => {
-    e.preventDefault();
-    isEraseModeActive = !isEraseModeActive;
-    const canvas = document.getElementById('robotEditorCanvas');
-    eraseBtn.textContent = isEraseModeActive ? 'Desactivar Modo Borrar' : 'Activar Modo Borrar';
-    eraseBtn.style.backgroundColor = isEraseModeActive ? '#d9534f' : '';
-    eraseBtn.style.borderColor = isEraseModeActive ? '#d43f3a' : '';
-    if (canvas) {
-      canvas.style.cursor = isEraseModeActive ? 'not-allowed' : 'crosshair';
-    }
-    console.log('Erase mode:', isEraseModeActive ? 'activated' : 'deactivated');
-  });
+  // Store in localStorage for simulator to access
+  localStorage.setItem('customRobotDesign', JSON.stringify(exportData));
+  
+  // Switch to simulator tab
+  const simulatorTabButton = document.querySelector('.tab-button[data-tab="simulator"]');
+  if (simulatorTabButton) simulatorTabButton.click();
+  
+  alert("Diseño del robot exportado al simulador. Usa el botón 'Restaurar Robot por Defecto' para volver al robot original.");
+}
+
+function calculateRobotGeometry() {
+  if (placedComponents.length === 0) return null;
+
+  // Find the chassis component
+  const chassis = placedComponents.find(comp => comp.type === 'chassis');
+  if (!chassis) return null;
+
+  // Calculate dimensions in meters (convert from mm)
+  const width_m = chassis.width / 1000;
+  const length_m = chassis.height / 1000;
+
+  // Find sensor components
+  const sensors = placedComponents.filter(comp => comp.type === 'sensor');
+  if (sensors.length < 3) return null;
+
+  // Calculate sensor positions relative to chassis center
+  const chassisCenterX = chassis.x + chassis.width / 2;
+  const chassisCenterY = chassis.y + chassis.height / 2;
+
+  // Calculate sensor spread and offset
+  const sensorPositions = sensors.map(sensor => ({
+    x: sensor.x + sensor.width / 2 - chassisCenterX,
+    y: sensor.y + sensor.height / 2 - chassisCenterY
+  }));
+
+  // Calculate sensor spread (distance between left and right sensors)
+  const leftSensor = sensorPositions.reduce((leftmost, current) => 
+    current.x < leftmost.x ? current : leftmost, sensorPositions[0]);
+  const rightSensor = sensorPositions.reduce((rightmost, current) => 
+    current.x > rightmost.x ? current : rightmost, sensorPositions[0]);
+  
+  const sensorSpread_m = Math.abs(rightSensor.x - leftSensor.x) / 1000;
+
+  // Find center sensor
+  const centerSensor = sensorPositions.find(sensor => 
+    Math.abs(sensor.x) < 5 && Math.abs(sensor.y) > 0);
+  
+  if (!centerSensor) return null;
+
+  // Calculate sensor offset (distance from chassis center to sensor line)
+  const sensorOffset_m = Math.abs(centerSensor.y) / 1000;
+
+  // Calculate sensor diameter
+  const sensorDiameter_m = sensors[0].width / 1000;
+
+  return {
+    width_m,
+    length_m,
+    sensorSpread_m,
+    sensorOffset_m,
+    sensorDiameter_m
+  };
 }
 
 function getPaletteComponent(type) {
