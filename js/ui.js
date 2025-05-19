@@ -283,7 +283,7 @@ export function setupFoldableSections() {
             const content = title.nextElementSibling;
             const indicator = title.querySelector('.fold-indicator');
             if (content && content.classList.contains('foldable-content')) {
-                const isHidden = content.style.display === 'none' || content.style.display === '';
+                const isHidden = getComputedStyle(content).display === 'none';
                 content.style.display = isHidden ? 'block' : 'none';
                 if (indicator) indicator.textContent = isHidden ? '[-]' : '[+]';
             }
