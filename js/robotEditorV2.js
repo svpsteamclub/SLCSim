@@ -8,6 +8,8 @@ let dragData = null;
 let selectedComponent = null;
 let offsetX = 0, offsetY = 0;
 
+let lastDblClickTime = 0;
+
 function getPaletteComponentsFromFiles() {
   const files = [
     'robot_body1.png',
@@ -174,7 +176,6 @@ function setupCanvasEvents(canvas, ctx) {
   });
 
   // Double-click to rotate component 90 degrees (debounced)
-  let lastDblClickTime = 0;
   canvas.addEventListener('dblclick', (e) => {
     const now = Date.now();
     if (now - lastDblClickTime < 300) return; // Ignore if within 300ms of last dblclick
