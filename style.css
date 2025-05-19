@@ -277,4 +277,17 @@ hr.internal-separator { margin-top: 20px; margin-bottom:10px; width: 95%; backgr
 }
 
 footer { text-align: center; margin-top: 30px; padding-bottom: 20px; font-size: 0.9em; color: #555; }
+
+.pid-params-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+  align-items: flex-end;
+  margin-bottom: 8px;
+}
+.pid-params-row > div {
+  display: flex;
+  flex-direction: column;
+  min-width: 140px;
+}
 /* END OF FILE style.css */
