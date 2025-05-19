@@ -3,6 +3,7 @@ import {
     MAX_BAR_HEIGHT_PX, currentMaxValError, currentMaxValPTerm, currentMaxValITerm,
     currentMaxValDTerm, /* currentMaxValAdjPID is now dynamic */ MAX_VAL_PWM_BAR, AVAILABLE_TRACKS, PIXELS_PER_METER
 } from './config.js'; // Removed unused currentMaxValAdjPID import from here
+import { initRobotEditorV2 } from './robotEditorV2.js';
 
 let domElements = {}; 
 
@@ -302,6 +303,11 @@ export function setupTabNavigation() {
             tabContents.forEach(content => {
                 content.style.display = content.id === `${targetTab}Content` ? 'block' : 'none';
             });
+
+            // Initialize robot editor only when its tab is shown
+            if (targetTab === 'robotEditor') {
+                initRobotEditorV2();
+            }
         });
     });
 }

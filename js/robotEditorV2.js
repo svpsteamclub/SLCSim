@@ -200,7 +200,10 @@ function setupCanvasEvents(canvas, ctx) {
 
 function setupButtons() {
   const elems = getDOMElements();
-  
+  if (!elems.saveRobotDesign || !elems.loadRobotDesign || !elems.exportRobotDesign || !elems.toggleEraseComponentButton) {
+    console.error('One or more robot editor buttons are missing in the DOM.');
+    return;
+  }
   elems.saveRobotDesign.addEventListener('click', saveRobotDesign);
   elems.loadRobotDesign.addEventListener('click', () => {
     document.getElementById('loadRobotDesignInput').click();
