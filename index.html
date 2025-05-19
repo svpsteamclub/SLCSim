@@ -79,10 +79,10 @@
                 </div>
             </div>
             <hr style="width:100%; margin: 15px 0;">
-            <div class="arduino-controls controls"> <!-- .controls here applies flex item sizing if its parent .controls-container was display:flex -->
+            <div class="arduino-controls controls">
                 <h3 class="foldable-title">Parámetros del Código (PID) <span class="fold-indicator">[+]</span></h3>
                  <div class="foldable-content" style="display: none;">
-                    <div> <!-- This div is styled by CSS to be flex row for PID params -->
+                    <div> 
                         <div><label for="arduino_kp">Arduino Kp:</label><input type="number" id="arduino_kp" value="120" step="1"></div>
                         <div><label for="arduino_ki">Arduino Ki:</label><input type="number" id="arduino_ki" value="3" step="0.001"></div>
                         <div><label for="arduino_kd">Arduino Kd:</label><input type="number" id="arduino_kd" value="15" step="0.1"></div>
@@ -90,38 +90,41 @@
                         <div><label for="arduino_integralMax">INTEGRAL_MAX:</label><input type="number" id="arduino_integralMax" value="250" step="1.0"></div>
                     </div>
                 </div>
-            </div>
+                
+                <!-- MOVED PID EXPLANATION HERE -->
+                <hr class="internal-separator">
+                <div class="pid-explanation-inner-container">
+                    <h4 class="foldable-title">Entendiendo el Controlador PID y los Parámetros del Código <span class="fold-indicator">[+]</span></h4>
+                    <div class="foldable-content" style="display: none;">
+                        <p>El robot utiliza un controlador <strong>PID (Proporcional-Integral-Derivativo)</strong> para seguir la línea. El objetivo es minimizar el "error", que es la desviación del robot del centro de la línea, calculado a partir de los sensores frontales.</p>
+                        <ul>
+                            <li><strong>Error (Err):</strong> Mide qué tan lejos y hacia qué lado está el robot de la línea. Cero significa centrado. Un error positivo indica que la línea está a la derecha del robot (o el robot está a la izquierda de la línea). Un error negativo indica que la línea está a la izquierda del robot.</li>
+                            <li><strong>Término Proporcional (P):</strong> Reacciona al error actual (<code>P = Kp * Error</code>). Una Kp alta da una respuesta rápida pero puede causar oscilaciones.</li>
+                            <li><strong>Término Integral (I):</strong> Acumula errores pasados (<code>I = Ki * Suma_Errores_Ponderada_Por_Tiempo</code>). Elimina errores estacionarios (desviaciones pequeñas pero persistentes). Una Ki alta puede causar inestabilidad o "integral windup" si no se limita.</li>
+                            <li><strong>Término Derivativo (D):</strong> Reacciona a la tasa de cambio del error (<code>D = Kd * (Error_Actual - Error_Previo) / tiempo_paso</code>). Amortigua la respuesta, reduce el sobreimpulso y ayuda a anticipar futuros errores. Una Kd alta puede amplificar el ruido de los sensores.</li>
+                            <li><strong>Ajuste PID (AdjPID):</strong> Es la suma <code>P + I + D</code>. Este valor ajusta la velocidad de los motores:
+                                <code>VelocidadBruta_Derecho = VELOCIDAD_BASE - AdjPID</code>,
+                                <code>VelocidadBruta_Izquierdo = VELOCIDAD_BASE + AdjPID</code>.
+                                Estos valores brutos pueden ser positivos (adelante) o negativos (reversa). La magnitud (después de aplicar valor absoluto, deadband y limitación a 255) se convierte en la señal PWM para la velocidad del motor, y el signo determina la dirección.
+                            </li>
+                        </ul>
+                        <p><strong>Parámetros Ajustables del Código:</strong></p>
+                        <ul>
+                            <li><strong>Arduino Kp:</strong> Ganancia Proporcional. Controla la fuerza de la corrección basada en el error actual.</li>
+                            <li><strong>Arduino Ki:</strong> Ganancia Integral. Controla la influencia de la acumulación de errores pasados.</li>
+                            <li><strong>Arduino Kd:</strong> Ganancia Derivativa. Controla la influencia de la predicción del error basada en su tasa de cambio.</li>
+                            <li><strong>VELOCIDAD_BASE (0-255):</strong> Velocidad de referencia (PWM) para ambos motores cuando el error es cero.</li>
+                            <li><strong>INTEGRAL_MAX:</strong> Límite para el valor acumulado del término integral (antes de multiplicarlo por Ki), para prevenir el "integral windup". Si es `0` (valor por defecto), el término integral se desactiva (efectivamente se mantiene en cero). Debe ser mayor que cero para que el término integral funcione y se limite adecuadamente.</li>
+                        </ul>
+                        <p>Si el robot pierde completamente la línea (todos los sensores en blanco), el error PID se establece a un valor grande (positivo o negativo, dependiendo de la última dirección conocida de la línea) para forzar un giro e intentar reencontrarla. Ya no existe una lógica de "recuperación" separada.</p>
+                    </div>
+                </div>
+            </div> <!-- End of arduino-controls -->
+
+             <!-- The <hr> that was between arduino-controls and pid-explanation is now GONE from here -->
         </div> <!-- END OF Main controls-container for simulator options -->
         
-        <!-- PID Explanation section - uses .foldable-container for full-width block styling -->
-        <div class="pid-explanation-container foldable-container controls"> <!-- Added .controls for card style, CSS will override flex sizing -->
-            <h4 class="foldable-title">Entendiendo el Controlador PID y los Parámetros del Código <span class="fold-indicator">[+]</span></h4>
-            <div class="foldable-content" style="display: none;">
-                <p>El robot utiliza un controlador <strong>PID (Proporcional-Integral-Derivativo)</strong> para seguir la línea. El objetivo es minimizar el "error", que es la desviación del robot del centro de la línea, calculado a partir de los sensores frontales.</p>
-                <ul>
-                    <li><strong>Error (Err):</strong> Mide qué tan lejos y hacia qué lado está el robot de la línea. Cero significa centrado. Un error positivo indica que la línea está a la derecha del robot (o el robot está a la izquierda de la línea). Un error negativo indica que la línea está a la izquierda del robot.</li>
-                    <li><strong>Término Proporcional (P):</strong> Reacciona al error actual (<code>P = Kp * Error</code>). Una Kp alta da una respuesta rápida pero puede causar oscilaciones.</li>
-                    <li><strong>Término Integral (I):</strong> Acumula errores pasados (<code>I = Ki * Suma_Errores_Ponderada_Por_Tiempo</code>). Elimina errores estacionarios (desviaciones pequeñas pero persistentes). Una Ki alta puede causar inestabilidad o "integral windup" si no se limita.</li>
-                    <li><strong>Término Derivativo (D):</strong> Reacciona a la tasa de cambio del error (<code>D = Kd * (Error_Actual - Error_Previo) / tiempo_paso</code>). Amortigua la respuesta, reduce el sobreimpulso y ayuda a anticipar futuros errores. Una Kd alta puede amplificar el ruido de los sensores.</li>
-                    <li><strong>Ajuste PID (AdjPID):</strong> Es la suma <code>P + I + D</code>. Este valor ajusta la velocidad de los motores:
-                        <code>VelocidadBruta_Derecho = VELOCIDAD_BASE - AdjPID</code>,
-                        <code>VelocidadBruta_Izquierdo = VELOCIDAD_BASE + AdjPID</code>.
-                        Estos valores brutos pueden ser positivos (adelante) o negativos (reversa). La magnitud (después de aplicar valor absoluto, deadband y limitación a 255) se convierte en la señal PWM para la velocidad del motor, y el signo determina la dirección.
-                    </li>
-                </ul>
-                <p><strong>Parámetros Ajustables del Código:</strong></p>
-                <ul>
-                    <li><strong>Arduino Kp:</strong> Ganancia Proporcional. Controla la fuerza de la corrección basada en el error actual.</li>
-                    <li><strong>Arduino Ki:</strong> Ganancia Integral. Controla la influencia de la acumulación de errores pasados.</li>
-                    <li><strong>Arduino Kd:</strong> Ganancia Derivativa. Controla la influencia de la predicción del error basada en su tasa de cambio.</li>
-                    <li><strong>VELOCIDAD_BASE (0-255):</strong> Velocidad de referencia (PWM) para ambos motores cuando el error es cero.</li>
-                    <li><strong>INTEGRAL_MAX:</strong> Límite para el valor acumulado del término integral (antes de multiplicarlo por Ki), para prevenir el "integral windup". Si es `0` (valor por defecto), el término integral se desactiva (efectivamente se mantiene en cero). Debe ser mayor que cero para que el término integral funcione y se limite adecuadamente.</li>
-                </ul>
-                <p>Si el robot pierde completamente la línea (todos los sensores en blanco), el error PID se establece a un valor grande (positivo o negativo, dependiendo de la última dirección conocida de la línea) para forzar un giro e intentar reencontrarla. Ya no existe una lógica de "recuperación" separada.</p>
-            </div>
-        </div>
-
-        <div class="controls-container"> <!-- Buttons and Info need their own .controls-container to be centered -->
+        <div class="controls-container"> <!-- Buttons and Info in their own centered container -->
             <div class="buttons">
                 <button id="startButton">Simular</button>
                 <button id="stopButton">Detener</button>
@@ -178,14 +181,12 @@
             <h3 class="foldable-title">¿Cómo Funciona el Robot Seguidor de Líneas? <span class="fold-indicator">[+]</span></h3>
             <div class="foldable-content" style="display: none;">
                 <p>El robot seguidor de líneas está diseñado para seguir una trayectoria marcada...</p>
-                <!-- ... (Full explanation) ... -->
             </div>
         </div>
         <div class="controls-container explanation-section foldable-container">
             <h3 class="foldable-title">¿Cómo Usar el Simulador? <span class="fold-indicator">[+]</span></h3>
             <div class="foldable-content" style="display: none;">
                 <p>Este simulador te permite experimentar con diferentes configuraciones...</p>
-                <!-- ... (Full explanation) ... -->
             </div>
         </div>
     </div> <!-- End of #simulatorContent -->

@@ -38,7 +38,6 @@ body {
     min-width: 0;
 }
 
-/* Common style for main content blocks like control groups and explanation sections */
 .controls-container,
 .foldable-container { 
     background-color: #fff;
@@ -46,10 +45,10 @@ body {
     border-radius: 8px;
     box-shadow: 0 2px 10px rgba(0,0,0,0.1);
     margin-bottom: 20px;
-    width: 90%; /* Default width for these blocks */
-    max-width: 900px; /* Consistent max width */
-    margin-left: auto;   /* Centers the container */
-    margin-right: auto;  /* Centers the container */
+    width: 90%; 
+    max-width: 900px; 
+    margin-left: auto;   
+    margin-right: auto;  
     box-sizing: border-box; 
 }
 
@@ -77,7 +76,6 @@ body {
 
 .main-controls { display: flex; flex-wrap: wrap; gap: 20px; margin-bottom: 15px; justify-content: space-around; }
 
-/* General .controls style for inner control groups (e.g., sim-controls, robot-geometry-controls) */
 .controls { 
     display: flex; 
     flex-direction: column; 
@@ -86,24 +84,22 @@ body {
     border: 1px solid #e0e0e0; 
     border-radius: 6px; 
     background-color: #f9f9f9;
-    flex: 1 1 280px; /* Makes it a flex item that can grow/shrink, with a basis of 280px */
-    min-width: 250px; /* Minimum width when it's a flex item */
+    flex: 1 1 280px; 
+    min-width: 250px; 
     box-sizing: border-box;
 }
 
-/* Specific override for the PID explanation section when it also has .controls and .foldable-container */
-/* This aims to make it behave like a full-width block rather than a smaller flex item */
-.pid-explanation-container.controls.foldable-container {
-    flex-grow: 0;     /* Do not grow as a flex item beyond its width/max-width */
-    flex-shrink: 0;   /* Do not shrink as a flex item if space is tight */
-    flex-basis: auto; /* Let width/max-width define its size primarily */
-    /* width, max-width, margin-left/right are inherited from .foldable-container or .controls-container */
-    min-width: 0;     /* Override min-width from .controls, allow it to be its full defined width */
-}
+/* REMOVED the specific override for .pid-explanation-container.controls.foldable-container 
+   as it's no longer needed if the HTML structure is correct (i.e., it won't have .controls and .foldable-container 
+   if it's just an inner part of .arduino-controls)
+*/
 
 
 .controls h3 { margin-top: 0; margin-bottom: 12px; font-size: 1.1em; color: #444; border-bottom: 1px solid #ddd; padding-bottom: 6px; width: 100%; }
-.controls h4 { margin-top: 0; margin-bottom: 12px; font-size: 1.0em; color: #444; border-bottom: 1px solid #ddd; padding-bottom: 6px; width: 100%; }
+.controls h4 { margin-top: 0; margin-bottom: 12px; font-size: 1.0em; color: #444; /*border-bottom: 1px solid #ddd;*/ padding-bottom: 6px; width: 100%; } 
+/* Removed border-bottom from generic h4, can be added specifically if needed */
+
+
 .controls label { margin-bottom: 4px; font-weight: bold; font-size: 0.9em; color: #555; display: block; }
 
 .controls input[type="number"],
@@ -140,6 +136,22 @@ input[readonly] { background-color: #e9ecef; opacity: 1; cursor: not-allowed; }
     padding-left: 0px; padding-right: 0px;
 }
 .track-selection p { text-align: center; }
+
+/* Styling for the PID explanation when it's inside .arduino-controls */
+.arduino-controls .pid-explanation-inner-container {
+    margin-top: 15px; /* Space above it */
+    width: 100%; /* Take full width of its parent card */
+}
+.arduino-controls .pid-explanation-inner-container h4.foldable-title {
+    border-bottom: none; /* Remove double border */
+    font-size: 1.0em; /* Match other h4 if needed */
+    padding-bottom: 2px;
+}
+.arduino-controls .pid-explanation-inner-container .foldable-content p,
+.arduino-controls .pid-explanation-inner-container .foldable-content ul {
+    text-align: left;
+    font-size: 0.9em; /* Match other paragraph text */
+}
 
 
 .buttons { text-align: center; margin-bottom: 15px; padding-top: 10px; }
@@ -178,8 +190,8 @@ button:active:not(:disabled), .button-like-label:active { transform: translateY(
 #toggleEraseModeButton:hover:not(:disabled) {
     background-color: #31b0d5;
 }
-#toggleEraseModeButton.active-erase { /* Style for when erase mode button is active via JS class */
-    background-color: #d9534f; /* Reddish */
+#toggleEraseModeButton.active-erase { 
+    background-color: #d9534f; 
     border-color: #d43f3a;
 }
 
@@ -205,6 +217,8 @@ button:disabled {
 }
 
 hr { border: 0; height: 1px; background: #ccc; margin: 20px 0; }
+hr.internal-separator { margin-top: 20px; margin-bottom:10px; width: 95%; background: #e0e0e0; margin-left:auto; margin-right:auto;}
+
 
 .info { background-color: #e9e9e9; padding: 10px; border-radius: 6px; display: flex; flex-wrap: wrap; justify-content: space-around; align-items: flex-end; }
 .info-item { display: flex; flex-direction: column; align-items: center; margin: 5px 8px; min-width: 60px; }
@@ -249,7 +263,6 @@ hr { border: 0; height: 1px; background: #ccc; margin: 20px 0; }
 #trackPartsPalette img:hover { border-color: #aaa; }
 
 .custom-track-controls { align-items: center; }
-/* .custom-track-controls p is now handled by .controls p */
 
 .track-editor-file-controls, .track-editor-grid-controls {
     display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-bottom: 15px; 
