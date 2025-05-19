@@ -172,6 +172,22 @@ function setupCanvasEvents(canvas, ctx) {
     selectedComponent = null;
     canvas.style.cursor = isEraseModeActive ? 'not-allowed' : 'crosshair';
   });
+
+  // Double-click to rotate component 90 degrees
+  canvas.addEventListener('dblclick', (e) => {
+    const rect = canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    // Check components in reverse order (top to bottom)
+    for (let i = placedComponents.length - 1; i >= 0; i--) {
+      const comp = placedComponents[i];
+      if (isPointInComponent(x, y, comp)) {
+        comp.angle = ((comp.angle || 0) + Math.PI / 2) % (2 * Math.PI);
+        render(ctx, canvas);
+        break;
+      }
+    }
+  });
 }
 
 function setupButtons() {
