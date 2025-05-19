@@ -35,7 +35,25 @@ function getPaletteComponentsFromFiles() {
 
 export function initRobotEditorV2() {
   const canvas = document.getElementById('robotEditorCanvas');
+  if (!canvas) {
+    console.error('Robot Editor Canvas not found!');
+    return;
+  }
   const ctx = canvas.getContext('2d');
+  if (!ctx) {
+    console.error('Could not get canvas context!');
+    return;
+  }
+
+  // Initialize erase mode state
+  isEraseModeActive = false;
+  const eraseBtn = document.getElementById('toggleEraseComponentButton');
+  if (eraseBtn) {
+    eraseBtn.textContent = 'Activar Modo Borrar';
+    eraseBtn.style.backgroundColor = '';
+    eraseBtn.style.borderColor = '';
+  }
+
   window.PALETTE_COMPONENTS = getPaletteComponentsFromFiles();
   buildPalette(() => {
     setupPaletteDrag();
@@ -97,6 +115,7 @@ function setupCanvasEvents(canvas, ctx) {
   canvas.addEventListener('dragover', (e) => {
     e.preventDefault();
   });
+
   canvas.addEventListener('drop', (e) => {
     if (!dragData) return;
     const rect = canvas.getBoundingClientRect();
@@ -122,6 +141,7 @@ function setupCanvasEvents(canvas, ctx) {
       const comp = placedComponents[i];
       if (isPointInComponent(x, y, comp)) {
         if (isEraseModeActive) {
+          console.log('Erasing component:', comp);
           placedComponents.splice(i, 1);
           render(ctx, canvas);
           return;
@@ -154,14 +174,27 @@ function setupCanvasEvents(canvas, ctx) {
 
 function setupButtons() {
   const eraseBtn = document.getElementById('toggleEraseComponentButton');
+  if (!eraseBtn) {
+    console.error('Erase button not found!');
+    return;
+  }
+
   eraseBtn.addEventListener('click', () => {
     isEraseModeActive = !isEraseModeActive;
+    const canvas = document.getElementById('robotEditorCanvas');
+    
+    // Update button appearance
     eraseBtn.textContent = isEraseModeActive ? 'Desactivar Modo Borrar' : 'Activar Modo Borrar';
     eraseBtn.style.backgroundColor = isEraseModeActive ? '#d9534f' : '';
     eraseBtn.style.borderColor = isEraseModeActive ? '#d43f3a' : '';
-    document.getElementById('robotEditorCanvas').style.cursor = isEraseModeActive ? 'not-allowed' : 'crosshair';
+    
+    // Update canvas cursor
+    if (canvas) {
+      canvas.style.cursor = isEraseModeActive ? 'not-allowed' : 'crosshair';
+    }
+    
+    console.log('Erase mode:', isEraseModeActive ? 'activated' : 'deactivated');
   });
-  // TODO: Save, Load, Export logic
 }
 
 function getPaletteComponent(type) {
