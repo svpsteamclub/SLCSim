@@ -281,11 +281,16 @@ export function setupFoldableSections() {
         title.addEventListener('click', () => {
             console.log('Foldable section clicked:', title.textContent.trim()); // Debug log
             const content = title.nextElementSibling;
+            console.log('Next element sibling:', content);
             const indicator = title.querySelector('.fold-indicator');
             if (content && content.classList.contains('foldable-content')) {
-                const isHidden = getComputedStyle(content).display === 'none';
-                content.style.display = isHidden ? 'block' : 'none';
+                // Cast to HTMLElement for style
+                const contentDiv = content;
+                const isHidden = getComputedStyle(contentDiv).display === 'none';
+                contentDiv.style.display = isHidden ? 'block' : 'none';
                 if (indicator) indicator.textContent = isHidden ? '[-]' : '[+]';
+            } else {
+                console.warn('Foldable content not found or not the expected element:', content);
             }
         });
     });
