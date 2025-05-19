@@ -119,8 +119,9 @@ function setupCanvasEvents(canvas, ctx) {
   canvas.addEventListener('drop', (e) => {
     if (!dragData) return;
     const rect = canvas.getBoundingClientRect();
-    const x = (e.clientX - rect.left);
-    const y = (e.clientY - rect.top);
+    // Snap to 5x5 grid
+    const x = Math.round((e.clientX - rect.left) / 5) * 5;
+    const y = Math.round((e.clientY - rect.top) / 5) * 5;
     placedComponents.push({
       ...dragData,
       x,
@@ -161,8 +162,9 @@ function setupCanvasEvents(canvas, ctx) {
     const rect = canvas.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
-    selectedComponent.x = x - offsetX;
-    selectedComponent.y = y - offsetY;
+    // Snap to 5x5 grid
+    selectedComponent.x = Math.round((x - offsetX) / 5) * 5;
+    selectedComponent.y = Math.round((y - offsetY) / 5) * 5;
     render(ctx, canvas);
   });
 
