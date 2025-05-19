@@ -4,7 +4,13 @@
  */
 
 import { getDOMElements } from './ui.js';
-import { DEFAULT_ROBOT_GEOMETRY } from './config.js';
+import { DEFAULT_ROBOT_GEOMETRY, SIMULATION_CONFIG } from './config.js';
+
+const GRID_SIZE = 5; // Grid size in pixels
+const MIN_WHEELS = 2;
+const MAX_WHEELS = 4;
+const MIN_SENSORS = 1;
+const MAX_SENSORS = 8;
 
 // Type definitions
 /** @typedef {Object} Component
@@ -33,15 +39,8 @@ import { DEFAULT_ROBOT_GEOMETRY } from './config.js';
  * @property {boolean} showMeasurements - Whether measurements are shown
  */
 
-const SCALE = 1; // 1px = 1mm
-const GRID_SIZE = 5; // Grid size in pixels
-const MIN_WHEELS = 2;
-const MAX_WHEELS = 4;
-const MIN_SENSORS = 1;
-const MAX_SENSORS = 8;
-
 /** @type {EditorState} */
-const state = {
+let state = {
     placedComponents: [],
     isEraseModeActive: false,
     dragData: null,
@@ -119,7 +118,8 @@ function getPaletteComponentsFromFiles() {
  * Initialize the robot editor
  */
 export function initRobotEditorV2() {
-    const canvas = document.getElementById('robotEditorCanvas');
+    const elems = getDOMElements();
+    const canvas = elems.robotEditorCanvas;
     if (!canvas) {
         console.error('Robot Editor Canvas not found!');
         return;
@@ -130,13 +130,94 @@ export function initRobotEditorV2() {
         return;
     }
 
+    // Set fixed canvas dimensions from config
+    const canvasWidth = SIMULATION_CONFIG.canvasWidth;
+    const canvasHeight = SIMULATION_CONFIG.canvasHeight;
+    canvas.width = canvasWidth;
+    canvas.height = canvasHeight;
+    canvas.style.width = `${canvasWidth}px`;
+    canvas.style.height = `${canvasHeight}px`;
+
+    // Initialize state
+    state = {
+        placedComponents: [],
+        isEraseModeActive: false,
+        dragData: null,
+        selectedComponent: null,
+        offsetX: 0,
+        offsetY: 0,
+        lastDblClickTime: 0,
+        history: [],
+        historyIndex: -1,
+        gridVisible: true,
+        snapToGrid: true,
+        showMeasurements: true
+    };
+
     // Initialize erase mode state
-    state.isEraseModeActive = false;
-    const eraseBtn = document.getElementById('toggleEraseComponentButton');
-    if (eraseBtn) {
-        eraseBtn.textContent = 'Activar Modo Borrar';
-        eraseBtn.style.backgroundColor = '';
-        eraseBtn.style.borderColor = '';
+    const eraseButton = elems.toggleEraseComponentButton;
+    if (eraseButton) {
+        eraseButton.addEventListener('click', () => {
+            state.isEraseModeActive = !state.isEraseModeActive;
+            eraseButton.textContent = state.isEraseModeActive ? 'Desactivar Modo Borrar' : 'Activar Modo Borrar';
+            canvas.style.cursor = state.isEraseModeActive ? 'not-allowed' : 'crosshair';
+        });
+    }
+
+    // Initialize component palettes
+    const chassisPalette = document.getElementById('robotChassisPalette');
+    const wheelPalette = document.getElementById('robotWheelPalette');
+    const sensorPalette = document.getElementById('robotSensorPalette');
+
+    if (chassisPalette) {
+        const img = chassisPalette.querySelector('img');
+        if (img) {
+            img.addEventListener('dragstart', (e) => {
+                state.dragData = {
+                    type: 'chassis',
+                    file: 'robot_body.png',
+                    src: 'assets/robot_parts/robot_body.png',
+                    width: 100,
+                    height: 60,
+                    x: 0,
+                    y: 0
+                };
+            });
+        }
+    }
+
+    if (wheelPalette) {
+        const img = wheelPalette.querySelector('img');
+        if (img) {
+            img.addEventListener('dragstart', (e) => {
+                state.dragData = {
+                    type: 'wheel',
+                    file: 'robot_wheel.png',
+                    src: 'assets/robot_parts/robot_wheel.png',
+                    width: 40,
+                    height: 40,
+                    x: 0,
+                    y: 0
+                };
+            });
+        }
+    }
+
+    if (sensorPalette) {
+        const img = sensorPalette.querySelector('img');
+        if (img) {
+            img.addEventListener('dragstart', (e) => {
+                state.dragData = {
+                    type: 'sensor',
+                    file: 'sensor.png',
+                    src: 'assets/robot_parts/sensor.png',
+                    width: 20,
+                    height: 20,
+                    x: 0,
+                    y: 0
+                };
+            });
+        }
     }
 
     // @ts-ignore - We know this exists
@@ -483,15 +564,9 @@ function getPaletteComponent(type) {
 }
 
 function isPointInComponent(x, y, comp) {
-    // Calculate the rotated point coordinates
     const dx = x - comp.x;
     const dy = y - comp.y;
-    const rotatedX = dx * Math.cos(-comp.angle) - dy * Math.sin(-comp.angle);
-    const rotatedY = dx * Math.sin(-comp.angle) + dy * Math.cos(-comp.angle);
-    
-    // Check if the point is within the component's bounds
-    return Math.abs(rotatedX) <= comp.width / 2 &&
-           Math.abs(rotatedY) <= comp.height / 2;
+    return Math.abs(dx) <= comp.width/2 && Math.abs(dy) <= comp.height/2;
 }
 
 function render(ctx, canvas) {
@@ -561,19 +636,20 @@ function drawGrid(ctx, canvas) {
   ctx.restore();
 }
 
-function drawMeasurements(ctx, component) {
+function drawMeasurements(ctx, comp) {
   ctx.save();
-  ctx.fillStyle = '#333';
-  ctx.font = '10px Arial';
+  ctx.fillStyle = '#000';
+  ctx.font = '12px Arial';
   ctx.textAlign = 'center';
   
-  // Draw width measurement
-  ctx.fillText(`${component.width}mm`, 0, -component.height/2 - 5);
+  // Draw width
+  ctx.fillText(`${comp.width}px`, comp.x, comp.y - comp.height/2 - 5);
   
-  // Draw height measurement
+  // Draw height
   ctx.save();
+  ctx.translate(comp.x - comp.width/2 - 5, comp.y);
   ctx.rotate(-Math.PI/2);
-  ctx.fillText(`${component.height}mm`, 0, -component.width/2 - 5);
+  ctx.fillText(`${comp.height}px`, 0, 0);
   ctx.restore();
   
   ctx.restore();
@@ -582,24 +658,21 @@ function drawMeasurements(ctx, component) {
 function drawAlignmentGuides(ctx, canvas) {
   if (!state.selectedComponent) return;
   
-  const selected = state.selectedComponent;
   ctx.save();
   ctx.strokeStyle = '#2196F3';
   ctx.lineWidth = 1;
   ctx.setLineDash([5, 5]);
   
-  // Draw vertical alignment guides
-  const centerX = selected.x;
+  // Vertical center line
   ctx.beginPath();
-  ctx.moveTo(centerX, 0);
-  ctx.lineTo(centerX, canvas.height);
+  ctx.moveTo(canvas.width/2, 0);
+  ctx.lineTo(canvas.width/2, canvas.height);
   ctx.stroke();
   
-  // Draw horizontal alignment guides
-  const centerY = selected.y;
+  // Horizontal center line
   ctx.beginPath();
-  ctx.moveTo(0, centerY);
-  ctx.lineTo(canvas.width, centerY);
+  ctx.moveTo(0, canvas.height/2);
+  ctx.lineTo(canvas.width, canvas.height/2);
   ctx.stroke();
   
   ctx.restore();
@@ -662,13 +735,12 @@ function drawDragPreview(ctx, x, y) {
   ctx.save();
   ctx.globalAlpha = 0.5;
   ctx.translate(x, y);
-  ctx.rotate(state.dragData.angle || 0);
+  ctx.rotate(0);
   
-  // Draw component preview
   const img = new Image();
   img.src = state.dragData.src;
   ctx.drawImage(img, -state.dragData.width/2, -state.dragData.height/2, 
-               state.dragData.width, state.dragData.height);
+                state.dragData.width, state.dragData.height);
   
   ctx.restore();
 }
@@ -679,7 +751,16 @@ function showNotification(message, type = 'info') {
   notification.textContent = message;
   document.body.appendChild(notification);
   
+  // Trigger animation
+  requestAnimationFrame(() => {
+    notification.style.opacity = '1';
+    notification.style.transform = 'translateY(0)';
+  });
+  
+  // Remove after 3 seconds
   setTimeout(() => {
-    notification.remove();
+    notification.style.opacity = '0';
+    notification.style.transform = 'translateY(-20px)';
+    setTimeout(() => notification.remove(), 300);
   }, 3000);
 } 
