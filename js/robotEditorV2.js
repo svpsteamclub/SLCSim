@@ -1,13 +1,6 @@
 import { getDOMElements } from './ui.js';
 
 const SCALE = 1; // 1px = 1mm
-const PALETTE_COMPONENTS = [
-  { type: 'chassis', name: 'Chasis', file: 'robot_body.png', src: 'assets/robot_parts/robot_body.png', width: 340, height: 160 },
-  { type: 'wheel', name: 'Rueda', file: 'robot_wheel.png', src: 'assets/robot_parts/robot_wheel.png', width: 50, height: 50 },
-  { type: 'sensor', name: 'Sensor', file: 'sensor.png', src: 'assets/robot_parts/sensor.png', width: 12, height: 12 },
-  { type: 'arduino', name: 'Arduino', file: 'arduino_placeholder.png', src: 'https://via.placeholder.com/70x70?text=Arduino', width: 68, height: 53 },
-  { type: 'driver', name: 'Driver', file: 'driver_placeholder.png', src: 'https://via.placeholder.com/70x70?text=Driver', width: 60, height: 40 },
-];
 
 let placedComponents = [];
 let isEraseModeActive = false;
@@ -15,13 +8,73 @@ let dragData = null;
 let selectedComponent = null;
 let offsetX = 0, offsetY = 0;
 
+function getPaletteComponentsFromFiles() {
+  // List of files in assets/robot_parts (update this list if new files are added)
+  const files = [
+    'robot_body1.png',
+    'robot_wheel.png',
+    'sensor.png',
+    'arduino_uno.png',
+    'l298n.png',
+  ];
+  return files.map(file => {
+    let type = 'other', name = file;
+    if (file.startsWith('robot_body')) { type = 'chassis'; name = 'Chasis'; }
+    else if (file.startsWith('robot_wheel')) { type = 'wheel'; name = 'Rueda'; }
+    else if (file.startsWith('sensor')) { type = 'sensor'; name = 'Sensor'; }
+    else if (file.startsWith('arduino')) { type = 'arduino'; name = 'Arduino'; }
+    else if (file.startsWith('l298n') || file.startsWith('driver')) { type = 'driver'; name = 'Driver'; }
+    // Default sizes (can be improved by reading from a config file)
+    let width = 50, height = 50;
+    if (type === 'chassis') { width = 340; height = 160; }
+    if (type === 'wheel') { width = 50; height = 50; }
+    if (type === 'sensor') { width = 12; height = 12; }
+    if (type === 'arduino') { width = 68; height = 53; }
+    if (type === 'driver') { width = 60; height = 40; }
+    return {
+      type,
+      name,
+      file,
+      src: `assets/robot_parts/${file}`,
+      width,
+      height
+    };
+  });
+}
+
 export function initRobotEditorV2() {
   const canvas = document.getElementById('robotEditorCanvas');
   const ctx = canvas.getContext('2d');
+  window.PALETTE_COMPONENTS = getPaletteComponentsFromFiles();
+  buildPalette();
   setupPaletteDrag();
   setupCanvasEvents(canvas, ctx);
   setupButtons();
   render(ctx, canvas);
+}
+
+function buildPalette() {
+  // Clear existing palettes
+  document.getElementById('robotChassisPalette').innerHTML = '';
+  document.getElementById('robotWheelPalette').innerHTML = '';
+  document.getElementById('robotSensorPalette').innerHTML = '';
+  document.getElementById('robotArduinoPalette').innerHTML = '';
+  document.getElementById('robotDriverPalette').innerHTML = '';
+  (window.PALETTE_COMPONENTS || []).forEach(comp => {
+    const img = document.createElement('img');
+    img.src = comp.src;
+    img.alt = comp.name;
+    img.draggable = true;
+    img.dataset.type = comp.type;
+    img.dataset.file = comp.file;
+    img.style.width = '70px';
+    img.style.height = '70px';
+    if (comp.type === 'chassis') document.getElementById('robotChassisPalette').appendChild(img);
+    if (comp.type === 'wheel') document.getElementById('robotWheelPalette').appendChild(img);
+    if (comp.type === 'sensor') document.getElementById('robotSensorPalette').appendChild(img);
+    if (comp.type === 'arduino') document.getElementById('robotArduinoPalette').appendChild(img);
+    if (comp.type === 'driver') document.getElementById('robotDriverPalette').appendChild(img);
+  });
 }
 
 function setupPaletteDrag() {
@@ -108,7 +161,7 @@ function setupButtons() {
 }
 
 function getPaletteComponent(type) {
-  return PALETTE_COMPONENTS.find(c => c.type === type);
+  return (window.PALETTE_COMPONENTS || []).find(c => c.type === type);
 }
 
 function isPointInComponent(x, y, comp) {
