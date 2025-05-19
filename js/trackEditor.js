@@ -316,7 +316,7 @@ function getRotatedConnections(part, rotation_deg) {
     return rotated;
 }
 
-function generateRandomTrackWithRetry(maxRetries = 10) {
+function generateRandomTrackWithRetry(maxRetries = 30) {
     console.log("generateRandomTrackWithRetry CALLED for Path First track. maxRetries:", maxRetries);
     for (let i = 0; i < maxRetries; i++) {
         console.log(`--- Attempt ${i + 1} / ${maxRetries} calling generateRandomLoopTrack ---`);
