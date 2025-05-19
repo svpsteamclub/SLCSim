@@ -60,7 +60,7 @@ function checkAllAssetsLoadedAndInit() {
                     UI.updateRobotGeometryDisplay(newGeometry); 
                 }
             },
-            loadTrackFromEditorCanvas: (trackCanvas, startX_m, startY_m, startAngle_rad) => {
+            loadTrackFromEditorCanvas: async (trackCanvas, startX_m, startY_m, startAngle_rad) => {
                 stopSimulation(); // Stop any current simulation
                 currentTrackIsCustom = true; 
                 customTrackImageFilename = "Pista_del_Editor.png";
@@ -68,18 +68,23 @@ function checkAllAssetsLoadedAndInit() {
                 UI.getDOMElements().customTrackInput.value = ''; 
                 UI.getDOMElements().trackImageSelector.selectedIndex = -1;
 
-
-                if (simulation.setTrackFromCanvas(trackCanvas, startX_m, startY_m, startAngle_rad)) {
-                    const {simulationCanvas} = UI.getDOMElements();
-                    simulationCanvas.width = trackCanvas.width;
-                    simulationCanvas.height = trackCanvas.height;
-                    
-                    // Force a render of the new state
-                    if (displayCtx && simulation) {
-                         simulation.draw(displayCtx, displayCanvas.width, displayCanvas.height, null);
+                try {
+                    if (await simulation.setTrackFromCanvas(trackCanvas, startX_m, startY_m, startAngle_rad)) {
+                        const {simulationCanvas} = UI.getDOMElements();
+                        simulationCanvas.width = trackCanvas.width;
+                        simulationCanvas.height = trackCanvas.height;
+                        
+                        // Force a render of the new state
+                        if (displayCtx && simulation) {
+                            simulation.draw(displayCtx, displayCanvas.width, displayCanvas.height, null);
+                        }
+                        UI.updateUIForSimulationState(simulationRunning, isSettingStartPosition, true, true);
+                    } else {
+                        alert("Error al cargar la pista desde el editor.");
+                        UI.updateUIForSimulationState(simulationRunning, isSettingStartPosition, false, true);
                     }
-                    UI.updateUIForSimulationState(simulationRunning, isSettingStartPosition, true, true);
-                } else {
+                } catch (error) {
+                    console.error("Error loading track from editor:", error);
                     alert("Error al cargar la pista desde el editor.");
                     UI.updateUIForSimulationState(simulationRunning, isSettingStartPosition, false, true);
                 }
