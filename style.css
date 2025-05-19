@@ -280,14 +280,24 @@ footer { text-align: center; margin-top: 30px; padding-bottom: 20px; font-size: 
 
 .pid-params-row {
   display: flex;
-  flex-wrap: wrap;
-  gap: 24px;
+  flex-wrap: nowrap;
+  gap: 8px;
   align-items: flex-end;
   margin-bottom: 8px;
+  overflow-x: auto;
 }
 .pid-params-row > div {
   display: flex;
   flex-direction: column;
-  min-width: 140px;
+  min-width: 110px;
+  margin-bottom: 0;
+}
+.arduino-controls.controls {
+  margin-bottom: 20px;
+  background: #f9f9f9;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  padding: 15px;
+  box-sizing: border-box;
 }
 /* END OF FILE style.css */
