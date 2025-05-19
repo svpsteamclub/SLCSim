@@ -256,9 +256,11 @@ hr.internal-separator { margin-top: 20px; margin-bottom:10px; width: 95%; backgr
 .explanation-section ul ul, .explanation-section ol ul { margin-left: 20px; }
 
 .tab-navigation {
-    text-align: center;
-    margin-bottom: 20px;
-    background-color: #f0f0f0;
+    background: transparent;
+    box-shadow: none;
+    border: none;
+    padding: 0;
+    margin: 0 auto 20px auto;
 }
 .tab-button {
     padding: 10px 20px;
