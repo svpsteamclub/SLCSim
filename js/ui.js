@@ -1,8 +1,8 @@
 // js/ui.js
 import {
     MAX_BAR_HEIGHT_PX, currentMaxValError, currentMaxValPTerm, currentMaxValITerm,
-    currentMaxValDTerm, currentMaxValAdjPID, MAX_VAL_PWM_BAR, AVAILABLE_TRACKS, PIXELS_PER_METER
-} from './config.js';
+    currentMaxValDTerm, /* currentMaxValAdjPID is now dynamic */ MAX_VAL_PWM_BAR, AVAILABLE_TRACKS, PIXELS_PER_METER
+} from './config.js'; // Removed unused currentMaxValAdjPID import from here
 
 let domElements = {}; 
 
@@ -77,11 +77,11 @@ export function getDOMElements() {
 export function getSimulationParameters() {
     const elems = getDOMElements();
 
-    console.log("UI RAW VALUES FROM INPUTS: Kp:", elems.arduinoKpInput.value,
-                "Ki:", elems.arduinoKiInput.value,
-                "Kd:", elems.arduinoKdInput.value,
-                "BaseVel:", elems.arduinoVelBaseInput.value,
-                "IntMax:", elems.arduinoIntegralMaxInput.value);
+    // console.log("UI RAW VALUES FROM INPUTS: Kp:", elems.arduinoKpInput.value,
+    //             "Ki:", elems.arduinoKiInput.value,
+    //             "Kd:", elems.arduinoKdInput.value,
+    //             "BaseVel:", elems.arduinoVelBaseInput.value,
+    //             "IntMax:", elems.arduinoIntegralMaxInput.value);
 
     let kp = parseFloat(elems.arduinoKpInput.value);
     let ki = parseFloat(elems.arduinoKiInput.value);
@@ -89,7 +89,6 @@ export function getSimulationParameters() {
     let baseSpeed = parseFloat(elems.arduinoVelBaseInput.value);
     let integralMax = parseFloat(elems.arduinoIntegralMaxInput.value);
 
-    // Default to 0 if NaN (e.g., empty input), otherwise use the parsed value (which could be 0 if user typed "0")
     kp = isNaN(kp) ? 0 : kp;
     ki = isNaN(ki) ? 0 : ki;
     kd = isNaN(kd) ? 0 : kd;
@@ -104,14 +103,19 @@ export function getSimulationParameters() {
         baseSpeed: baseSpeed,
     };
     
-    console.log("UI PARSED PID SETTINGS to be used:", JSON.stringify(pidSettings));
+    // console.log("UI PARSED PID SETTINGS to be used:", JSON.stringify(pidSettings));
 
     let simMaxSpeed = parseFloat(elems.maxRobotSpeedMPSInput.value);
-    simMaxSpeed = isNaN(simMaxSpeed) ? ( (kp === 0 && ki === 0 && kd === 0 && baseSpeed === 0) ? 0 : 1.0 ) : simMaxSpeed;
+    // If all driving PID parameters are zero, default max speed to 0, otherwise default to 1.0 if input is blank
+    simMaxSpeed = isNaN(simMaxSpeed) ? 
+                  ( (pidSettings.kp === 0 && pidSettings.ki === 0 && pidSettings.kd === 0 && pidSettings.baseSpeed === 0) ? 0 : 1.0 ) 
+                  : simMaxSpeed;
 
     let simDeadband = parseInt(elems.motorDeadbandPWMInput.value);
-    simDeadband = isNaN(simDeadband) ? ( (kp === 0 && ki === 0 && kd === 0 && baseSpeed === 0) ? 0 : 5) : simDeadband;
-
+    // If all driving PID parameters are zero, default deadband to 0, otherwise default to 5 if input is blank
+    simDeadband = isNaN(simDeadband) ? 
+                  ( (pidSettings.kp === 0 && pidSettings.ki === 0 && pidSettings.kd === 0 && pidSettings.baseSpeed === 0) ? 0 : 5 ) 
+                  : simDeadband;
 
     return {
         timeStep: parseFloat(elems.timeStepInput.value) || 0.01,
@@ -125,7 +129,6 @@ export function getSimulationParameters() {
     };
 }
 
-// ... (rest of ui.js functions: populateTrackSelector, updateBar, updatePIDDisplay, etc. remain unchanged from your last full version)
 export function populateTrackSelector() {
     const { trackImageSelector } = getDOMElements();
     if (!trackImageSelector) return;
@@ -141,14 +144,14 @@ export function populateTrackSelector() {
 
     AVAILABLE_TRACKS.forEach((track, index) => {
         const option = document.createElement('option');
-        option.value = track.fileName; 
+        option.value = track.fileName;
         option.textContent = track.displayName;
         option.dataset.fileName = track.fileName;
         option.dataset.width = track.width;
         option.dataset.height = track.height;
-        option.dataset.startX = track.startX; 
+        option.dataset.startX = track.startX;
         option.dataset.startY = track.startY;
-        option.dataset.startAngle = track.startAngle; 
+        option.dataset.startAngle = track.startAngle;
 
         if (index === 0) option.selected = true;
         trackImageSelector.appendChild(option);
@@ -162,8 +165,10 @@ export function updateBar(barElement, value, maxValue, valueTextElement) {
         heightPercentage = 0;
     } else if (typeof value === 'number' && !isNaN(value)) {
         absValue = Math.abs(value);
-        if (maxValue > 0.00001) { 
+        if (maxValue > 0.00001) {
             heightPercentage = Math.min(100, (absValue / maxValue) * 100);
+        } else { // If maxValue is 0 or very small, bar is 0 unless value is also 0
+             heightPercentage = (value === 0) ? 0 : 100; // Or 0, depending on desired behavior for non-zero value with zero max
         }
     }
     if (isNaN(heightPercentage)) heightPercentage = 0;
@@ -171,7 +176,9 @@ export function updateBar(barElement, value, maxValue, valueTextElement) {
 }
 
 export function updatePIDDisplay(pidTerms, motorPWMs) {
-    const elems = getDOMElements();
+    const elems = getDOMElements(); 
+    if (!elems.errorValSpan) return; 
+
     if (pidTerms) {
         elems.errorValSpan.textContent = pidTerms.error.toFixed(2);
         updateBar(elems.errorBar, pidTerms.error, currentMaxValError, elems.errorValSpan);
@@ -181,17 +188,25 @@ export function updatePIDDisplay(pidTerms, motorPWMs) {
         updateBar(elems.iBar, pidTerms.iTerm, currentMaxValITerm, elems.iValSpan);
         elems.dValSpan.textContent = pidTerms.dTerm.toFixed(2);
         updateBar(elems.dBar, pidTerms.dTerm, currentMaxValDTerm, elems.dValSpan);
-        elems.arduinoAjusteValSpan.textContent = pidTerms.adjPID.toFixed(2);
-        // Adjust max for AdjPID bar based on current baseSpeed if it changed
-        const baseSpeedForBar = parseFloat(elems.arduinoVelBaseInput.value) || 0;
-        // currentMaxValAdjPID = baseSpeedForBar + 255; // Max theoretical range
-        // A more practical max for the bar could be related to VELOCIDAD_BASE * 2 or similar
-        let dynamicMaxAdjPID = Math.max(255, baseSpeedForBar * 1.5 + Math.abs(pidTerms.adjPID) * 1.1); // Make it dynamic
-        if (pidSettings && pidSettings.baseSpeed === 0 && pidSettings.kp === 0 && pidSettings.ki ===0 && pidSettings.kd ===0 ) {
-            dynamicMaxAdjPID = 50; // A small sensible max if everything is zero
+        
+        const baseSpeedFromUI = parseFloat(elems.arduinoVelBaseInput.value);
+        const kpFromUI = parseFloat(elems.arduinoKpInput.value);
+        const kiFromUI = parseFloat(elems.arduinoKiInput.value);
+        const kdFromUI = parseFloat(elems.arduinoKdInput.value);
+
+        const currentBaseSpeed = isNaN(baseSpeedFromUI) ? 0 : baseSpeedFromUI;
+        const currentKp = isNaN(kpFromUI) ? 0 : kpFromUI;
+        const currentKi = isNaN(kiFromUI) ? 0 : kiFromUI;
+        const currentKd = isNaN(kdFromUI) ? 0 : kdFromUI;
+
+        let dynamicMaxAdjPID = Math.max(255, currentBaseSpeed * 1.5 + Math.abs(pidTerms.adjPID) * 1.2); 
+        
+        if (currentBaseSpeed === 0 && currentKp === 0 && currentKi === 0 && currentKd === 0 ) {
+            dynamicMaxAdjPID = 50; // A small sensible max for the bar if all driving PID params are zero
         }
+        if (dynamicMaxAdjPID <= 0) dynamicMaxAdjPID = 50; // Ensure it's positive for bar scaling
 
-
+        elems.arduinoAjusteValSpan.textContent = pidTerms.adjPID.toFixed(2);
         updateBar(elems.adjPIDBar, pidTerms.adjPID, dynamicMaxAdjPID, elems.arduinoAjusteValSpan);
     }
     if (motorPWMs) {
@@ -208,7 +223,7 @@ export function resetPIDDisplay() {
     elems.pValSpan.textContent = "0.00";   updateBar(elems.pBar, 0, currentMaxValPTerm, elems.pValSpan);
     elems.iValSpan.textContent = "0.00";   updateBar(elems.iBar, 0, currentMaxValITerm, elems.iValSpan);
     elems.dValSpan.textContent = "0.00";   updateBar(elems.dBar, 0, currentMaxValDTerm, elems.dValSpan);
-    elems.arduinoAjusteValSpan.textContent = "N/A"; updateBar(elems.adjPIDBar, 0, currentMaxValAdjPID, elems.arduinoAjusteValSpan);
+    elems.arduinoAjusteValSpan.textContent = "N/A"; updateBar(elems.adjPIDBar, 0, 255, elems.arduinoAjusteValSpan); // Use a default max for reset
     elems.vLeftValSpan.textContent = "0";  updateBar(elems.vLeftBar, 0, MAX_VAL_PWM_BAR, elems.vLeftValSpan);
     elems.vRightValSpan.textContent = "0"; updateBar(elems.vRightBar, 0, MAX_VAL_PWM_BAR, elems.vRightValSpan);
 }

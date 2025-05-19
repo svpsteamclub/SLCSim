@@ -19,17 +19,17 @@ export class PIDController {
         this.output = 0; 
 
         this.lastKnownLineDirection = 0; 
-        // console.log(`PIDController INITIALIZED with: kp=${this.kp}, ki=${this.ki}, kd=${this.kd}, intMax=${this.integralMax}, baseSpeed=${this.baseSpeed}`);
+        console.log(`PIDController INITIALIZED with: kp=${this.kp}, ki=${this.ki}, kd=${this.kd}, intMax=${this.integralMax}, baseSpeed=${this.baseSpeed}`);
     }
 
     updateSettings(settings) {
-        // console.log("PIDController updateSettings received:", JSON.parse(JSON.stringify(settings))); 
+        console.log("[PIDController.updateSettings] Received settings:", JSON.parse(JSON.stringify(settings))); 
         this.kp = typeof settings.kp === 'number' ? settings.kp : this.kp;
         this.ki = typeof settings.ki === 'number' ? settings.ki : this.ki; 
         this.kd = typeof settings.kd === 'number' ? settings.kd : this.kd; 
         this.integralMax = typeof settings.integralMax === 'number' ? settings.integralMax : this.integralMax;
         this.baseSpeed = typeof settings.baseSpeed === 'number' ? settings.baseSpeed : this.baseSpeed;
-        // console.log(`PIDController AFTER update: kp=${this.kp}, ki=${this.ki}, kd=${this.kd}, intMax=${this.integralMax}, baseSpeed=${this.baseSpeed}`); 
+        console.log(`[PIDController.updateSettings] AFTER update: kp=${this.kp}, ki=${this.ki}, kd=${this.kd}, intMax=${this.integralMax}, baseSpeed=${this.baseSpeed}`); 
     }
     
     reset() {
@@ -85,32 +85,42 @@ export class PIDController {
 
 
     computeOutput(dt_s) {
+        // console.log(`[PID Compute] START: ki=${this.ki} (type: ${typeof this.ki}), kd=${this.kd} (type: ${typeof this.kd}), intMax=${this.integralMax}, error=${this.error.toFixed(2)}`);
+
         // Proportional Term
         this.pTerm = this.kp * this.error;
 
         // Integral Term
+        // console.log(`[PID Compute] Before I-Term Check: ki=${this.ki}, integralMax=${this.integralMax}, integralAccumulator=${this.integralAccumulator.toFixed(2)}`);
         if (this.ki === 0 || this.integralMax <= 0) { 
              this.iTerm = 0;
              this.integralAccumulator = 0; 
+            //  console.log("[PID Compute] I-Term is ZERO because ki is 0 or integralMax <= 0.");
         } else {
             this.integralAccumulator += this.error * dt_s;
             this.integralAccumulator = clamp(this.integralAccumulator, -this.integralMax, this.integralMax);
             this.iTerm = this.ki * this.integralAccumulator;
+            // console.log(`[PID Compute] I-Term Calculated: ${this.iTerm.toFixed(2)} (ki=${this.ki} * acc=${this.integralAccumulator.toFixed(2)})`);
         }
 
         // Derivative Term
+        // console.log(`[PID Compute] Before D-Term Check: kd=${this.kd}, error=${this.error.toFixed(2)}, prevError=${this.prevError.toFixed(2)}, dt_s=${dt_s.toFixed(4)}`);
         if (this.kd === 0) { 
             this.dTerm = 0;
+            // console.log("[PID Compute] D-Term is ZERO because kd is 0.");
         } else {
-            if (dt_s > 0.0001) {
+            if (dt_s > 0.0001) { // Avoid division by zero or very small dt
                 this.dTerm = this.kd * (this.error - this.prevError) / dt_s;
+                // console.log(`[PID Compute] D-Term Calculated: ${this.dTerm.toFixed(2)} (kd=${this.kd} * deltaErr=${(this.error - this.prevError).toFixed(3)} / dt=${dt_s.toFixed(4)})`);
             } else {
                 this.dTerm = 0;
+                // console.log("[PID Compute] D-Term is ZERO because dt_s is too small.");
             }
         }
-        this.prevError = this.error; // Must be after D-term calculation
+        this.prevError = this.error; 
 
         this.output = this.pTerm + this.iTerm + this.dTerm;
+        // console.log(`[PID Compute] FINAL TERMS: P=${this.pTerm.toFixed(2)}, I=${this.iTerm.toFixed(2)}, D=${this.dTerm.toFixed(2)}, Output=${this.output.toFixed(2)}`);
         
         return this.output; 
     }
