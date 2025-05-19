@@ -64,11 +64,11 @@ function buildPalette(callback) {
     img.onload = () => {
       comp.width = img.naturalWidth;
       comp.height = img.naturalHeight;
+      img.style.width = img.naturalWidth + 'px';
+      img.style.height = img.naturalHeight + 'px';
       loaded++;
       if (loaded === comps.length && typeof callback === 'function') callback();
     };
-    img.style.width = '70px';
-    img.style.height = '70px';
     if (comp.type === 'chassis') document.getElementById('robotChassisPalette').appendChild(img);
     if (comp.type === 'wheel') document.getElementById('robotWheelPalette').appendChild(img);
     if (comp.type === 'sensor') document.getElementById('robotSensorPalette').appendChild(img);
