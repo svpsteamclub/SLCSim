@@ -506,18 +506,27 @@ function handleTrackSelectionChange() {
     if (isSettingStartPosition) toggleSetStartPositionMode();
     stopSimulation();
 
-    const selectedOption = UI.getDOMElements().trackImageSelector.selectedOptions[0];
+    const selector = UI.getDOMElements().trackImageSelector;
+    const selectedOption = selector.selectedOptions[0];
+
+    // If blank or invalid, force to first valid option
     if (!selectedOption || !selectedOption.dataset.fileName) {
-        if (simulation && simulation.track) simulation.track.clear(); 
-        UI.updateUIForSimulationState(simulationRunning, isSettingStartPosition, false, false);
-        if (displayCtx && simulation) simulation.draw(displayCtx, displayCanvas.width, displayCanvas.height, null);
+        if (selector.options.length > 0 && selector.options[0].dataset.fileName) {
+            selector.selectedIndex = 0;
+            // Call again with the new selection
+            handleTrackSelectionChange();
+        } else {
+            if (simulation && simulation.track) simulation.track.clear(); 
+            UI.updateUIForSimulationState(simulationRunning, isSettingStartPosition, false, false);
+            if (displayCtx && simulation) simulation.draw(displayCtx, displayCanvas.width, displayCanvas.height, null);
+        }
         return;
     }
-    
+
     currentTrackIsCustom = false; // Now it's a predefined track
     customTrackFile = null;
     customTrackImageFilename = "";
-    if (UI.getDOMElements().customTrackInput) UI.getDOMElements().customTrackInput.value = ''; 
+    if (UI.getDOMElements().customTrackInput) UI.getDOMElements().customTrackInput.value = '';
 
     const trackUrl = selectedOption.dataset.fileName;
     const trackWidth = parseInt(selectedOption.dataset.width);
@@ -526,7 +535,7 @@ function handleTrackSelectionChange() {
     predefinedTrackStart.y_px = parseFloat(selectedOption.dataset.startY);
     predefinedTrackStart.angle_deg = parseFloat(selectedOption.dataset.startAngle);
 
-    if(UI.getDOMElements().startButton) UI.getDOMElements().startButton.disabled = true; 
+    if(UI.getDOMElements().startButton) UI.getDOMElements().startButton.disabled = true;
 
     simulation.loadTrack(
         trackUrl, trackWidth, trackHeight,
