@@ -66,15 +66,20 @@ export class Simulation {
         }, isCustomFile, fileName);
     }
     
-    setTrackFromCanvas(sourceCanvas, startX_m, startY_m, startAngle_rad) {
-        const success = this.track.setFromCanvas(sourceCanvas, this.params.lineThreshold);
-        if (success) {
-             this.robot.resetState(startX_m, startY_m, startAngle_rad);
-             this.pidController.reset();
-             this.totalSimTime_s = 0;
-             this.lapTimer.initialize({ x_m: startX_m, y_m: startY_m, angle_rad: startAngle_rad }, this.totalSimTime_s);
+    async setTrackFromCanvas(sourceCanvas, startX_m, startY_m, startAngle_rad) {
+        try {
+            const success = await this.track.setFromCanvas(sourceCanvas, this.params.lineThreshold);
+            if (success) {
+                this.robot.resetState(startX_m, startY_m, startAngle_rad);
+                this.pidController.reset();
+                this.totalSimTime_s = 0;
+                this.lapTimer.initialize({ x_m: startX_m, y_m: startY_m, angle_rad: startAngle_rad }, this.totalSimTime_s);
+            }
+            return success;
+        } catch (error) {
+            console.error("Error setting track from canvas:", error);
+            return false;
         }
-        return success;
     }
 
     resetSimulation(startX_m, startY_m, startAngle_rad) {

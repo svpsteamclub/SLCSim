@@ -83,33 +83,37 @@
         
         // Used by track editor to set the track from a generated canvas/image
         setFromCanvas(sourceCanvas, lineThreshold) {
-            this.lineThreshold = lineThreshold;
-            this.isCustom = true; // Tracks from editor are considered custom
-            this.customFileName = "Pista_del_Editor.png";
+            return new Promise((resolve, reject) => {
+                this.lineThreshold = lineThreshold;
+                this.isCustom = true; // Tracks from editor are considered custom
+                this.customFileName = "Pista_del_Editor.png";
 
-            this.width_px = sourceCanvas.width;
-            this.height_px = sourceCanvas.height;
+                this.width_px = sourceCanvas.width;
+                this.height_px = sourceCanvas.height;
 
-            // Create a new Image object from the sourceCanvas to ensure it behaves like normally loaded tracks
-            this.image = new Image();
-            this.image.onload = () => {
-                this.offscreenCanvas.width = this.width_px;
-                this.offscreenCanvas.height = this.height_px;
-                this.offscreenCtx.drawImage(this.image, 0, 0, this.width_px, this.height_px);
-                try {
-                    this.imageData = this.offscreenCtx.getImageData(0, 0, this.width_px, this.height_px);
-                    console.log(`Track set from canvas. Dimensions: ${this.width_px}x${this.height_px}`);
-                } catch (e) {
-                    console.error("Error getting image data from canvas-generated track:", e);
+                // Create a new Image object from the sourceCanvas to ensure it behaves like normally loaded tracks
+                this.image = new Image();
+                this.image.onload = () => {
+                    this.offscreenCanvas.width = this.width_px;
+                    this.offscreenCanvas.height = this.height_px;
+                    this.offscreenCtx.drawImage(this.image, 0, 0, this.width_px, this.height_px);
+                    try {
+                        this.imageData = this.offscreenCtx.getImageData(0, 0, this.width_px, this.height_px);
+                        console.log(`Track set from canvas. Dimensions: ${this.width_px}x${this.height_px}`);
+                        resolve(true);
+                    } catch (e) {
+                        console.error("Error getting image data from canvas-generated track:", e);
+                        this.imageData = null;
+                        reject(e);
+                    }
+                };
+                this.image.onerror = () => {
+                    console.error("Error loading image from canvas data URL for editor track.");
                     this.imageData = null;
-                }
-            };
-            this.image.onerror = () => {
-                console.error("Error loading image from canvas data URL for editor track.");
-                this.imageData = null;
-            };
-            this.image.src = sourceCanvas.toDataURL(); // This triggers the onload
-            return (this.imageData !== null);
+                    reject(new Error("Failed to load track image"));
+                };
+                this.image.src = sourceCanvas.toDataURL(); // This triggers the onload
+            });
         }
 
 
