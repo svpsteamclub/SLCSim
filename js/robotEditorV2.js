@@ -173,8 +173,12 @@ function setupCanvasEvents(canvas, ctx) {
     canvas.style.cursor = isEraseModeActive ? 'not-allowed' : 'crosshair';
   });
 
-  // Double-click to rotate component 90 degrees
+  // Double-click to rotate component 90 degrees (debounced)
+  let lastDblClickTime = 0;
   canvas.addEventListener('dblclick', (e) => {
+    const now = Date.now();
+    if (now - lastDblClickTime < 300) return; // Ignore if within 300ms of last dblclick
+    lastDblClickTime = now;
     e.preventDefault();
     e.stopPropagation();
     const rect = canvas.getBoundingClientRect();
@@ -185,9 +189,7 @@ function setupCanvasEvents(canvas, ctx) {
       const comp = placedComponents[i];
       if (isPointInComponent(x, y, comp)) {
         if (typeof comp.angle !== 'number') comp.angle = 0;
-        console.log('Before:', comp.angle);
         comp.angle = ((comp.angle + Math.PI / 2) % (2 * Math.PI));
-        console.log('After:', comp.angle);
         render(ctx, canvas);
         break;
       }
