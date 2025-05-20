@@ -297,7 +297,7 @@ function setupCanvasEvents(canvas, ctx) {
       const rect = canvas.getBoundingClientRect();
       const x = Math.round((e.clientX - rect.left) / GRID_SIZE) * GRID_SIZE;
       const y = Math.round((e.clientY - rect.top) / GRID_SIZE) * GRID_SIZE;
-      drawDragPreview(ctx, x, y);
+      renderWithDragPreview(ctx, canvas, x, y);
     }
   });
 
@@ -783,6 +783,11 @@ function drawDragPreview(ctx, x, y) {
   }
 
   ctx.restore();
+}
+
+function renderWithDragPreview(ctx, canvas, x, y) {
+  render(ctx, canvas); // Redraw everything (clears canvas)
+  drawDragPreview(ctx, x, y); // Draw the drag preview on top
 }
 
 function showNotification(message, type = 'info') {
