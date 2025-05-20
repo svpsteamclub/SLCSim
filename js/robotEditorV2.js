@@ -92,17 +92,17 @@ function getPaletteComponentsFromFiles() {
     const files = [
         'robot_body1.png',
         'robot_wheel.png',
-        'sensor.png',
-        'arduino_uno.png',
-        'l298n.png',
+        'sensor.png'
+        // 'arduino_uno.png',
+        // 'l298n.png',
     ];
     return files.map(file => {
         let type = 'other', name = file;
         if (file.startsWith('robot_body')) { type = 'chassis'; name = 'Chasis'; }
         else if (file.startsWith('robot_wheel')) { type = 'wheel'; name = 'Rueda'; }
         else if (file.startsWith('sensor')) { type = 'sensor'; name = 'Sensor'; }
-        else if (file.startsWith('arduino')) { type = 'arduino'; name = 'Arduino'; }
-        else if (file.startsWith('l298n') || file.startsWith('driver')) { type = 'driver'; name = 'Driver'; }
+        // else if (file.startsWith('arduino')) { type = 'arduino'; name = 'Arduino'; }
+        // else if (file.startsWith('l298n') || file.startsWith('driver')) { type = 'driver'; name = 'Driver'; }
         return {
             type,
             name,
@@ -239,9 +239,9 @@ function buildPalette(callback) {
     const palettes = {
         chassis: document.getElementById('robotChassisPalette'),
         wheel: document.getElementById('robotWheelPalette'),
-        sensor: document.getElementById('robotSensorPalette'),
-        arduino: document.getElementById('robotArduinoPalette'),
-        driver: document.getElementById('robotDriverPalette')
+        sensor: document.getElementById('robotSensorPalette')
+        // arduino: document.getElementById('robotArduinoPalette'),
+        // driver: document.getElementById('robotDriverPalette')
     };
 
     Object.values(palettes).forEach(palette => {
