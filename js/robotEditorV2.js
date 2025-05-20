@@ -258,12 +258,12 @@ function buildPalette(callback) {
         img.draggable = true;
         img.dataset.type = comp.type;
         img.dataset.file = comp.file;
-        // Only set palette display size, not component size
-        img.style.width = '70px';
-        img.style.height = '70px';
+        // Set only the palette display height, width is proportional
         img.onload = function() {
-            comp.width = img.naturalWidth;
-            comp.height = img.naturalHeight;
+            comp.height = 70; // Fixed display height
+            comp.width = Math.round((img.naturalWidth / img.naturalHeight) * 70); // Proportional width
+            img.style.height = '70px';
+            img.style.width = comp.width + 'px';
             loaded++;
             if (loaded === comps.length && typeof callback === 'function') callback();
         };
