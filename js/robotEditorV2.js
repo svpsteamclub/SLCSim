@@ -63,25 +63,16 @@ const constraints = {
         required: true
     },
     wheel: {
-        min: MIN_WHEELS,
-        max: MAX_WHEELS,
+        min: 2,
+        max: 2,
         required: true
     },
     sensor: {
-        min: MIN_SENSORS,
-        max: MAX_SENSORS,
+        min: 3,
+        max: 3,
         required: true
-    },
-    arduino: {
-        min: 0,
-        max: 1,
-        required: false
-    },
-    driver: {
-        min: 0,
-        max: 1,
-        required: false
     }
+    // arduino and driver removed for now
 };
 
 /**
@@ -272,6 +263,12 @@ function buildPalette(callback) {
         const palette = palettes[comp.type];
         if (palette) palette.appendChild(img);
     });
+
+    // Remove Arduino and Driver labels if present
+    const arduinoLabel = document.querySelector('label[for="robotArduinoPalette"]');
+    if (arduinoLabel) arduinoLabel.style.display = 'none';
+    const driverLabel = document.querySelector('label[for="robotDriverPalette"]');
+    if (driverLabel) driverLabel.style.display = 'none';
 }
 
 function setupPaletteDrag() {
