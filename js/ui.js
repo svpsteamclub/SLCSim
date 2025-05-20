@@ -66,7 +66,6 @@ export function cacheDOMElements() {
         trackPartsPalette: document.getElementById('trackPartsPalette'),
         toggleEraseModeButton: document.getElementById('toggleEraseModeButton'), 
         toggleEraseComponentButton: document.getElementById('toggleEraseComponentButton'),
-        robotEditorPlaceholder: document.getElementById('robotEditorPlaceholder'),
     };
     return domElements;
 }
@@ -307,11 +306,6 @@ export function setupTabNavigation() {
             tabContents.forEach(content => {
                 content.style.display = content.id === `${targetTab}Content` ? 'block' : 'none';
             });
-
-            // Initialize robot editor only when its tab is shown
-            if (targetTab === 'robotEditor') {
-                initRobotEditorV2();
-            }
         });
     });
 }

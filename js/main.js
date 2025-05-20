@@ -3,7 +3,6 @@ import { Simulation } from './simulation.js';
 import * as Config from './config.js';
 import * as Utils from './utils.js';
 import * as UI from './ui.js';
-import { initRobotEditorV2 } from './robotEditorV2.js';
 import { initTrackEditor } from './trackEditor.js';
 
 let simulation;
@@ -98,7 +97,6 @@ function checkAllAssetsLoadedAndInit() {
                 simulation.resetRobotState();
             }
         };
-        if (typeof initRobotEditorV2 === 'function') initRobotEditorV2();
         if (typeof initTrackEditor === 'function') initTrackEditor(mainAppInterface);
 
         // requestAnimationFrame(gameLoop); // gameLoop starts from loadInitialTrack or its equivalents
