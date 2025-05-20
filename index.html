@@ -85,7 +85,7 @@
                         <label for="maxRobotSpeedMPS">Máxima Velocidad del Robot (m/s):</label>
                         <input type="number" id="maxRobotSpeedMPS" value="1.0" step="0.05">
                         <label for="motorResponseFactor">Factor de respuesta de los motores (0-1):</label>
-                        <input type="number" id="motorResponseFactor" value="0.03" step="0.01">
+                        <input type="number" id="motorResponseFactor" value="0.04" step="0.01">
                         <label for="sensorNoiseProb">Probabilidad de ruido en los sensores (0-1):</label>
                         <input type="number" id="sensorNoiseProb" value="0.0" step="0.005">
                         <label for="movementPerturbFactor">Factor de Perturbación de Movimientos (0-1):</label>
@@ -105,9 +105,9 @@
                         <label for="robotLengthInput_actual">Largo (m):</label>
                         <input type="number" id="robotLengthInput_actual" value="0.34" step="0.01" readonly>
                         <label for="sideSensorSpreadInput">Amplitud de los sensores laterales (m, desde el centro del array de sensores):</label>
-                        <input type="number" id="sideSensorSpreadInput" value="0.016" step="0.005" readonly>
+                        <input type="number" id="sideSensorSpreadInput" value="0.017" step="0.005" readonly>
                         <label for="sensorForwardOffsetInput">Posición de los sensores (m, desde el centro del robot):</label>
-                        <input type="number" id="sensorForwardOffsetInput" value="0.14" step="0.01" readonly>
+                        <input type="number" id="sensorForwardOffsetInput" value="0.15" step="0.01" readonly>
                         <label for="sensorDiameterInput">Diámetro de los sensores (m):</label>
                         <input type="number" id="sensorDiameterInput" value="0.012" step="0.001" readonly>
                         <button id="restoreDefaultRobot" class="control-button">Restaurar Robot por Defecto</button>
@@ -118,10 +118,10 @@
             <div class="arduino-controls controls">
                 <h3>Parámetros del Código (PID)</h3>
                 <div class="pid-params-row">
-                    <div><label for="arduino_kp">Arduino Kp:</label><input type="number" id="arduino_kp" value="120" step="1"></div>
-                    <div><label for="arduino_ki">Arduino Ki:</label><input type="number" id="arduino_ki" value="3" step="0.001"></div>
-                    <div><label for="arduino_kd">Arduino Kd:</label><input type="number" id="arduino_kd" value="15" step="0.1"></div>
-                    <div><label for="arduino_velBase">VELOCIDAD_BASE (0-255):</label><input type="number" id="arduino_velBase" value="110" step="1"></div>
+                    <div><label for="arduino_kp">Arduino Kp:</label><input type="number" id="arduino_kp" value="90" step="1"></div>
+                    <div><label for="arduino_ki">Arduino Ki:</label><input type="number" id="arduino_ki" value="0.075" step="0.001"></div>
+                    <div><label for="arduino_kd">Arduino Kd:</label><input type="number" id="arduino_kd" value="4" step="0.1"></div>
+                    <div><label for="arduino_velBase">VELOCIDAD_BASE (0-255):</label><input type="number" id="arduino_velBase" value="140" step="1"></div>
                     <div><label for="arduino_integralMax">INTEGRAL_MAX:</label><input type="number" id="arduino_integralMax" value="250" step="1.0"></div>
                 </div>
             </div>
