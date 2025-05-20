@@ -224,32 +224,8 @@
     </div> <!-- End of #simulatorContent -->
 
     <div id="robotEditorContent" class="tab-content" style="display: none;">
-        <div class="controls-container"> 
-            <h2>Editor de Geometría del Robot</h2>
-            <p>Arrastra componentes desde la paleta al canvas para diseñar tu robot. Escala: 1 px = 1 mm.</p>
-            <div class="robot-editor-palette-group">
-                <h4>Chasis</h4>
-                <div class="robot-parts-palette" id="robotChassisPalette">
-                    <img src="assets/robot_parts/robot_body.png" alt="Chasis" draggable="true" data-type="chassis" data-file="robot_body.png" style="width:70px;height:70px;">
-                </div>
-                <h4>Ruedas</h4>
-                <div class="robot-parts-palette" id="robotWheelPalette">
-                    <img src="assets/robot_parts/robot_wheel.png" alt="Rueda" draggable="true" data-type="wheel" data-file="robot_wheel.png" style="width:70px;height:70px;">
-                </div>
-                <h4>Sensores</h4>
-                <div class="robot-parts-palette" id="robotSensorPalette">
-                    <img src="assets/robot_parts/sensor.png" alt="Sensor" draggable="true" data-type="sensor" data-file="sensor.png" style="width:70px;height:70px;">
-                </div>
-            </div>
-            <div class="robot-editor-buttons" style="margin-top: 15px;">
-                <button id="saveRobotDesign">Guardar Diseño</button>
-                <button id="loadRobotDesign">Cargar Diseño</button>
-                <input type="file" id="loadRobotDesignInput" accept=".robotdesign,.json,.txt" style="display:none;">
-                <button id="exportRobotDesign">Exportar para Simulador</button>
-                <button id="toggleEraseComponentButton" type="button">Activar Modo Borrar</button>
-            </div>
-        </div>
-        <canvas id="robotEditorCanvas" width="800" height="600" style="border:1px solid #ccc; background:#fff;"></canvas>
+        <!-- Robot Editor Placeholder: Start from scratch here -->
+        <div id="robotEditorPlaceholder"></div>
     </div> 
 
     <div id="trackEditorContent" class="tab-content" style="display: none;">

@@ -36,44 +36,9 @@ const BODY_IMAGES = [
     { id: 'robot_body2.png', name: 'Body Type 2' }
 ];
 
-/**
- * Initialize the robot editor
- */
+// Robot Editor V2 - Start from scratch
 export function initRobotEditorV2() {
-    const elems = getDOMElements();
-    const canvas = elems.robotEditorCanvas;
-    if (!canvas) {
-        console.error('Robot Editor Canvas not found!');
-        return;
-    }
-    const ctx = canvas.getContext('2d');
-    if (!ctx) {
-        console.error('Could not get canvas context!');
-        return;
-    }
-
-    // Set fixed canvas dimensions from config
-    const canvasWidth = SIMULATION_CONFIG.canvasWidth;
-    const canvasHeight = SIMULATION_CONFIG.canvasHeight;
-    canvas.width = canvasWidth;
-    canvas.height = canvasHeight;
-    canvas.style.width = `${canvasWidth}px`;
-    canvas.style.height = `${canvasHeight}px`;
-
-    // Initialize input fields
-    setupInputFields();
-    
-    // Initialize body selection and custom upload
-    setupBodySelection();
-    
-    // Setup export button
-    const exportBtn = document.getElementById('exportRobotDesign');
-    if (exportBtn) {
-        exportBtn.addEventListener('click', exportRobotDesign);
-    }
-
-    // Initial render
-    render(ctx, canvas);
+    // TODO: Implement new robot editor
 }
 
 /**

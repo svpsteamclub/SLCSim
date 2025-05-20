@@ -66,6 +66,7 @@ export function cacheDOMElements() {
         trackPartsPalette: document.getElementById('trackPartsPalette'),
         toggleEraseModeButton: document.getElementById('toggleEraseModeButton'), 
         toggleEraseComponentButton: document.getElementById('toggleEraseComponentButton'),
+        robotEditorPlaceholder: document.getElementById('robotEditorPlaceholder'),
     };
     return domElements;
 }
