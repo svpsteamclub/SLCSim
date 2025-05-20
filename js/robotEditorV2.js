@@ -582,6 +582,9 @@ function render(ctx, canvas) {
     drawGrid(ctx, canvas);
   }
 
+  // Always draw center grid lines in red
+  drawCenterGridLines(ctx, canvas);
+
   // Draw components
   state.placedComponents.forEach(comp => {
     const img = new Image();
@@ -601,12 +604,6 @@ function render(ctx, canvas) {
       ctx.strokeRect(-comp.width/2 - 2, -comp.height/2 - 2, 
                     comp.width + 4, comp.height + 4);
     }
-    
-    // Draw measurements if enabled
-    // (Removed to hide measurement numbers)
-    // if (state.showMeasurements) {
-    //   drawMeasurements(ctx, comp);
-    // }
     
     ctx.restore();
   });
@@ -680,6 +677,28 @@ function drawAlignmentGuides(ctx, canvas) {
   ctx.lineTo(canvas.width, canvas.height/2);
   ctx.stroke();
   
+  ctx.restore();
+}
+
+// Draw always-visible red center grid lines
+function drawCenterGridLines(ctx, canvas) {
+  ctx.save();
+  ctx.strokeStyle = 'red';
+  ctx.lineWidth = 1;
+  ctx.setLineDash([5, 5]);
+
+  // Vertical center line
+  ctx.beginPath();
+  ctx.moveTo(canvas.width/2, 0);
+  ctx.lineTo(canvas.width/2, canvas.height);
+  ctx.stroke();
+
+  // Horizontal center line
+  ctx.beginPath();
+  ctx.moveTo(0, canvas.height/2);
+  ctx.lineTo(canvas.width, canvas.height/2);
+  ctx.stroke();
+
   ctx.restore();
 }
 
