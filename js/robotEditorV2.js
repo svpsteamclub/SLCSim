@@ -258,14 +258,12 @@ function buildPalette(callback) {
         img.draggable = true;
         img.dataset.type = comp.type;
         img.dataset.file = comp.file;
-        // Set fixed size for both palette and component
-        comp.width = 70;
-        comp.height = 70;
-        comp.x = 0;
-        comp.y = 0;
+        // Only set palette display size, not component size
         img.style.width = '70px';
         img.style.height = '70px';
         img.onload = function() {
+            comp.width = img.naturalWidth;
+            comp.height = img.naturalHeight;
             loaded++;
             if (loaded === comps.length && typeof callback === 'function') callback();
         };
@@ -279,12 +277,13 @@ function setupPaletteDrag() {
     img.addEventListener('dragstart', function(e) {
       // Find the palette component by file
       const comp = (window.PALETTE_COMPONENTS || []).find(function(c) { return c.file === img.dataset.file; });
+      if (!comp) return;
       state.dragData = {
         type: img.dataset.type,
         file: img.dataset.file,
         src: img.src,
-        width: 70,
-        height: 70,
+        width: comp.width,
+        height: comp.height,
         x: 0,
         y: 0
       };
