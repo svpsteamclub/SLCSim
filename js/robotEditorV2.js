@@ -251,18 +251,21 @@ function buildPalette(callback) {
     let loaded = 0;
     // @ts-ignore - We know this exists
     const comps = window.PALETTE_COMPONENTS || [];
-    comps.forEach(comp => {
+    comps.forEach(function(comp) {
         const img = document.createElement('img');
         img.src = comp.src;
         img.alt = comp.name;
         img.draggable = true;
         img.dataset.type = comp.type;
         img.dataset.file = comp.file;
-        img.onload = () => {
-            comp.width = img.naturalWidth;
-            comp.height = img.naturalHeight;
-            img.style.width = img.naturalWidth + 'px';
-            img.style.height = img.naturalHeight + 'px';
+        // Set fixed size for both palette and component
+        comp.width = 70;
+        comp.height = 70;
+        comp.x = 0;
+        comp.y = 0;
+        img.style.width = '70px';
+        img.style.height = '70px';
+        img.onload = function() {
             loaded++;
             if (loaded === comps.length && typeof callback === 'function') callback();
         };
@@ -272,16 +275,18 @@ function buildPalette(callback) {
 }
 
 function setupPaletteDrag() {
-  document.querySelectorAll('.robot-parts-palette img').forEach(img => {
-    img.addEventListener('dragstart', (e) => {
+  document.querySelectorAll('.robot-parts-palette img').forEach(function(img) {
+    img.addEventListener('dragstart', function(e) {
       // Find the palette component by file
-      const comp = (window.PALETTE_COMPONENTS || []).find(c => c.file === img.dataset.file);
+      const comp = (window.PALETTE_COMPONENTS || []).find(function(c) { return c.file === img.dataset.file; });
       state.dragData = {
         type: img.dataset.type,
         file: img.dataset.file,
         src: img.src,
-        width: comp.width,
-        height: comp.height
+        width: 70,
+        height: 70,
+        x: 0,
+        y: 0
       };
     });
   });
