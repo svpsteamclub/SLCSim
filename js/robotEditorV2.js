@@ -260,8 +260,10 @@ function buildPalette(callback) {
         img.dataset.file = comp.file;
         // Set only the palette display height, width is proportional
         img.onload = function() {
-            comp.height = 70; // Fixed display height
-            comp.width = Math.round((img.naturalWidth / img.naturalHeight) * 70); // Proportional width
+            comp.naturalWidth = img.naturalWidth;
+            comp.naturalHeight = img.naturalHeight;
+            comp.height = 70; // Palette display height
+            comp.width = Math.round((img.naturalWidth / img.naturalHeight) * 70); // Palette display width
             img.style.height = '70px';
             img.style.width = comp.width + 'px';
             loaded++;
@@ -282,8 +284,8 @@ function setupPaletteDrag() {
         type: img.dataset.type,
         file: img.dataset.file,
         src: img.src,
-        width: comp.width,
-        height: comp.height,
+        width: comp.naturalWidth,   // Use natural/original size
+        height: comp.naturalHeight, // Use natural/original size
         x: 0,
         y: 0
       };
