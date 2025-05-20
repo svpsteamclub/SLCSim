@@ -754,17 +754,34 @@ function redo() {
 
 function drawDragPreview(ctx, x, y) {
   if (!state.dragData) return;
-  
+
   ctx.save();
   ctx.globalAlpha = 0.5;
   ctx.translate(x, y);
   ctx.rotate(0);
-  
-  const img = new Image();
-  img.src = state.dragData.src;
-  ctx.drawImage(img, -state.dragData.width/2, -state.dragData.height/2, 
-                state.dragData.width, state.dragData.height);
-  
+
+  // Use a cached image to avoid loading artifacts
+  if (!state.dragData._previewImg) {
+    const img = new Image();
+    img.src = state.dragData.src;
+    img.onload = () => {
+      state.dragData._previewImg = img;
+      // Redraw the canvas to show the loaded image
+      render(ctx, ctx.canvas);
+    };
+    // Draw a placeholder rectangle while loading
+    ctx.fillStyle = 'rgba(200,200,200,0.5)';
+    ctx.fillRect(-state.dragData.width/2, -state.dragData.height/2, state.dragData.width, state.dragData.height);
+  } else {
+    ctx.drawImage(
+      state.dragData._previewImg,
+      -state.dragData.width/2,
+      -state.dragData.height/2,
+      state.dragData.width,
+      state.dragData.height
+    );
+  }
+
   ctx.restore();
 }
 
