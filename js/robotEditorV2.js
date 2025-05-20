@@ -603,9 +603,10 @@ function render(ctx, canvas) {
     }
     
     // Draw measurements if enabled
-    if (state.showMeasurements) {
-      drawMeasurements(ctx, comp);
-    }
+    // (Removed to hide measurement numbers)
+    // if (state.showMeasurements) {
+    //   drawMeasurements(ctx, comp);
+    // }
     
     ctx.restore();
   });
