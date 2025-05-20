@@ -351,9 +351,16 @@ function setupCanvasEvents(canvas, ctx) {
     const rect = canvas.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
-    // Snap to 5x5 grid
-    state.selectedComponent.x = Math.round((x - state.offsetX) / 5) * 5;
-    state.selectedComponent.y = Math.round((y - state.offsetY) / 5) * 5;
+    
+    // For wheels, only allow vertical movement
+    if (state.selectedComponent.type === 'wheel') {
+      state.selectedComponent.x = SIMULATION_CONFIG.canvasWidth / 2;
+      state.selectedComponent.y = Math.round((y - state.offsetY) / GRID_SIZE) * GRID_SIZE;
+    } else {
+      // For other components, allow both x and y movement
+      state.selectedComponent.x = Math.round((x - state.offsetX) / GRID_SIZE) * GRID_SIZE;
+      state.selectedComponent.y = Math.round((y - state.offsetY) / GRID_SIZE) * GRID_SIZE;
+    }
     render(ctx, canvas);
   });
 
@@ -583,6 +590,11 @@ function render(ctx, canvas) {
 
   // Always draw center grid lines in red
   drawCenterGridLines(ctx, canvas);
+  
+  // Draw wheel placement guides if dragging a wheel
+  if (state.dragData && state.dragData.type === 'wheel') {
+    drawWheelPlacementGuide(ctx, canvas);
+  }
 
   // Draw components
   state.placedComponents.forEach(comp => {
@@ -701,15 +713,81 @@ function drawCenterGridLines(ctx, canvas) {
   ctx.restore();
 }
 
+/**
+ * Check if a wheel position is valid (must be vertically aligned at center)
+ * @param {number} x - X position in pixels
+ * @param {number} y - Y position in pixels
+ * @returns {boolean} Whether the position is valid for a wheel
+ */
+function isValidWheelPosition(x, y) {
+  // Allow a small tolerance for the center alignment
+  const CENTER_TOLERANCE = 5;
+  return Math.abs(x - SIMULATION_CONFIG.canvasWidth / 2) <= CENTER_TOLERANCE;
+}
+
+/**
+ * Draw wheel placement guide
+ * @param {CanvasRenderingContext2D} ctx - Canvas context
+ * @param {HTMLCanvasElement} canvas - Canvas element
+ */
+function drawWheelPlacementGuide(ctx, canvas) {
+  ctx.save();
+  ctx.strokeStyle = '#4CAF50';
+  ctx.lineWidth = 2;
+  ctx.setLineDash([5, 5]);
+  
+  // Draw vertical center line
+  ctx.beginPath();
+  ctx.moveTo(canvas.width/2, 0);
+  ctx.lineTo(canvas.width/2, canvas.height);
+  ctx.stroke();
+  
+  // Draw horizontal guides at common wheel positions
+  const wheelSpacing = 60; // Default spacing between wheels
+  const centerY = canvas.height / 2;
+  
+  // Draw guides for top and bottom wheel positions
+  ctx.beginPath();
+  ctx.moveTo(canvas.width/2 - 20, centerY - wheelSpacing);
+  ctx.lineTo(canvas.width/2 + 20, centerY - wheelSpacing);
+  ctx.stroke();
+  
+  ctx.beginPath();
+  ctx.moveTo(canvas.width/2 - 20, centerY + wheelSpacing);
+  ctx.lineTo(canvas.width/2 + 20, centerY + wheelSpacing);
+  ctx.stroke();
+  
+  ctx.restore();
+}
+
 function canPlaceComponent(type) {
   const constraint = constraints[type];
   if (!constraint) return false;
   
   const count = state.placedComponents.filter(c => c.type === type).length;
-  return count < constraint.max;
+  if (count >= constraint.max) return false;
+
+  // For wheels, check if the position is valid
+  if (type === 'wheel' && state.dragData) {
+    return isValidWheelPosition(state.dragData.x, state.dragData.y);
+  }
+
+  return true;
 }
 
 function addComponent(component) {
+  // For wheels, ensure they are placed at the center
+  if (component.type === 'wheel') {
+    component.x = SIMULATION_CONFIG.canvasWidth / 2;
+    
+    // If this is the second wheel, try to place it at a reasonable distance from the first wheel
+    const existingWheels = state.placedComponents.filter(c => c.type === 'wheel');
+    if (existingWheels.length === 1) {
+      const firstWheel = existingWheels[0];
+      const wheelSpacing = 60; // Default spacing between wheels
+      component.y = firstWheel.y + wheelSpacing;
+    }
+  }
   state.placedComponents.push(component);
   saveToHistory();
 }
@@ -757,6 +835,16 @@ function drawDragPreview(ctx, x, y) {
 
   ctx.save();
   ctx.globalAlpha = 0.5;
+  
+  // For wheels, snap to center and show valid placement indicator
+  if (state.dragData.type === 'wheel') {
+    x = SIMULATION_CONFIG.canvasWidth / 2;
+    
+    // Draw valid placement indicator
+    ctx.fillStyle = isValidWheelPosition(x, y) ? 'rgba(76, 175, 80, 0.3)' : 'rgba(244, 67, 54, 0.3)';
+    ctx.fillRect(x - 20, y - 20, 40, 40);
+  }
+  
   ctx.translate(x, y);
   ctx.rotate(0);
 
