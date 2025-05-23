@@ -151,7 +151,10 @@
             // Clear the main canvas
             ctx.clearRect(0, 0, canvasWidth, canvasHeight);
             
-            // Draw watermark if available (centered, 10% opacity)
+            // Draw the track on the main canvas
+            ctx.drawImage(tempCanvas, 0, 0, canvasWidth, canvasHeight);
+
+            // Draw watermark if available (centered, 10% opacity) ABOVE the track
             console.log('Watermark image:', this.watermarkImage, 'complete:', this.watermarkImage && this.watermarkImage.complete);
             if (this.watermarkImage && this.watermarkImage.complete) {
                 const watermarkSize = Math.min(canvasWidth, canvasHeight) * 0.4;
@@ -169,9 +172,6 @@
                 ctx.globalAlpha = 1.0;
                 ctx.restore();
             }
-            
-            // Draw the track on the main canvas
-            ctx.drawImage(tempCanvas, 0, 0, canvasWidth, canvasHeight);
         }
         clear() {
             this.image = new Image();
