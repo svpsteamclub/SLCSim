@@ -135,7 +135,7 @@ export function getSimulationParameters() {
         movementPerturbFactor: parseFloat(elems.movementPerturbFactorInput.value) || 0.0,
         motorDeadbandPWM: simDeadband,
         lineThreshold: parseInt(elems.lineThresholdInput.value) || 30,
-        pid: pidSettings,
+        pidSettings: pidSettings,
     };
 }
 

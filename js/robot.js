@@ -36,14 +36,13 @@
             if (!geometry) return;
 
             // Update all geometry properties
-            this.width_m = geometry.width_m;
+            this.wheelbase_m = geometry.width_m;
             this.length_m = geometry.length_m;
             this.sensorForwardProtrusion_m = geometry.sensorOffset_m;
             this.sensorSideSpread_m = geometry.sensorSpread_m;
             this.sensorDiameter_m = geometry.sensorDiameter_m;
 
             // Update derived properties
-            this.wheelbase_m = this.width_m;
             this.wheelRadius_m = this.sensorDiameter_m / 2;
             this.wheelCircumference_m = 2 * Math.PI * this.wheelRadius_m;
             this.maxAngularSpeed_radps = this.maxSpeed_mps / this.wheelRadius_m;
@@ -55,7 +54,7 @@
 
         updateSensorPositions() {
             // Calculate sensor positions based on current geometry
-            const halfWidth = this.width_m / 2;
+            const halfWidth = this.wheelbase_m / 2;
             const halfLength = this.length_m / 2;
             const sensorOffset = this.sensorForwardProtrusion_m;
             const sensorSpread = this.sensorSideSpread_m;

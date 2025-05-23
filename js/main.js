@@ -219,13 +219,18 @@ function startSimulation() {
     }
     
     const paramsFromUI = UI.getSimulationParameters();
-    let currentRobotGeom = Config.DEFAULT_ROBOT_GEOMETRY;
-    if (typeof getRobotDerivedGeometry === 'function') {
-        currentRobotGeom = getRobotDerivedGeometry() || Config.DEFAULT_ROBOT_GEOMETRY;
-    }
+    let currentRobotGeom = {
+        width_m: parseFloat(UI.getDOMElements().robotWidthInput_actual.value),
+        length_m: parseFloat(UI.getDOMElements().robotLengthInput_actual.value),
+        sensorSpread_m: parseFloat(UI.getDOMElements().sideSensorSpreadInput.value),
+        sensorOffset_m: parseFloat(UI.getDOMElements().sensorForwardOffsetInput.value),
+        sensorDiameter_m: parseFloat(UI.getDOMElements().sensorDiameterInput.value)
+    };
+
     simulation.updateParameters({
         ...paramsFromUI,
-        robotGeometry: currentRobotGeom
+        robotGeometry: currentRobotGeom,
+        pidSettings: paramsFromUI.pidSettings
     });
     UI.updateRobotGeometryDisplay(currentRobotGeom);
 
