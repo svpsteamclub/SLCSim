@@ -288,15 +288,11 @@ export function setupFoldableSections() {
     const foldableTitles = document.querySelectorAll('.foldable-title');
     foldableTitles.forEach(title => {
         title.addEventListener('click', () => {
-            console.log('Foldable section clicked:', title.textContent.trim()); // Debug log
             const content = title.nextElementSibling;
-            console.log('Next element sibling:', content);
             const indicator = title.querySelector('.fold-indicator');
             if (content && content.classList.contains('foldable-content')) {
                 content.classList.toggle('open');
                 if (indicator) indicator.textContent = content.classList.contains('open') ? '[-]' : '[+]';
-            } else {
-                console.warn('Foldable content not found or not the expected element:', content);
             }
         });
     });

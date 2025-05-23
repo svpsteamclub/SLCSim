@@ -34,18 +34,13 @@ let predefinedTrackStart = { x_px: 0, y_px: 0, angle_deg: 0};
 
 function checkAllAssetsLoadedAndInit() {
     assetsLoadedCount++;
-    console.log("Asset loaded, count:", assetsLoadedCount, "of", TOTAL_ASSETS_TO_LOAD);
     
     if (assetsLoadedCount === TOTAL_ASSETS_TO_LOAD) {
-        console.log("All essential assets loaded. Initializing simulation...");
-        
         // Initialize simulation with robot images
         simulation = new Simulation(robotImages, watermarkImage);
-        console.log("Simulation initialized:", simulation);
         
         // Get initial parameters and update simulation
         const initialParams = UI.getSimulationParameters();
-        console.log("Initial parameters:", initialParams);
         simulation.updateParameters(initialParams);
         
         // Update UI with default robot geometry
@@ -64,7 +59,6 @@ function checkAllAssetsLoadedAndInit() {
         // Create and initialize mainAppInterface
         const mainAppInterface = {
             updateRobotGeometry: (newGeometry) => {
-                console.log("Updating robot geometry:", newGeometry);
                 if (simulation && simulation.robot) {
                     simulation.updateParameters({ robotGeometry: newGeometry });
                     UI.updateRobotGeometryDisplay(newGeometry);
@@ -74,7 +68,6 @@ function checkAllAssetsLoadedAndInit() {
                 }
             },
             restoreDefaultRobot: () => {
-                console.log("Restoring default robot geometry");
                 if (simulation && simulation.robot) {
                     simulation.updateParameters({ robotGeometry: Config.DEFAULT_ROBOT_GEOMETRY });
                     UI.updateRobotGeometryDisplay(Config.DEFAULT_ROBOT_GEOMETRY);
@@ -105,7 +98,6 @@ function checkAllAssetsLoadedAndInit() {
                         UI.updateUIForSimulationState(simulationRunning, isSettingStartPosition, false, true);
                     }
                 } catch (error) {
-                    console.error("Error loading track from editor:", error);
                     alert("Error al cargar la pista desde el editor.");
                     UI.updateUIForSimulationState(simulationRunning, isSettingStartPosition, false, true);
                 }
@@ -120,44 +112,35 @@ function checkAllAssetsLoadedAndInit() {
         
         // Force initial render
         if (displayCtx && simulation) {
-            console.log("Forcing initial render");
             simulation.draw(displayCtx, displayCanvas.width, displayCanvas.height, null);
         }
     }
 }
 
 function loadInitialAssets() {
-    console.log("Starting to load initial assets...");
-    
     Utils.loadAndScaleImage(Config.ROBOT_IMAGE_PATHS.body, null, null, (img) => {
-        console.log("Robot body image loaded");
         robotImages.body = img;
         checkAllAssetsLoadedAndInit();
     });
     
     Utils.loadAndScaleImage(Config.ROBOT_IMAGE_PATHS.wheel, null, null, (img) => {
-        console.log("Robot wheel image loaded");
         robotImages.wheel = img;
         checkAllAssetsLoadedAndInit();
     });
     
     Utils.loadAndScaleImage(Config.WATERMARK_IMAGE_PATH, null, null, (img) => {
-        console.log("Watermark image loaded");
         watermarkImage = img;
         checkAllAssetsLoadedAndInit();
     });
 }
 
 function loadInitialTrack() {
-    console.log("Loading initial track...");
     const { trackImageSelector, startButton } = UI.getDOMElements();
     
     if (Config.AVAILABLE_TRACKS.length > 0 && trackImageSelector.options.length > 0) {
-        console.log("Selecting first track from available tracks");
         trackImageSelector.selectedIndex = 0;
         handleTrackSelectionChange();
     } else {
-        console.log("No predefined tracks available");
         currentTrackIsCustom = false;
         if (simulation && simulation.track) {
             simulation.track.clear();
@@ -766,7 +749,6 @@ export function createMainAppInterface(simulationCore, robot, lapTimer) {
                     UI.updateUIForSimulationState(simulationRunning, isSettingStartPosition, false, true);
                 }
             } catch (error) {
-                console.error("Error loading track from editor:", error);
                 alert("Error al cargar la pista desde el editor.");
                 UI.updateUIForSimulationState(simulationRunning, isSettingStartPosition, false, true);
             }
