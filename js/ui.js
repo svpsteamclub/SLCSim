@@ -4,6 +4,7 @@ import {
     currentMaxValDTerm, /* currentMaxValAdjPID is now dynamic */ MAX_VAL_PWM_BAR, AVAILABLE_TRACKS, PIXELS_PER_METER
 } from './config.js'; // Removed unused currentMaxValAdjPID import from here
 import { initRobotEditorV2 } from './robotEditorV2.js';
+import { initTrackEditor } from './trackEditor.js';
 
 let domElements = {}; 
 
@@ -314,6 +315,15 @@ export function setupTabNavigation() {
             tabContents.forEach(content => {
                 content.style.display = content.id === `${targetTab}Content` ? 'block' : 'none';
             });
+
+            // Initialize the track editor when its tab is activated
+            if (targetTab === 'trackEditor') {
+                if (typeof window.mainAppInterface !== 'undefined') {
+                    initTrackEditor(window.mainAppInterface);
+                } else {
+                    initTrackEditor();
+                }
+            }
         });
     });
 }
