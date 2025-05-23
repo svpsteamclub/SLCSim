@@ -23,12 +23,26 @@ export class PIDController {
     }
 
     updateSettings(settings) {
-        console.log("[PIDController.updateSettings] Received settings:", JSON.parse(JSON.stringify(settings)));
-        this.kp = typeof settings.kp === 'number' ? settings.kp : this.kp;
-        this.ki = typeof settings.ki === 'number' ? settings.ki : this.ki;
-        this.kd = typeof settings.kd === 'number' ? settings.kd : this.kd;
-        this.integralMax = typeof settings.integralMax === 'number' ? settings.integralMax : this.integralMax;
-        this.baseSpeed = typeof settings.baseSpeed === 'number' ? settings.baseSpeed : this.baseSpeed;
+        if (!settings || settings === "undefined") {
+            console.warn("[PIDController.updateSettings] Skipping update: settings is undefined or invalid.");
+            return;
+        }
+        // Defensive: If settings is a string, try to parse it, but catch errors
+        let parsed = settings;
+        if (typeof settings === "string") {
+            try {
+                parsed = JSON.parse(settings);
+            } catch (e) {
+                console.error("[PIDController.updateSettings] Invalid JSON for settings:", settings);
+                return;
+            }
+        }
+        console.log("[PIDController.updateSettings] Received settings:", JSON.parse(JSON.stringify(parsed)));
+        this.kp = typeof parsed.kp === 'number' ? parsed.kp : this.kp;
+        this.ki = typeof parsed.ki === 'number' ? parsed.ki : this.ki;
+        this.kd = typeof parsed.kd === 'number' ? parsed.kd : this.kd;
+        this.integralMax = typeof parsed.integralMax === 'number' ? parsed.integralMax : this.integralMax;
+        this.baseSpeed = typeof parsed.baseSpeed === 'number' ? parsed.baseSpeed : this.baseSpeed;
         console.log(`[PIDController.updateSettings] AFTER update: kp=${this.kp}, ki=${this.ki}, kd=${this.kd}, intMax=${this.integralMax}, baseSpeed=${this.baseSpeed}`);
     }
 
