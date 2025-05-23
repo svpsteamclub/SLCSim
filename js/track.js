@@ -152,6 +152,7 @@
             ctx.clearRect(0, 0, canvasWidth, canvasHeight);
             
             // Draw watermark if available (centered, 10% opacity)
+            console.log('Watermark image:', this.watermarkImage, 'complete:', this.watermarkImage && this.watermarkImage.complete);
             if (this.watermarkImage && this.watermarkImage.complete) {
                 const watermarkSize = Math.min(canvasWidth, canvasHeight) * 0.4;
                 const x = (canvasWidth - watermarkSize) / 2;
