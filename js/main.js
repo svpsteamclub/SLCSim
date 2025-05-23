@@ -88,6 +88,9 @@ function checkAllAssetsLoadedAndInit() {
         // Initialize UI with the mainAppInterface
         UI.initUI(mainAppInterface);
         
+        // Make mainAppInterface globally available for the track editor
+        window.mainAppInterface = mainAppInterface;
+        
         // Force initial render
         if (displayCtx && simulation) {
             console.log("Forcing initial render");
