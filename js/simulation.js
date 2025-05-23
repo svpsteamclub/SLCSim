@@ -7,13 +7,14 @@ import { LapTimer } from './lapTimer.js';
 
 
 export class Simulation {
-    constructor(robotImages, watermarkImage) {
+    constructor(robotImages, watermarkImage, initialGeometry) {
         console.log("Initializing Simulation with robot images:", robotImages);
         
-        // Initialize robot with default geometry
+        // Initialize robot with provided geometry or default
+        const geometry = initialGeometry || DEFAULT_ROBOT_GEOMETRY;
         this.robot = new Robot(
-            DEFAULT_ROBOT_GEOMETRY.width_m / PIXELS_PER_METER, 
-            DEFAULT_ROBOT_GEOMETRY.length_m / PIXELS_PER_METER,
+            geometry.width_m / PIXELS_PER_METER, 
+            geometry.length_m / PIXELS_PER_METER,
             0
         );
         this.robot.setImages(robotImages.body, robotImages.wheel);

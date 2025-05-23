@@ -36,8 +36,17 @@ function checkAllAssetsLoadedAndInit() {
     assetsLoadedCount++;
     
     if (assetsLoadedCount === TOTAL_ASSETS_TO_LOAD) {
-        // Initialize simulation with robot images
-        simulation = new Simulation(robotImages, watermarkImage);
+        // Obtener geometría inicial de los inputs del HTML
+        const elems = UI.getDOMElements();
+        const initialGeometry = {
+            width_m: parseFloat(elems.robotWidthInput_actual.value),
+            length_m: parseFloat(elems.robotLengthInput_actual.value),
+            sensorSpread_m: parseFloat(elems.sideSensorSpreadInput.value),
+            sensorOffset_m: parseFloat(elems.sensorForwardOffsetInput.value),
+            sensorDiameter_m: parseFloat(elems.sensorDiameterInput.value)
+        };
+        // Initialize simulation with robot images y geometría inicial
+        simulation = new Simulation(robotImages, watermarkImage, initialGeometry);
         
         // Get initial parameters and update simulation
         const initialParams = UI.getSimulationParameters();
