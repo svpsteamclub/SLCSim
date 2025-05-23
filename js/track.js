@@ -157,17 +157,30 @@
             // Draw watermark if available (centered, 10% opacity) ABOVE the track
             console.log('Watermark image:', this.watermarkImage, 'complete:', this.watermarkImage && this.watermarkImage.complete);
             if (this.watermarkImage && this.watermarkImage.complete) {
-                const watermarkSize = Math.min(canvasWidth, canvasHeight) * 0.4;
-                const x = (canvasWidth - watermarkSize) / 2;
-                const y = (canvasHeight - watermarkSize) / 2;
+                const maxSize = Math.min(canvasWidth, canvasHeight) * 0.4;
+                const aspectRatio = this.watermarkImage.naturalWidth / this.watermarkImage.naturalHeight;
+                let watermarkWidth, watermarkHeight;
+                
+                if (aspectRatio > 1) {
+                    // Image is wider than tall
+                    watermarkWidth = maxSize;
+                    watermarkHeight = maxSize / aspectRatio;
+                } else {
+                    // Image is taller than wide
+                    watermarkHeight = maxSize;
+                    watermarkWidth = maxSize * aspectRatio;
+                }
+                
+                const x = (canvasWidth - watermarkWidth) / 2;
+                const y = (canvasHeight - watermarkHeight) / 2;
                 ctx.save();
                 ctx.globalAlpha = 0.10;
                 ctx.drawImage(
                     this.watermarkImage,
                     x,
                     y,
-                    watermarkSize,
-                    watermarkSize
+                    watermarkWidth,
+                    watermarkHeight
                 );
                 ctx.globalAlpha = 1.0;
                 ctx.restore();
