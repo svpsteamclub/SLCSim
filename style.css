@@ -264,7 +264,7 @@ hr.internal-separator { margin-top: 20px; margin-bottom:10px; width: 95%; backgr
     box-shadow: none;
     border: none;
     padding: 0;
-    margin: 0 auto 20px auto;
+    margin: 0 auto;
 }
 .tab-button {
     padding: 10px 20px;
