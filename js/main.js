@@ -57,12 +57,20 @@ function checkAllAssetsLoadedAndInit() {
                 if (simulation && simulation.robot) {
                     simulation.robot.updateGeometry(newGeometry);
                     UI.updateRobotGeometryDisplay(newGeometry);
+                    simulation.resetSimulation(simulation.robot.x_m, simulation.robot.y_m, simulation.robot.angle_rad);
+                    if (displayCtx && simulation) {
+                        simulation.draw(displayCtx, displayCanvas.width, displayCanvas.height, null);
+                    }
                 }
             },
             restoreDefaultRobot: () => {
                 if (simulation && simulation.robot) {
                     simulation.robot.updateGeometry(Config.DEFAULT_ROBOT_GEOMETRY);
                     UI.updateRobotGeometryDisplay(Config.DEFAULT_ROBOT_GEOMETRY);
+                    simulation.resetSimulation(simulation.robot.x_m, simulation.robot.y_m, simulation.robot.angle_rad);
+                    if (displayCtx && simulation) {
+                        simulation.draw(displayCtx, displayCanvas.width, displayCanvas.height, null);
+                    }
                 }
             },
             loadTrackFromEditorCanvas: async (trackCanvas, startX_m, startY_m, startAngle_rad) => {
@@ -573,6 +581,81 @@ function setupEventListeners() {
     elems.clearCustomTrackButton.addEventListener('click', clearCustomTrack);
     
     elems.simulationCanvas.addEventListener('mousedown', handleCanvasMouseDownForStartPos);
+
+    // Add event listeners for robot geometry inputs
+    elems.robotWidthInput_actual.addEventListener('change', (e) => {
+        const value = parseFloat(e.target.value);
+        if (!isNaN(value) && value > 0) {
+            const geometry = {
+                width_m: value,
+                length_m: parseFloat(elems.robotLengthInput_actual.value),
+                sensorSpread_m: parseFloat(elems.sideSensorSpreadInput.value),
+                sensorOffset_m: parseFloat(elems.sensorForwardOffsetInput.value),
+                sensorDiameter_m: parseFloat(elems.sensorDiameterInput.value)
+            };
+            mainAppInterface.updateRobotGeometry(geometry);
+        }
+    });
+
+    elems.robotLengthInput_actual.addEventListener('change', (e) => {
+        const value = parseFloat(e.target.value);
+        if (!isNaN(value) && value > 0) {
+            const geometry = {
+                width_m: parseFloat(elems.robotWidthInput_actual.value),
+                length_m: value,
+                sensorSpread_m: parseFloat(elems.sideSensorSpreadInput.value),
+                sensorOffset_m: parseFloat(elems.sensorForwardOffsetInput.value),
+                sensorDiameter_m: parseFloat(elems.sensorDiameterInput.value)
+            };
+            mainAppInterface.updateRobotGeometry(geometry);
+        }
+    });
+
+    elems.sideSensorSpreadInput.addEventListener('change', (e) => {
+        const value = parseFloat(e.target.value);
+        if (!isNaN(value) && value > 0) {
+            const geometry = {
+                width_m: parseFloat(elems.robotWidthInput_actual.value),
+                length_m: parseFloat(elems.robotLengthInput_actual.value),
+                sensorSpread_m: value,
+                sensorOffset_m: parseFloat(elems.sensorForwardOffsetInput.value),
+                sensorDiameter_m: parseFloat(elems.sensorDiameterInput.value)
+            };
+            mainAppInterface.updateRobotGeometry(geometry);
+        }
+    });
+
+    elems.sensorForwardOffsetInput.addEventListener('change', (e) => {
+        const value = parseFloat(e.target.value);
+        if (!isNaN(value) && value > 0) {
+            const geometry = {
+                width_m: parseFloat(elems.robotWidthInput_actual.value),
+                length_m: parseFloat(elems.robotLengthInput_actual.value),
+                sensorSpread_m: parseFloat(elems.sideSensorSpreadInput.value),
+                sensorOffset_m: value,
+                sensorDiameter_m: parseFloat(elems.sensorDiameterInput.value)
+            };
+            mainAppInterface.updateRobotGeometry(geometry);
+        }
+    });
+
+    elems.sensorDiameterInput.addEventListener('change', (e) => {
+        const value = parseFloat(e.target.value);
+        if (!isNaN(value) && value > 0) {
+            const geometry = {
+                width_m: parseFloat(elems.robotWidthInput_actual.value),
+                length_m: parseFloat(elems.robotLengthInput_actual.value),
+                sensorSpread_m: parseFloat(elems.sideSensorSpreadInput.value),
+                sensorOffset_m: parseFloat(elems.sensorForwardOffsetInput.value),
+                sensorDiameter_m: value
+            };
+            mainAppInterface.updateRobotGeometry(geometry);
+        }
+    });
+
+    elems.restoreDefaultRobot.addEventListener('click', () => {
+        mainAppInterface.restoreDefaultRobot();
+    });
 
     elems.arduinoVelBaseInput.addEventListener('change', (e) => {
         // This was for bar scaling, but currentMaxValAdjPID is handled dynamically in updatePIDDisplay

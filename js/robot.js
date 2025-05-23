@@ -33,11 +33,13 @@
         
         // Method to update geometry from an editor or settings
         updateGeometry(geometry) {
-            this.wheelbase_m = geometry.width_m || this.wheelbase_m;
-            this.length_m = geometry.length_m || this.length_m;
-            this.sensorForwardProtrusion_m = geometry.sensorOffset_m || this.sensorForwardProtrusion_m;
-            this.sensorSideSpread_m = geometry.sensorSpread_m || this.sensorSideSpread_m;
-            this.sensorDiameter_m = geometry.sensorDiameter_m || this.sensorDiameter_m;
+            if (!geometry) return;
+            
+            this.wheelbase_m = geometry.width_m;
+            this.length_m = geometry.length_m;
+            this.sensorForwardProtrusion_m = geometry.sensorOffset_m;
+            this.sensorSideSpread_m = geometry.sensorSpread_m;
+            this.sensorDiameter_m = geometry.sensorDiameter_m;
         }
 
 
