@@ -157,109 +157,12 @@ input[readonly] { background-color: #e9ecef; opacity: 1; cursor: not-allowed; }
 }
 
 
-.buttons { text-align: center; margin-bottom: 15px; padding-top: 10px; }
-
-button, .button-like-label {
-    padding: 8px 15px; margin: 5px; border: 1px solid #ccc; border-radius: 5px;
-    cursor: pointer; font-weight: bold; font-size: 0.9em;  
-    transition: background-color 0.2s ease-in-out, transform 0.1s ease, box-shadow 0.2s ease;
-    min-width: 100px; background-color: #f0f0f0; color: #333; 
-    text-decoration: none; display: inline-block; text-align: center; line-height: normal; 
-}
-button:hover:not(:disabled), .button-like-label:hover { transform: translateY(-1px); box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-button:active:not(:disabled), .button-like-label:active { transform: translateY(0px); box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
-
-.buttons button { border: none; padding: 10px 18px; margin: 5px 8px; }
-
-#startButton { background-color: #4CAF50; color: white; border-color: #4CAF50;}
-#startButton:hover:not(:disabled) { background-color: #45a049; }
-#stopButton { background-color: #f44336; color: white; border-color: #f44336;}
-#stopButton:hover:not(:disabled) { background-color: #da190b; }
-#resetButton { background-color: #008CBA; color: white; border-color: #008CBA;}
-#resetButton:hover:not(:disabled) { background-color: #007ba7; }
-#setStartPositionButton { background-color: #6c757d; color: white; border-color: #6c757d;}
-#setStartPositionButton:hover:not(:disabled) { background-color: #5a6268; }
-#setStartPositionButton.active { background-color: #ffc107; color: black; border-color: #ffc107;}
-
-#saveTrackDesignButton,
-#generateRandomTrack,
-#exportTrackFromEditor,
-#toggleEraseModeButton { 
-    background-color: #5bc0de; color: white; border-color: #46b8da;
-}
-#saveTrackDesignButton:hover:not(:disabled),
-#generateRandomTrack:hover:not(:disabled),
-#exportTrackFromEditor:hover:not(:disabled),
-#toggleEraseModeButton:hover:not(:disabled) {
-    background-color: #31b0d5;
-}
-#toggleEraseModeButton.active-erase { 
-    background-color: #d9534f; 
-    border-color: #d43f3a;
-}
-
-
-.button-like-label[for="loadTrackDesignInput"] { 
-    background-color: #007bff; color: white; border-color: #007bff;
-}
-.button-like-label[for="loadTrackDesignInput"]:hover { background-color: #0056b3; }
-
-#saveRobotDesign, #loadRobotDesign, #addComponentToRobot {
-    background-color: #6c757d; color: white; border-color: #5a6268;
-}
-#saveRobotDesign:hover:not(:disabled), 
-#loadRobotDesign:hover:not(:disabled), 
-#addComponentToRobot:hover:not(:disabled) {
-    background-color: #545b62;
-}
-
-button:disabled {
-    background-color: #cccccc !important; color: #666666 !important;
-    border-color: #bbb !important; cursor: not-allowed;
-    box-shadow: none; transform: none;
-}
-
-hr { border: 0; height: 1px; background: #ccc; margin: 20px 0; }
-hr.internal-separator { margin-top: 20px; margin-bottom:10px; width: 95%; background: #e0e0e0; margin-left:auto; margin-right:auto;}
-
-
-.info { background-color: #e9e9e9; padding: 10px; border-radius: 6px; display: flex; flex-wrap: wrap; justify-content: space-around; align-items: flex-end; }
-.info-item { display: flex; flex-direction: column; align-items: center; margin: 5px 8px; min-width: 60px; }
-.info-label { font-size: 0.8em; color: #555; margin-bottom: 2px; text-align: center; }
-.info-value { font-weight: bold; color: #222; background-color: #fff; padding: 2px 5px; border-radius: 3px; border: 1px solid #ddd; font-size: 0.9em; margin-bottom: 4px; min-width: 35px; text-align: center; display: inline-block; }
-.bar-track { width: 20px; height: 50px; background-color: #ddd; border: 1px solid #bbb; position: relative; border-radius: 3px; overflow: hidden; }
-.bar { width: 100%; background-color: #4CAF50; position: absolute; bottom: 0; left: 0; height: 0%; border-radius: 2px 2px 0 0; transition: height 0.05s linear; }
-#errorBar  { background-color: #f44336; } #pBar { background-color: #2196F3; } #iBar { background-color: #FFC107; }
-#dBar { background-color: #9C27B0; } #adjPIDBar { background-color: #009688; } #vLeftBar, #vRightBar { background-color: #795548; }
-
-#simulationCanvas { border: 2px solid #333; background-color: #eee; display: block; margin: 20px auto; max-width: 100%; box-shadow: 0 0 10px rgba(0,0,0,0.1); image-rendering: pixelated; }
-.lap-times-container h3 { margin-top: 0; margin-bottom: 15px; color: #444; font-size: 1.2em; border-bottom: 1px solid #ddd; padding-bottom: 8px; }
-#lapTimesTable { width: 100%; border-collapse: collapse; margin-top: 10px; }
-#lapTimesTable th, #lapTimesTable td { border: 1px solid #ddd; padding: 8px 10px; text-align: left; }
-#lapTimesTable th { background-color: #e9e9e9; font-weight: bold; }
-#lapTimesTable tbody tr:nth-child(even) { background-color: #fdfdfd; }
-#lapTimesTable tbody tr:nth-child(odd) { background-color: #f7f7f7; }
-
-.foldable-title { cursor: pointer; display: flex; justify-content: space-between; align-items: center; width: 100%; }
-.fold-indicator { font-weight: bold; margin-left: 10px; user-select: none; font-size: 0.9em; }
-.foldable-content {
-    display: none;
-    transition: max-height 0.3s ease;
-    overflow: hidden;
-    max-height: 0;
-}
-.foldable-content.open {
-    display: block;
-    max-height: 1000px; /* Large enough for content */
-}
-.foldable-content label, .foldable-content input, .foldable-content ul, .foldable-content ol { flex-basis: auto; flex-grow: 0; flex-shrink: 1; }
-.foldable-content p { text-align: left; }
-
-
 .explanation-section ul, .explanation-section ol { text-align: left; margin-left: 20px; }
 .explanation-section ul ul, .explanation-section ol ul { margin-left: 20px; }
 
 .tab-navigation {
+    display: flex;
+    justify-content: center;
     background: transparent;
     box-shadow: none;
     border: none;
@@ -461,14 +364,6 @@ select {
 }
 
 /* Optimize tab navigation */
-.tab-navigation {
-    display: flex;
-    gap: 10px;
-    padding: 10px;
-    background: #f5f5f5;
-    will-change: transform;
-}
-
 .tab-button {
     transition: background-color 0.2s ease, transform 0.1s ease;
     will-change: transform, background-color;
@@ -529,5 +424,103 @@ select {
 }
 
 /* Robot Editor styles placeholder: Add new styles here for the new robot editor */
+
+.buttons { text-align: center; margin-bottom: 15px; padding-top: 10px; }
+
+button, .button-like-label {
+    padding: 8px 15px; margin: 5px; border: 1px solid #ccc; border-radius: 5px;
+    cursor: pointer; font-weight: bold; font-size: 0.9em;  
+    transition: background-color 0.2s ease-in-out, transform 0.1s ease, box-shadow 0.2s ease;
+    min-width: 100px; background-color: #f0f0f0; color: #333; 
+    text-decoration: none; display: inline-block; text-align: center; line-height: normal; 
+}
+button:hover:not(:disabled), .button-like-label:hover { transform: translateY(-1px); box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+button:active:not(:disabled), .button-like-label:active { transform: translateY(0px); box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
+
+.buttons button { border: none; padding: 10px 18px; margin: 5px 8px; }
+
+#startButton { background-color: #4CAF50; color: white; border-color: #4CAF50;}
+#startButton:hover:not(:disabled) { background-color: #45a049; }
+#stopButton { background-color: #f44336; color: white; border-color: #f44336;}
+#stopButton:hover:not(:disabled) { background-color: #da190b; }
+#resetButton { background-color: #008CBA; color: white; border-color: #008CBA;}
+#resetButton:hover:not(:disabled) { background-color: #007ba7; }
+#setStartPositionButton { background-color: #6c757d; color: white; border-color: #6c757d;}
+#setStartPositionButton:hover:not(:disabled) { background-color: #5a6268; }
+#setStartPositionButton.active { background-color: #ffc107; color: black; border-color: #ffc107;}
+
+#saveTrackDesignButton,
+#generateRandomTrack,
+#exportTrackFromEditor,
+#toggleEraseModeButton { 
+    background-color: #5bc0de; color: white; border-color: #46b8da;
+}
+#saveTrackDesignButton:hover:not(:disabled),
+#generateRandomTrack:hover:not(:disabled),
+#exportTrackFromEditor:hover:not(:disabled),
+#toggleEraseModeButton:hover:not(:disabled) {
+    background-color: #31b0d5;
+}
+#toggleEraseModeButton.active-erase { 
+    background-color: #d9534f; 
+    border-color: #d43f3a;
+}
+
+
+.button-like-label[for="loadTrackDesignInput"] { 
+    background-color: #007bff; color: white; border-color: #007bff;
+}
+.button-like-label[for="loadTrackDesignInput"]:hover { background-color: #0056b3; }
+
+#saveRobotDesign, #loadRobotDesign, #addComponentToRobot {
+    background-color: #6c757d; color: white; border-color: #5a6268;
+}
+#saveRobotDesign:hover:not(:disabled), 
+#loadRobotDesign:hover:not(:disabled), 
+#addComponentToRobot:hover:not(:disabled) {
+    background-color: #545b62;
+}
+
+button:disabled {
+    background-color: #cccccc !important; color: #666666 !important;
+    border-color: #bbb !important; cursor: not-allowed;
+    box-shadow: none; transform: none;
+}
+
+hr { border: 0; height: 1px; background: #ccc; margin: 20px 0; }
+hr.internal-separator { margin-top: 20px; margin-bottom:10px; width: 95%; background: #e0e0e0; margin-left:auto; margin-right:auto;}
+
+
+.info { background-color: #e9e9e9; padding: 10px; border-radius: 6px; display: flex; flex-wrap: wrap; justify-content: space-around; align-items: flex-end; }
+.info-item { display: flex; flex-direction: column; align-items: center; margin: 5px 8px; min-width: 60px; }
+.info-label { font-size: 0.8em; color: #555; margin-bottom: 2px; text-align: center; }
+.info-value { font-weight: bold; color: #222; background-color: #fff; padding: 2px 5px; border-radius: 3px; border: 1px solid #ddd; font-size: 0.9em; margin-bottom: 4px; min-width: 35px; text-align: center; display: inline-block; }
+.bar-track { width: 20px; height: 50px; background-color: #ddd; border: 1px solid #bbb; position: relative; border-radius: 3px; overflow: hidden; }
+.bar { width: 100%; background-color: #4CAF50; position: absolute; bottom: 0; left: 0; height: 0%; border-radius: 2px 2px 0 0; transition: height 0.05s linear; }
+#errorBar  { background-color: #f44336; } #pBar { background-color: #2196F3; } #iBar { background-color: #FFC107; }
+#dBar { background-color: #9C27B0; } #adjPIDBar { background-color: #009688; } #vLeftBar, #vRightBar { background-color: #795548; }
+
+#simulationCanvas { border: 2px solid #333; background-color: #eee; display: block; margin: 20px auto; max-width: 100%; box-shadow: 0 0 10px rgba(0,0,0,0.1); image-rendering: pixelated; }
+.lap-times-container h3 { margin-top: 0; margin-bottom: 15px; color: #444; font-size: 1.2em; border-bottom: 1px solid #ddd; padding-bottom: 8px; }
+#lapTimesTable { width: 100%; border-collapse: collapse; margin-top: 10px; }
+#lapTimesTable th, #lapTimesTable td { border: 1px solid #ddd; padding: 8px 10px; text-align: left; }
+#lapTimesTable th { background-color: #e9e9e9; font-weight: bold; }
+#lapTimesTable tbody tr:nth-child(even) { background-color: #fdfdfd; }
+#lapTimesTable tbody tr:nth-child(odd) { background-color: #f7f7f7; }
+
+.foldable-title { cursor: pointer; display: flex; justify-content: space-between; align-items: center; width: 100%; }
+.fold-indicator { font-weight: bold; margin-left: 10px; user-select: none; font-size: 0.9em; }
+.foldable-content {
+    display: none;
+    transition: max-height 0.3s ease;
+    overflow: hidden;
+    max-height: 0;
+}
+.foldable-content.open {
+    display: block;
+    max-height: 1000px; /* Large enough for content */
+}
+.foldable-content label, .foldable-content input, .foldable-content ul, .foldable-content ol { flex-basis: auto; flex-grow: 0; flex-shrink: 1; }
+.foldable-content p { text-align: left; }
 
 /* END OF FILE style.css */
