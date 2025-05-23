@@ -39,9 +39,6 @@ function checkAllAssetsLoadedAndInit() {
         // Initialize simulation with robot images
         simulation = new Simulation(robotImages, watermarkImage);
         
-        // Update UI with default robot geometry first
-        UI.updateRobotGeometryDisplay(Config.DEFAULT_ROBOT_GEOMETRY);
-        
         // Get initial parameters and update simulation
         const initialParams = UI.getSimulationParameters();
         simulation.updateParameters(initialParams);
