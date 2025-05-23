@@ -23,6 +23,7 @@ export class Simulation {
         this.params = {
             timeStep: 0.01,
             maxRobotSpeedMPS: 1.0,
+            motorEfficiency: 1.0, // New
             motorResponseFactor: 0.03,
             sensorNoiseProb: 0.0,
             movementPerturbFactor: 0.0, 
@@ -35,6 +36,7 @@ export class Simulation {
     updateParameters(simParams, pidSettings, robotGeom) {
         this.params.timeStep = simParams.timeStep ?? this.params.timeStep;
         this.params.maxRobotSpeedMPS = simParams.maxRobotSpeedMPS ?? this.params.maxRobotSpeedMPS;
+        this.params.motorEfficiency = simParams.motorEfficiency ?? this.params.motorEfficiency; // New
         this.params.motorResponseFactor = simParams.motorResponseFactor ?? this.params.motorResponseFactor;
         this.params.sensorNoiseProb = simParams.sensorNoiseProb ?? this.params.sensorNoiseProb;
         this.params.movementPerturbFactor = simParams.movementPerturbFactor ?? this.params.movementPerturbFactor;
@@ -109,9 +111,12 @@ export class Simulation {
         const adjPID = this.pidController.computeOutput(this.params.timeStep);
         const motorPWMs = this.pidController.getMotorPWMs(adjPID, this.params.motorDeadbandPWM);
 
-        // Calculate target speeds based on PWM, matching original script.js logic
-        let target_vL_mps = (motorPWMs.leftDirForward ? 1 : -1) * (motorPWMs.leftPWM / 255.0) * this.params.maxRobotSpeedMPS;
-        let target_vR_mps = (motorPWMs.rightDirForward ? 1 : -1) * (motorPWMs.rightPWM / 255.0) * this.params.maxRobotSpeedMPS;
+        // New: Calculate effective max speed based on efficiency
+        const effectiveMaxRobotSpeedMPS = this.params.maxRobotSpeedMPS * this.params.motorEfficiency;
+
+        // Calculate target speeds based on PWM, using effectiveMaxRobotSpeedMPS
+        let target_vL_mps = (motorPWMs.leftDirForward ? 1 : -1) * (motorPWMs.leftPWM / 255.0) * effectiveMaxRobotSpeedMPS;
+        let target_vR_mps = (motorPWMs.rightDirForward ? 1 : -1) * (motorPWMs.rightPWM / 255.0) * effectiveMaxRobotSpeedMPS;
         
         // --- ADDED for exact match with script.js logic ---
         if (motorPWMs.leftPWM === 0) target_vL_mps = 0;
@@ -123,7 +128,7 @@ export class Simulation {
             target_vL_mps, 
             target_vR_mps, 
             this.params.motorResponseFactor,
-            this.params.maxRobotSpeedMPS,
+            effectiveMaxRobotSpeedMPS, // Use effective speed for clamping in robot movement
             this.params.movementPerturbFactor
         );
 

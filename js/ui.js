@@ -15,6 +15,7 @@ export function cacheDOMElements() {
         timeStepInput: document.getElementById('timeStep'),
         pixelsPerMeterDisplay: document.getElementById('pixelsPerMeterDisplay'),
         maxRobotSpeedMPSInput: document.getElementById('maxRobotSpeedMPS'),
+        motorEfficiencyFactorInput: document.getElementById('motorEfficiencyFactorInput'), // New
         motorResponseFactorInput: document.getElementById('motorResponseFactor'),
         sensorNoiseProbInput: document.getElementById('sensorNoiseProb'),
         movementPerturbFactorInput: document.getElementById('movementPerturbFactor'),
@@ -119,10 +120,15 @@ export function getSimulationParameters() {
     simDeadband = isNaN(simDeadband) ? 
                   ( (pidSettings.kp === 0 && pidSettings.ki === 0 && pidSettings.kd === 0 && pidSettings.baseSpeed === 0) ? 0 : 5 ) 
                   : simDeadband;
+    
+    let motorEfficiency = parseFloat(elems.motorEfficiencyFactorInput.value);
+    motorEfficiency = (isNaN(motorEfficiency) || motorEfficiency < 0 || motorEfficiency > 1) ? 1.0 : motorEfficiency;
+
 
     return {
         timeStep: parseFloat(elems.timeStepInput.value) || 0.01,
         maxRobotSpeedMPS: simMaxSpeed,
+        motorEfficiency: motorEfficiency, // New
         motorResponseFactor: parseFloat(elems.motorResponseFactorInput.value) || 0.03,
         sensorNoiseProb: parseFloat(elems.sensorNoiseProbInput.value) || 0.0,
         movementPerturbFactor: parseFloat(elems.movementPerturbFactorInput.value) || 0.0,
@@ -264,9 +270,11 @@ export function updateUIForSimulationState(isRunning, isSettingStart, trackLoade
     elems.resetButton.disabled = isRunning || isSettingStart;
     elems.setStartPositionButton.disabled = isRunning || !trackLoaded;
 
-    [ elems.timeStepInput, elems.maxRobotSpeedMPSInput, elems.motorResponseFactorInput,
-      elems.sensorNoiseProbInput, elems.movementPerturbFactorInput, elems.motorDeadbandPWMInput, elems.lineThresholdInput,
-      elems.arduinoKpInput, elems.arduinoKiInput, elems.arduinoKdInput, elems.arduinoVelBaseInput, elems.arduinoIntegralMaxInput
+    [ elems.timeStepInput, elems.maxRobotSpeedMPSInput, elems.motorEfficiencyFactorInput, // New
+      elems.motorResponseFactorInput, elems.sensorNoiseProbInput, elems.movementPerturbFactorInput, 
+      elems.motorDeadbandPWMInput, elems.lineThresholdInput,
+      elems.arduinoKpInput, elems.arduinoKiInput, elems.arduinoKdInput, 
+      elems.arduinoVelBaseInput, elems.arduinoIntegralMaxInput
     ].forEach(input => { if (input) input.disabled = generalDisable; });
 
     elems.trackImageSelector.disabled = generalDisable || isCustomTrackActive || (AVAILABLE_TRACKS.length === 0);
