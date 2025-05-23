@@ -83,17 +83,17 @@
                         <label for="pixelsPerMeterDisplay">Pixeles por metro (Fijo):</label>
                         <input type="text" id="pixelsPerMeterDisplay" value="1000" readonly>
                         <label for="maxRobotSpeedMPS">Máxima Velocidad del Robot (m/s, @100% eficiencia):</label>
-                        <input type="number" id="maxRobotSpeedMPS" value="1.0" step="0.05">
-                        <label for="motorEfficiencyFactorInput">Eficiencia de Motores (0.0 - 1.0):</label>
-                        <input type="number" id="motorEfficiencyFactorInput" value="1.0" step="0.01" min="0.0" max="1.0">
+                        <input type="number" id="maxRobotSpeedMPS" value="0.6" step="0.05">
+                        <label for="motorEfficiencyFactorInput">Eficiencia de Motores (0.0 - 1.0):</readonly>
+                        <input type="number" id="motorEfficiencyFactorInput" value="0.6" step="0.01" min="0.0" max="1.0">
                         <label for="motorResponseFactor">Factor de respuesta de los motores (0-1):</label>
-                        <input type="number" id="motorResponseFactor" value="0.04" step="0.01">
+                        <input type="number" id="motorResponseFactor" value="0.035" step="0.01">
                         <label for="sensorNoiseProb">Probabilidad de ruido en los sensores (0-1):</label>
                         <input type="number" id="sensorNoiseProb" value="0.0" step="0.005">
                         <label for="movementPerturbFactor">Factor de Perturbación de Movimientos (0-1):</label>
                         <input type="number" id="movementPerturbFactor" value="0.5" step="0.005">
                         <label for="motorDeadbandPWM">Deadband de Motores (PWM 0-255):</label>
-                        <input type="number" id="motorDeadbandPWM" value="5" step="1">
+                        <input type="number" id="motorDeadbandPWM" value="40" step="1">
                         <label for="lineThreshold">Sensibilidad a la línea (0-255):</label>
                         <input type="number" id="lineThreshold" value="30" step="1">
                     </div>
