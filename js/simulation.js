@@ -9,18 +9,30 @@ import { LapTimer } from './lapTimer.js';
 export class Simulation {
     constructor(robotImages, watermarkImage) {
         console.log("Initializing Simulation with robot images:", robotImages);
+        
+        // Initialize robot with default geometry
         this.robot = new Robot(
             DEFAULT_ROBOT_GEOMETRY.width_m / PIXELS_PER_METER, 
             DEFAULT_ROBOT_GEOMETRY.length_m / PIXELS_PER_METER,
             0
         );
         this.robot.setImages(robotImages.body, robotImages.wheel);
+        console.log("Robot initialized:", this.robot);
         
-        this.pidController = new PIDController(120, 3, 15, 250, 110); 
+        // Initialize PID controller
+        this.pidController = new PIDController(120, 3, 15, 250, 110);
+        console.log("PID controller initialized:", this.pidController);
+        
+        // Initialize track
         this.track = new Track();
         this.track.setWatermark(watermarkImage);
+        console.log("Track initialized:", this.track);
+        
+        // Initialize lap timer
         this.lapTimer = new LapTimer(this.robot.wheelbase_m, this.robot.length_m);
+        console.log("Lap timer initialized:", this.lapTimer);
 
+        // Set default parameters
         this.params = {
             timeStep: 0.01,
             maxRobotSpeedMPS: 1.0,
@@ -168,17 +180,27 @@ export class Simulation {
             canvasHeight: displayCanvasHeight,
             hasTrack: !!this.track,
             hasTrackImage: !!this.track?.imageData,
-            hasRobot: !!this.robot
+            hasRobot: !!this.robot,
+            sensorStates: sensorStates
         });
 
+        // Clear the canvas
         displayCtx.clearRect(0, 0, displayCanvasWidth, displayCanvasHeight);
         
+        // Draw track if available
         if (this.track) {
+            console.log("Drawing track");
             this.track.draw(displayCtx, displayCanvasWidth, displayCanvasHeight);
+        } else {
+            console.log("No track to draw");
         }
         
+        // Draw robot if track and robot are available
         if (this.track?.imageData && this.robot) {
+            console.log("Drawing robot");
             this.robot.draw(displayCtx, sensorStates);
+        } else {
+            console.log("Cannot draw robot - missing track image or robot");
         }
     }
 }

@@ -30,7 +30,7 @@
 
             const img = new Image();
             img.onload = () => {
-                console.log("Track image loaded:", img.width, "x", img.height);
+                console.log("Track image loaded successfully:", img.width, "x", img.height);
                 this.width_px = img.width;
                 this.height_px = img.height;
                 
@@ -44,10 +44,15 @@
                 tempCtx.drawImage(img, 0, 0);
                 
                 // Get the image data
-                this.imageData = tempCtx.getImageData(0, 0, img.width, img.height);
-                console.log("Track image data obtained:", this.imageData.width, "x", this.imageData.height);
-                
-                callback(true, img.width, img.height);
+                try {
+                    this.imageData = tempCtx.getImageData(0, 0, img.width, img.height);
+                    console.log("Track image data obtained successfully:", this.imageData.width, "x", this.imageData.height);
+                    callback(true, img.width, img.height);
+                } catch (error) {
+                    console.error("Error getting image data:", error);
+                    this.imageData = null;
+                    callback(false, 0, 0);
+                }
             };
             
             img.onerror = (error) => {
@@ -57,13 +62,18 @@
             };
 
             if (typeof source === 'string') {
+                console.log("Loading track from URL:", source);
                 img.src = source;
             } else if (source instanceof File) {
+                console.log("Loading track from File object:", source.name);
                 const reader = new FileReader();
                 reader.onload = (e) => {
                     img.src = e.target.result;
                 };
                 reader.readAsDataURL(source);
+            } else {
+                console.error("Invalid track source:", source);
+                callback(false, 0, 0);
             }
         }
         
@@ -124,7 +134,10 @@
                 return;
             }
 
-            console.log("Drawing track:", this.imageData.width, "x", this.imageData.height);
+            console.log("Drawing track:", {
+                imageDataSize: `${this.imageData.width}x${this.imageData.height}`,
+                canvasSize: `${canvasWidth}x${canvasHeight}`
+            });
             
             // Create a temporary canvas to draw the track
             const tempCanvas = document.createElement('canvas');
@@ -134,6 +147,9 @@
             
             // Put the image data on the temporary canvas
             tempCtx.putImageData(this.imageData, 0, 0);
+            
+            // Clear the main canvas
+            ctx.clearRect(0, 0, canvasWidth, canvasHeight);
             
             // Draw the track on the main canvas
             ctx.drawImage(tempCanvas, 0, 0, canvasWidth, canvasHeight);

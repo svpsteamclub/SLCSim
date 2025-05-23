@@ -34,21 +34,37 @@ let predefinedTrackStart = { x_px: 0, y_px: 0, angle_deg: 0};
 
 function checkAllAssetsLoadedAndInit() {
     assetsLoadedCount++;
+    console.log("Asset loaded, count:", assetsLoadedCount, "of", TOTAL_ASSETS_TO_LOAD);
+    
     if (assetsLoadedCount === TOTAL_ASSETS_TO_LOAD) {
-        console.log("All essential assets loaded.");
-        simulation = new Simulation(robotImages, watermarkImage);
+        console.log("All essential assets loaded. Initializing simulation...");
         
+        // Initialize simulation with robot images
+        simulation = new Simulation(robotImages, watermarkImage);
+        console.log("Simulation initialized:", simulation);
+        
+        // Get initial parameters and update simulation
         const initialParams = UI.getSimulationParameters();
+        console.log("Initial parameters:", initialParams);
         simulation.updateParameters(initialParams);
-        UI.updateRobotGeometryDisplay(Config.DEFAULT_ROBOT_GEOMETRY); 
-
+        
+        // Update UI with default robot geometry
+        UI.updateRobotGeometryDisplay(Config.DEFAULT_ROBOT_GEOMETRY);
+        
+        // Setup event listeners
         setupEventListeners();
-        loadInitialTrack(); // This will also render initial state via its callback
+        
+        // Load initial track and render
+        loadInitialTrack();
+        
+        // Reset displays
         UI.resetPIDDisplay();
         UI.resetLapTimeDisplay();
-
+        
+        // Create and initialize mainAppInterface
         const mainAppInterface = {
             updateRobotGeometry: (newGeometry) => {
+                console.log("Updating robot geometry:", newGeometry);
                 if (simulation && simulation.robot) {
                     simulation.updateParameters({ robotGeometry: newGeometry });
                     UI.updateRobotGeometryDisplay(newGeometry);
@@ -58,6 +74,7 @@ function checkAllAssetsLoadedAndInit() {
                 }
             },
             restoreDefaultRobot: () => {
+                console.log("Restoring default robot geometry");
                 if (simulation && simulation.robot) {
                     simulation.updateParameters({ robotGeometry: Config.DEFAULT_ROBOT_GEOMETRY });
                     UI.updateRobotGeometryDisplay(Config.DEFAULT_ROBOT_GEOMETRY);
@@ -67,38 +84,61 @@ function checkAllAssetsLoadedAndInit() {
                 }
             }
         };
-
+        
         // Initialize UI with the mainAppInterface
         UI.initUI(mainAppInterface);
+        
+        // Force initial render
+        if (displayCtx && simulation) {
+            console.log("Forcing initial render");
+            simulation.draw(displayCtx, displayCanvas.width, displayCanvas.height, null);
+        }
     }
 }
 
 function loadInitialAssets() {
+    console.log("Starting to load initial assets...");
+    
     Utils.loadAndScaleImage(Config.ROBOT_IMAGE_PATHS.body, null, null, (img) => {
-        robotImages.body = img; checkAllAssetsLoadedAndInit();
+        console.log("Robot body image loaded");
+        robotImages.body = img;
+        checkAllAssetsLoadedAndInit();
     });
+    
     Utils.loadAndScaleImage(Config.ROBOT_IMAGE_PATHS.wheel, null, null, (img) => {
-        robotImages.wheel = img; checkAllAssetsLoadedAndInit();
+        console.log("Robot wheel image loaded");
+        robotImages.wheel = img;
+        checkAllAssetsLoadedAndInit();
     });
+    
     Utils.loadAndScaleImage(Config.WATERMARK_IMAGE_PATH, null, null, (img) => {
-        watermarkImage = img; checkAllAssetsLoadedAndInit();
+        console.log("Watermark image loaded");
+        watermarkImage = img;
+        checkAllAssetsLoadedAndInit();
     });
 }
 
 function loadInitialTrack() {
+    console.log("Loading initial track...");
     const { trackImageSelector, startButton } = UI.getDOMElements();
+    
     if (Config.AVAILABLE_TRACKS.length > 0 && trackImageSelector.options.length > 0) {
-        trackImageSelector.selectedIndex = 0; 
-        handleTrackSelectionChange(); 
+        console.log("Selecting first track from available tracks");
+        trackImageSelector.selectedIndex = 0;
+        handleTrackSelectionChange();
     } else {
+        console.log("No predefined tracks available");
         currentTrackIsCustom = false;
-        if (simulation && simulation.track) simulation.track.clear();
+        if (simulation && simulation.track) {
+            simulation.track.clear();
+        }
         UI.updateUIForSimulationState(simulationRunning, isSettingStartPosition, false, false);
         if (displayCtx && simulation) {
             simulation.draw(displayCtx, displayCanvas.width, displayCanvas.height, null);
         }
-        if(startButton) startButton.disabled = true;
-        console.log("No predefined tracks. Load a custom one or define tracks in config.js.");
+        if (startButton) {
+            startButton.disabled = true;
+        }
     }
 }
 
