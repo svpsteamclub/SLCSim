@@ -502,6 +502,8 @@ function handleCustomTrackUpload(event) {
             if (success) {
                 displayCanvas.width = actualWidth;
                 displayCanvas.height = actualHeight;
+                displayCanvas.style.width = '';
+                displayCanvas.style.height = '';
                 // Define a default initial start position for this new custom track
                 customTrackStart.x_m = actualWidth / Config.PIXELS_PER_METER / 2;
                 customTrackStart.y_m = Config.DEFAULT_ROBOT_GEOMETRY.length_m; 
@@ -589,6 +591,8 @@ function handleTrackSelectionChange() {
             if (success && displayCanvas) {
                 displayCanvas.width = actualWidth;
                 displayCanvas.height = actualHeight;
+                displayCanvas.style.width = '';
+                displayCanvas.style.height = '';
             }
             UI.updateUIForSimulationState(simulationRunning, isSettingStartPosition, success, false);
             if (displayCtx && simulation) {

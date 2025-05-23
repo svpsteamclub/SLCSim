@@ -167,13 +167,11 @@ function setupGrid() {
         // Set fixed dimensions based on grid size
         const canvasWidth = gridSize.cols * TRACK_PART_SIZE_PX;
         const canvasHeight = gridSize.rows * TRACK_PART_SIZE_PX;
-        
-        // Set both the canvas dimensions and its CSS dimensions
         editorCanvas.width = canvasWidth;
         editorCanvas.height = canvasHeight;
-        editorCanvas.style.width = `${canvasWidth}px`;
-        editorCanvas.style.height = `${canvasHeight}px`;
-        
+        // Remove CSS resizing
+        editorCanvas.style.width = '';
+        editorCanvas.style.height = '';
         if (ctx) { 
             renderEditor(); 
         }
