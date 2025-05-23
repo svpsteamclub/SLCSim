@@ -33,27 +33,28 @@ export class Simulation {
         this.totalSimTime_s = 0;
     }
 
-    updateParameters(simParams, pidSettings, robotGeom) {
-        this.params.timeStep = simParams.timeStep ?? this.params.timeStep;
-        this.params.maxRobotSpeedMPS = simParams.maxRobotSpeedMPS ?? this.params.maxRobotSpeedMPS;
-        this.params.motorEfficiency = simParams.motorEfficiency ?? this.params.motorEfficiency; // New
-        this.params.motorResponseFactor = simParams.motorResponseFactor ?? this.params.motorResponseFactor;
-        this.params.sensorNoiseProb = simParams.sensorNoiseProb ?? this.params.sensorNoiseProb;
-        this.params.movementPerturbFactor = simParams.movementPerturbFactor ?? this.params.movementPerturbFactor;
-        this.params.motorDeadbandPWM = simParams.motorDeadbandPWM ?? this.params.motorDeadbandPWM;
-        this.params.lineThreshold = simParams.lineThreshold ?? this.params.lineThreshold; 
+    updateParameters(params) {
+        if (params.robotGeometry) {
+            this.robot.updateGeometry(params.robotGeometry);
+            this.resetSimulation(this.robot.x_m, this.robot.y_m, this.robot.angle_rad);
+        }
+        this.params.timeStep = params.timeStep ?? this.params.timeStep;
+        this.params.maxRobotSpeedMPS = params.maxRobotSpeedMPS ?? this.params.maxRobotSpeedMPS;
+        this.params.motorEfficiency = params.motorEfficiency ?? this.params.motorEfficiency; // New
+        this.params.motorResponseFactor = params.motorResponseFactor ?? this.params.motorResponseFactor;
+        this.params.sensorNoiseProb = params.sensorNoiseProb ?? this.params.sensorNoiseProb;
+        this.params.movementPerturbFactor = params.movementPerturbFactor ?? this.params.movementPerturbFactor;
+        this.params.motorDeadbandPWM = params.motorDeadbandPWM ?? this.params.motorDeadbandPWM;
+        this.params.lineThreshold = params.lineThreshold ?? this.params.lineThreshold; 
         
         if (this.track) { 
             this.track.lineThreshold = this.params.lineThreshold;
         }
-        if (this.pidController && pidSettings) {
-            this.pidController.updateSettings(pidSettings);
+        if (this.pidController) {
+            this.pidController.updateSettings(params.pidSettings);
         }
-        if (this.robot && robotGeom) {
-            this.robot.updateGeometry(robotGeom);
-            this.lapTimer.robotWidth_m = this.robot.wheelbase_m;
-            this.lapTimer.robotLength_m = this.robot.length_m;
-        }
+        this.lapTimer.robotWidth_m = this.robot.wheelbase_m;
+        this.lapTimer.robotLength_m = this.robot.length_m;
     }
     
     loadTrack(source, width_px, height_px, startX_m, startY_m, startAngle_rad, isCustomFile = false, fileName = "", callback) {
@@ -84,11 +85,11 @@ export class Simulation {
         }
     }
 
-    resetSimulation(startX_m, startY_m, startAngle_rad) {
-        this.robot.resetState(startX_m, startY_m, startAngle_rad);
+    resetSimulation(x_m, y_m, angle_rad) {
+        this.robot.resetState(x_m, y_m, angle_rad);
         this.pidController.reset();
-        this.totalSimTime_s = 0;
-        this.lapTimer.initialize({ x_m: startX_m, y_m: startY_m, angle_rad: startAngle_rad }, this.totalSimTime_s);
+        this.lapTimer.reset();
+        this.draw();
     }
     
     fixedUpdate() {

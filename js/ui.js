@@ -332,8 +332,6 @@ export function updateRobotGeometryDisplay(geometry) {
 export function initUI(mainAppInterface) {
     const elems = getDOMElements();
     
-    // ... existing code ...
-
     // Handle robot geometry changes
     elems.robotWidthInput_actual.addEventListener('change', (e) => {
         const value = parseFloat(e.target.value);
@@ -405,12 +403,8 @@ export function initUI(mainAppInterface) {
         }
     });
 
-    // Handle custom robot design
     elems.restoreDefaultRobot.addEventListener('click', () => {
-        localStorage.removeItem('customRobotDesign');
         mainAppInterface.restoreDefaultRobot();
-        updateRobotGeometryDisplay(DEFAULT_ROBOT_GEOMETRY);
-        alert("Robot restaurado a la configuración por defecto.");
     });
 
     // Check for custom robot design on startup
@@ -427,6 +421,4 @@ export function initUI(mainAppInterface) {
             localStorage.removeItem('customRobotDesign');
         }
     }
-
-    // ... existing code ...
 }

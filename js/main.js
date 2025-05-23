@@ -39,12 +39,8 @@ function checkAllAssetsLoadedAndInit() {
         simulation = new Simulation(robotImages, watermarkImage);
         
         const initialParams = UI.getSimulationParameters();
-        let initialRobotGeom = Config.DEFAULT_ROBOT_GEOMETRY;
-        if (typeof getRobotDerivedGeometry === 'function') { // If robot editor provides geometry
-            initialRobotGeom = getRobotDerivedGeometry() || Config.DEFAULT_ROBOT_GEOMETRY;
-        }
-        simulation.updateParameters(initialParams, initialParams.pid, initialRobotGeom);
-        UI.updateRobotGeometryDisplay(initialRobotGeom); 
+        simulation.updateParameters(initialParams, initialParams.pid, Config.DEFAULT_ROBOT_GEOMETRY);
+        UI.updateRobotGeometryDisplay(Config.DEFAULT_ROBOT_GEOMETRY); 
 
         setupEventListeners();
         loadInitialTrack(); // This will also render initial state via its callback
@@ -72,48 +68,11 @@ function checkAllAssetsLoadedAndInit() {
                         simulation.draw(displayCtx, displayCanvas.width, displayCanvas.height, null);
                     }
                 }
-            },
-            loadTrackFromEditorCanvas: async (trackCanvas, startX_m, startY_m, startAngle_rad) => {
-                stopSimulation(); // Stop any current simulation
-                currentTrackIsCustom = true; 
-                customTrackImageFilename = "Pista_del_Editor.png";
-                customTrackStart = { x_m: startX_m, y_m: startY_m, angle_rad: startAngle_rad }; // Store its start
-                UI.getDOMElements().customTrackInput.value = ''; 
-                UI.getDOMElements().trackImageSelector.selectedIndex = -1;
-
-                try {
-                    if (await simulation.setTrackFromCanvas(trackCanvas, startX_m, startY_m, startAngle_rad)) {
-                        const {simulationCanvas} = UI.getDOMElements();
-                        simulationCanvas.width = trackCanvas.width;
-                        simulationCanvas.height = trackCanvas.height;
-                        
-                        // Force a render of the new state
-                        if (displayCtx && simulation) {
-                            simulation.draw(displayCtx, displayCanvas.width, displayCanvas.height, null);
-                        }
-                        UI.updateUIForSimulationState(simulationRunning, isSettingStartPosition, true, true);
-                    } else {
-                        alert("Error al cargar la pista desde el editor.");
-                        UI.updateUIForSimulationState(simulationRunning, isSettingStartPosition, false, true);
-                    }
-                } catch (error) {
-                    console.error("Error loading track from editor:", error);
-                    alert("Error al cargar la pista desde el editor.");
-                    UI.updateUIForSimulationState(simulationRunning, isSettingStartPosition, false, true);
-                }
-            },
-            updateRobotGeometry: (geometry) => {
-                simulation.robot.updateGeometry(geometry);
-                simulation.resetRobotState();
-            },
-            restoreDefaultRobot: () => {
-                simulation.robot.updateGeometry(Config.DEFAULT_ROBOT_GEOMETRY);
-                simulation.resetRobotState();
             }
         };
-        if (typeof initTrackEditor === 'function') initTrackEditor(mainAppInterface);
 
-        // requestAnimationFrame(gameLoop); // gameLoop starts from loadInitialTrack or its equivalents
+        // Initialize UI with the mainAppInterface
+        UI.initUI(mainAppInterface);
     }
 }
 
