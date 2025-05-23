@@ -18,6 +18,7 @@ body {
     margin: 0 auto 20px auto; 
     padding: 5px 0;
     background: transparent;
+    box-shadow: none;
 }
 
 .header-logos img {
@@ -439,15 +440,7 @@ footer {
 }
 
 /* Optimize layout calculations */
-.header-logos {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 10px 20px;
-    background: #f5f5f5;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    will-change: transform;
-}
+/* Remove this section entirely */
 
 /* Optimize button interactions */
 .control-button {
