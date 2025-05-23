@@ -319,14 +319,12 @@ footer {
 
 /* Optimize canvas rendering */
 #simulationCanvas {
-    width: 800px;
-    height: 600px;
-    max-width: none;
-    max-height: none;
-    min-width: 0;
-    min-height: 0;
     display: block;
-    box-sizing: content-box;
+    margin: 20px auto;
+    border: 2px solid #333;
+    background-color: #eee;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    image-rendering: pixelated;
 }
 
 .simulation-canvas-container {
