@@ -22,62 +22,48 @@
         }
 
         load(source, width_px, height_px, lineThreshold, callback, isCustomFile = false, fileName = "") {
-            this.lineThreshold = lineThreshold;
+            console.log("Track.load called with:", { source, width_px, height_px, lineThreshold, isCustomFile, fileName });
+            
             this.isCustom = isCustomFile;
-            this.customFileName = isCustomFile ? fileName : "";
+            this.fileName = fileName;
+            this.lineThreshold = lineThreshold;
 
-            const processImage = () => {
-                this.width_px = this.image.naturalWidth; // Use natural dimensions from image
-                this.height_px = this.image.naturalHeight;
-
-                // If predefined track dimensions are provided, resize display, but use natural for processing
-                if (!isCustomFile && width_px && height_px) {
-                     // These might be different from naturalWidth/Height if the config is wrong
-                     // For now, let's trust naturalWidth/Height for actual processing
-                }
-
-
-                this.offscreenCanvas.width = this.width_px;
-                this.offscreenCanvas.height = this.height_px;
-                this.offscreenCtx.drawImage(this.image, 0, 0, this.width_px, this.height_px);
-                try {
-                    this.imageData = this.offscreenCtx.getImageData(0, 0, this.width_px, this.height_px);
-                    console.log(`Track image ${this.isCustom ? `(custom: ${this.customFileName})` : ''} loaded and data processed. Dimensions: ${this.width_px}x${this.height_px}`);
-                    callback(true, this.width_px, this.height_px);
-                } catch (e) {
-                    console.error("Error getting image data for track:", e);
-                    this.imageData = null;
-                    callback(false);
-                }
+            const img = new Image();
+            img.onload = () => {
+                console.log("Track image loaded:", img.width, "x", img.height);
+                this.width_px = img.width;
+                this.height_px = img.height;
+                
+                // Create a temporary canvas to process the image
+                const tempCanvas = document.createElement('canvas');
+                tempCanvas.width = img.width;
+                tempCanvas.height = img.height;
+                const tempCtx = tempCanvas.getContext('2d');
+                
+                // Draw the image to the temporary canvas
+                tempCtx.drawImage(img, 0, 0);
+                
+                // Get the image data
+                this.imageData = tempCtx.getImageData(0, 0, img.width, img.height);
+                console.log("Track image data obtained:", this.imageData.width, "x", this.imageData.height);
+                
+                callback(true, img.width, img.height);
             };
             
-            if (isCustomFile && source instanceof File) { // source is a File object
+            img.onerror = (error) => {
+                console.error("Error loading track image:", error);
+                this.imageData = null;
+                callback(false, 0, 0);
+            };
+
+            if (typeof source === 'string') {
+                img.src = source;
+            } else if (source instanceof File) {
                 const reader = new FileReader();
                 reader.onload = (e) => {
-                    this.image = new Image(); // Reset image for custom load
-                    this.image.onload = processImage;
-                    this.image.onerror = () => {
-                        console.error(`Error loading custom track image from FileReader result for ${fileName}`);
-                        callback(false);
-                    };
-                    this.image.src = e.target.result;
-                };
-                reader.onerror = () => {
-                    console.error(`Error reading custom track file: ${fileName}`);
-                    callback(false);
+                    img.src = e.target.result;
                 };
                 reader.readAsDataURL(source);
-            } else if (typeof source === 'string') { // source is a URL
-                this.image = new Image(); // Reset image for URL load
-                this.image.onload = processImage;
-                this.image.onerror = () => {
-                    console.error(`Error loading track image from URL: ${source}`);
-                    callback(false);
-                };
-                this.image.src = source;
-            } else {
-                console.error("Invalid track source provided.");
-                callback(false);
             }
         }
         
@@ -132,49 +118,36 @@
             return brightness < this.lineThreshold;
         }
 
-        draw(displayCtx, displayCanvasWidth, displayCanvasHeight) {
-            if (this.image && this.image.complete && this.image.naturalWidth > 0) {
-                displayCtx.drawImage(this.image, 0, 0, displayCanvasWidth, displayCanvasHeight);
-                
-                // Draw watermark if available
-                if (this.watermarkImage && this.watermarkImage.complete && this.watermarkImage.naturalWidth > 0) {
-                    const watermarkAspectRatio = this.watermarkImage.naturalWidth / this.watermarkImage.naturalHeight;
-                    let watermarkWidth = displayCanvasWidth * 0.6;
-                    let watermarkHeight = watermarkWidth / watermarkAspectRatio;
-                    if (watermarkHeight > displayCanvasHeight * 0.6) {
-                        watermarkHeight = displayCanvasHeight * 0.6;
-                        watermarkWidth = watermarkHeight * watermarkAspectRatio;
-                    }
-                    // Final check to ensure it's not too wide after height adjustment
-                    if (watermarkWidth > displayCanvasWidth * 0.6) {
-                       watermarkWidth = displayCanvasWidth * 0.6;
-                       watermarkHeight = watermarkWidth / watermarkAspectRatio;
-                    }
+        draw(ctx, canvasWidth, canvasHeight) {
+            if (!this.imageData) {
+                console.log("No track image data to draw");
+                return;
+            }
 
-                    const watermarkX = (displayCanvasWidth - watermarkWidth) / 2;
-                    const watermarkY = (displayCanvasHeight - watermarkHeight) / 2;
-                    displayCtx.save();
-                    displayCtx.globalAlpha = 0.2;
-                    displayCtx.drawImage(this.watermarkImage, watermarkX, watermarkY, watermarkWidth, watermarkHeight);
-                    displayCtx.restore();
-                }
-
-            } else {
-                displayCtx.fillStyle = '#eee';
-                displayCtx.fillRect(0, 0, displayCanvasWidth, displayCanvasHeight);
-                displayCtx.fillStyle = 'black';
-                displayCtx.textAlign = 'center';
-                displayCtx.font = "16px Arial";
-                let message = "Cargando pista...";
-                if (this.isCustom && this.customFileName) {
-                    message = `Cargando pista personalizada: ${this.customFileName}...`;
-                } else if (this.image.src) {
-                     message = `Cargando pista: ${this.image.src.split('/').pop()}...`;
-                }
-                if (!this.image.src && !this.imageData) { // No track selected yet
-                    message = "Seleccione una pista predefinida o cargue una personalizada.";
-                }
-                displayCtx.fillText(message, displayCanvasWidth / 2, displayCanvasHeight / 2);
+            console.log("Drawing track:", this.imageData.width, "x", this.imageData.height);
+            
+            // Create a temporary canvas to draw the track
+            const tempCanvas = document.createElement('canvas');
+            tempCanvas.width = this.imageData.width;
+            tempCanvas.height = this.imageData.height;
+            const tempCtx = tempCanvas.getContext('2d');
+            
+            // Put the image data on the temporary canvas
+            tempCtx.putImageData(this.imageData, 0, 0);
+            
+            // Draw the track on the main canvas
+            ctx.drawImage(tempCanvas, 0, 0, canvasWidth, canvasHeight);
+            
+            // Draw watermark if available
+            if (this.watermarkImage && this.watermarkImage.complete) {
+                const watermarkSize = Math.min(canvasWidth, canvasHeight) * 0.2;
+                ctx.drawImage(
+                    this.watermarkImage,
+                    canvasWidth - watermarkSize - 10,
+                    canvasHeight - watermarkSize - 10,
+                    watermarkSize,
+                    watermarkSize
+                );
             }
         }
         clear() {

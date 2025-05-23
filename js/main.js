@@ -39,21 +39,19 @@ function checkAllAssetsLoadedAndInit() {
         simulation = new Simulation(robotImages, watermarkImage);
         
         const initialParams = UI.getSimulationParameters();
-        simulation.updateParameters(initialParams, initialParams.pid, Config.DEFAULT_ROBOT_GEOMETRY);
+        simulation.updateParameters(initialParams);
         UI.updateRobotGeometryDisplay(Config.DEFAULT_ROBOT_GEOMETRY); 
 
         setupEventListeners();
         loadInitialTrack(); // This will also render initial state via its callback
         UI.resetPIDDisplay();
         UI.resetLapTimeDisplay();
-        // updateUIForSimulationState is called within loadInitialTrack callback
 
         const mainAppInterface = {
             updateRobotGeometry: (newGeometry) => {
                 if (simulation && simulation.robot) {
-                    simulation.robot.updateGeometry(newGeometry);
+                    simulation.updateParameters({ robotGeometry: newGeometry });
                     UI.updateRobotGeometryDisplay(newGeometry);
-                    simulation.resetSimulation(simulation.robot.x_m, simulation.robot.y_m, simulation.robot.angle_rad);
                     if (displayCtx && simulation) {
                         simulation.draw(displayCtx, displayCanvas.width, displayCanvas.height, null);
                     }
@@ -61,9 +59,8 @@ function checkAllAssetsLoadedAndInit() {
             },
             restoreDefaultRobot: () => {
                 if (simulation && simulation.robot) {
-                    simulation.robot.updateGeometry(Config.DEFAULT_ROBOT_GEOMETRY);
+                    simulation.updateParameters({ robotGeometry: Config.DEFAULT_ROBOT_GEOMETRY });
                     UI.updateRobotGeometryDisplay(Config.DEFAULT_ROBOT_GEOMETRY);
-                    simulation.resetSimulation(simulation.robot.x_m, simulation.robot.y_m, simulation.robot.angle_rad);
                     if (displayCtx && simulation) {
                         simulation.draw(displayCtx, displayCanvas.width, displayCanvas.height, null);
                     }
@@ -94,11 +91,11 @@ function loadInitialTrack() {
         trackImageSelector.selectedIndex = 0; 
         handleTrackSelectionChange(); 
     } else {
-        currentTrackIsCustom = false; // Ensure flag is correct
+        currentTrackIsCustom = false;
         if (simulation && simulation.track) simulation.track.clear();
         UI.updateUIForSimulationState(simulationRunning, isSettingStartPosition, false, false);
-        if (displayCtx && simulation) { // Render empty state
-             simulation.draw(displayCtx, displayCanvas.width, displayCanvas.height, null);
+        if (displayCtx && simulation) {
+            simulation.draw(displayCtx, displayCanvas.width, displayCanvas.height, null);
         }
         if(startButton) startButton.disabled = true;
         console.log("No predefined tracks. Load a custom one or define tracks in config.js.");
@@ -480,21 +477,21 @@ function handleTrackSelectionChange() {
     const selector = UI.getDOMElements().trackImageSelector;
     const selectedOption = selector.selectedOptions[0];
 
-    // If blank or invalid, force to first valid option
     if (!selectedOption || !selectedOption.dataset.fileName) {
         if (selector.options.length > 0 && selector.options[0].dataset.fileName) {
             selector.selectedIndex = 0;
-            // Call again with the new selection
             handleTrackSelectionChange();
         } else {
-            if (simulation && simulation.track) simulation.track.clear(); 
+            if (simulation && simulation.track) simulation.track.clear();
             UI.updateUIForSimulationState(simulationRunning, isSettingStartPosition, false, false);
-            if (displayCtx && simulation) simulation.draw(displayCtx, displayCanvas.width, displayCanvas.height, null);
+            if (displayCtx && simulation) {
+                simulation.draw(displayCtx, displayCanvas.width, displayCanvas.height, null);
+            }
         }
         return;
     }
 
-    currentTrackIsCustom = false; // Now it's a predefined track
+    currentTrackIsCustom = false;
     customTrackFile = null;
     customTrackImageFilename = "";
     if (UI.getDOMElements().customTrackInput) UI.getDOMElements().customTrackInput.value = '';
@@ -502,11 +499,14 @@ function handleTrackSelectionChange() {
     const trackUrl = selectedOption.dataset.fileName;
     const trackWidth = parseInt(selectedOption.dataset.width);
     const trackHeight = parseInt(selectedOption.dataset.height);
-    predefinedTrackStart.x_px = parseFloat(selectedOption.dataset.startX); // Update module-level store
+    predefinedTrackStart.x_px = parseFloat(selectedOption.dataset.startX);
     predefinedTrackStart.y_px = parseFloat(selectedOption.dataset.startY);
     predefinedTrackStart.angle_deg = parseFloat(selectedOption.dataset.startAngle);
 
     if(UI.getDOMElements().startButton) UI.getDOMElements().startButton.disabled = true;
+
+    console.log("Loading track:", trackUrl, "with dimensions:", trackWidth, "x", trackHeight);
+    console.log("Start position:", predefinedTrackStart);
 
     simulation.loadTrack(
         trackUrl, trackWidth, trackHeight,
@@ -515,13 +515,14 @@ function handleTrackSelectionChange() {
         Utils.degreesToRadians(predefinedTrackStart.angle_deg),
         false, "", 
         (success, actualWidth, actualHeight) => {
+            console.log("Track load callback:", success, actualWidth, actualHeight);
             if (success && displayCanvas) {
                 displayCanvas.width = actualWidth;
                 displayCanvas.height = actualHeight;
             }
             UI.updateUIForSimulationState(simulationRunning, isSettingStartPosition, success, false);
-            if (displayCtx && simulation) { // Always render after attempt
-                 simulation.draw(displayCtx, displayCanvas.width, displayCanvas.height, null);
+            if (displayCtx && simulation) {
+                simulation.draw(displayCtx, displayCanvas.width, displayCanvas.height, null);
             }
         }
     );

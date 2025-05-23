@@ -8,6 +8,7 @@ import { LapTimer } from './lapTimer.js';
 
 export class Simulation {
     constructor(robotImages, watermarkImage) {
+        console.log("Initializing Simulation with robot images:", robotImages);
         this.robot = new Robot(
             DEFAULT_ROBOT_GEOMETRY.width_m / PIXELS_PER_METER, 
             DEFAULT_ROBOT_GEOMETRY.length_m / PIXELS_PER_METER,
@@ -23,7 +24,7 @@ export class Simulation {
         this.params = {
             timeStep: 0.01,
             maxRobotSpeedMPS: 1.0,
-            motorEfficiency: 1.0, // New
+            motorEfficiency: 1.0,
             motorResponseFactor: 0.03,
             sensorNoiseProb: 0.0,
             movementPerturbFactor: 0.0, 
@@ -40,7 +41,7 @@ export class Simulation {
         }
         this.params.timeStep = params.timeStep ?? this.params.timeStep;
         this.params.maxRobotSpeedMPS = params.maxRobotSpeedMPS ?? this.params.maxRobotSpeedMPS;
-        this.params.motorEfficiency = params.motorEfficiency ?? this.params.motorEfficiency; // New
+        this.params.motorEfficiency = params.motorEfficiency ?? this.params.motorEfficiency;
         this.params.motorResponseFactor = params.motorResponseFactor ?? this.params.motorResponseFactor;
         this.params.sensorNoiseProb = params.sensorNoiseProb ?? this.params.sensorNoiseProb;
         this.params.movementPerturbFactor = params.movementPerturbFactor ?? this.params.movementPerturbFactor;
@@ -157,10 +158,27 @@ export class Simulation {
     }
 
     draw(displayCtx, displayCanvasWidth, displayCanvasHeight, sensorStates) {
+        if (!displayCtx) {
+            console.error("No display context provided for drawing");
+            return;
+        }
+
+        console.log("Drawing simulation:", {
+            canvasWidth: displayCanvasWidth,
+            canvasHeight: displayCanvasHeight,
+            hasTrack: !!this.track,
+            hasTrackImage: !!this.track?.imageData,
+            hasRobot: !!this.robot
+        });
+
         displayCtx.clearRect(0, 0, displayCanvasWidth, displayCanvasHeight);
-        this.track.draw(displayCtx, displayCanvasWidth, displayCanvasHeight);
-        if (this.track.imageData) { 
-             this.robot.draw(displayCtx, sensorStates);
+        
+        if (this.track) {
+            this.track.draw(displayCtx, displayCanvasWidth, displayCanvasHeight);
+        }
+        
+        if (this.track?.imageData && this.robot) {
+            this.robot.draw(displayCtx, sensorStates);
         }
     }
 }
