@@ -53,10 +53,16 @@ function checkAllAssetsLoadedAndInit() {
         // updateUIForSimulationState is called within loadInitialTrack callback
 
         const mainAppInterface = {
-            updateRobotGeometryInSimulator: (newGeometry) => {
+            updateRobotGeometry: (newGeometry) => {
                 if (simulation && simulation.robot) {
                     simulation.robot.updateGeometry(newGeometry);
-                    UI.updateRobotGeometryDisplay(newGeometry); 
+                    UI.updateRobotGeometryDisplay(newGeometry);
+                }
+            },
+            restoreDefaultRobot: () => {
+                if (simulation && simulation.robot) {
+                    simulation.robot.updateGeometry(Config.DEFAULT_ROBOT_GEOMETRY);
+                    UI.updateRobotGeometryDisplay(Config.DEFAULT_ROBOT_GEOMETRY);
                 }
             },
             loadTrackFromEditorCanvas: async (trackCanvas, startX_m, startY_m, startAngle_rad) => {
@@ -598,9 +604,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
 export function createMainAppInterface(simulationCore, robot, lapTimer) {
     return {
-        updateRobotGeometryInSimulator: (newGeometry) => {
+        updateRobotGeometry: (newGeometry) => {
             robot.updateGeometry(newGeometry);
             lapTimer.reset(newGeometry.width_m, newGeometry.length_m);
+            simulationCore.resetRobotState();
+        },
+        restoreDefaultRobot: () => {
+            robot.updateGeometry(Config.DEFAULT_ROBOT_GEOMETRY);
+            lapTimer.reset(Config.DEFAULT_ROBOT_GEOMETRY.width_m, Config.DEFAULT_ROBOT_GEOMETRY.length_m);
             simulationCore.resetRobotState();
         },
         loadTrackFromEditorCanvas: async (trackCanvas, startX_m, startY_m, startAngle_rad) => {

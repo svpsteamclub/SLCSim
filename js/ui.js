@@ -334,6 +334,77 @@ export function initUI(mainAppInterface) {
     
     // ... existing code ...
 
+    // Handle robot geometry changes
+    elems.robotWidthInput_actual.addEventListener('change', (e) => {
+        const value = parseFloat(e.target.value);
+        if (!isNaN(value) && value > 0) {
+            const geometry = {
+                width_m: value,
+                length_m: parseFloat(elems.robotLengthInput_actual.value),
+                sensorSpread_m: parseFloat(elems.sideSensorSpreadInput.value),
+                sensorOffset_m: parseFloat(elems.sensorForwardOffsetInput.value),
+                sensorDiameter_m: parseFloat(elems.sensorDiameterInput.value)
+            };
+            mainAppInterface.updateRobotGeometry(geometry);
+        }
+    });
+
+    elems.robotLengthInput_actual.addEventListener('change', (e) => {
+        const value = parseFloat(e.target.value);
+        if (!isNaN(value) && value > 0) {
+            const geometry = {
+                width_m: parseFloat(elems.robotWidthInput_actual.value),
+                length_m: value,
+                sensorSpread_m: parseFloat(elems.sideSensorSpreadInput.value),
+                sensorOffset_m: parseFloat(elems.sensorForwardOffsetInput.value),
+                sensorDiameter_m: parseFloat(elems.sensorDiameterInput.value)
+            };
+            mainAppInterface.updateRobotGeometry(geometry);
+        }
+    });
+
+    elems.sideSensorSpreadInput.addEventListener('change', (e) => {
+        const value = parseFloat(e.target.value);
+        if (!isNaN(value) && value > 0) {
+            const geometry = {
+                width_m: parseFloat(elems.robotWidthInput_actual.value),
+                length_m: parseFloat(elems.robotLengthInput_actual.value),
+                sensorSpread_m: value,
+                sensorOffset_m: parseFloat(elems.sensorForwardOffsetInput.value),
+                sensorDiameter_m: parseFloat(elems.sensorDiameterInput.value)
+            };
+            mainAppInterface.updateRobotGeometry(geometry);
+        }
+    });
+
+    elems.sensorForwardOffsetInput.addEventListener('change', (e) => {
+        const value = parseFloat(e.target.value);
+        if (!isNaN(value) && value > 0) {
+            const geometry = {
+                width_m: parseFloat(elems.robotWidthInput_actual.value),
+                length_m: parseFloat(elems.robotLengthInput_actual.value),
+                sensorSpread_m: parseFloat(elems.sideSensorSpreadInput.value),
+                sensorOffset_m: value,
+                sensorDiameter_m: parseFloat(elems.sensorDiameterInput.value)
+            };
+            mainAppInterface.updateRobotGeometry(geometry);
+        }
+    });
+
+    elems.sensorDiameterInput.addEventListener('change', (e) => {
+        const value = parseFloat(e.target.value);
+        if (!isNaN(value) && value > 0) {
+            const geometry = {
+                width_m: parseFloat(elems.robotWidthInput_actual.value),
+                length_m: parseFloat(elems.robotLengthInput_actual.value),
+                sensorSpread_m: parseFloat(elems.sideSensorSpreadInput.value),
+                sensorOffset_m: parseFloat(elems.sensorForwardOffsetInput.value),
+                sensorDiameter_m: value
+            };
+            mainAppInterface.updateRobotGeometry(geometry);
+        }
+    });
+
     // Handle custom robot design
     elems.restoreDefaultRobot.addEventListener('click', () => {
         localStorage.removeItem('customRobotDesign');
