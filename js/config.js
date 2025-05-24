@@ -24,7 +24,7 @@ export const WHEEL_WIDTH_M = 0.03;
 export const PIXELS_PER_METER = 1000;
 
 export const MAX_BAR_HEIGHT_PX = 50;
-export let currentMaxValError = 2.5;
+export let currentMaxValError = 4;
 export let currentMaxValPTerm = 150;
 export let currentMaxValITerm = 50;
 export let currentMaxValDTerm = 150;

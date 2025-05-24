@@ -84,13 +84,13 @@ export class PIDController {
             currentError = 0.0;
             this.lastKnownLineDirection = 0; // Corresponds to POS_MEM_NONE
         } else if (S_DER === 0 && S_CEN === 1 && S_IZQ === 1) { // 110 - Line a bit to the left
-            currentError = -0.5;
+            currentError = -1.0;
             this.lastKnownLineDirection = 1; // Corresponds to POS_MEM_LEFT_OF_LINE
         } else if (S_DER === 0 && S_CEN === 0 && S_IZQ === 1) { // 100 - Line to the left
             currentError = -2.0;
             this.lastKnownLineDirection = 1; // Corresponds to POS_MEM_LEFT_OF_LINE
         } else if (S_DER === 1 && S_CEN === 1 && S_IZQ === 0) { // 011 - Line a bit to the right
-            currentError = 0.5;
+            currentError = 1.0;
             this.lastKnownLineDirection = 2; // Corresponds to POS_MEM_RIGHT_OF_LINE
         } else if (S_DER === 1 && S_CEN === 0 && S_IZQ === 0) { // 001 - Line to the right
             currentError = 2.0;
